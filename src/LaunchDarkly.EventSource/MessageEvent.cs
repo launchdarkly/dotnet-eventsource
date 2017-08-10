@@ -6,11 +6,11 @@ namespace LaunchDarkly.EventSource
 {
     public class MessageEvent
     {
-        private readonly String _data;
-        private readonly String _lastEventId;
+        private readonly string _data;
+        private readonly string _lastEventId;
         private readonly Uri _origin;
 
-        public MessageEvent(String data, String lastEventId, Uri origin)
+        public MessageEvent(string data, string lastEventId, Uri origin)
         {
             _data = data;
             _lastEventId = lastEventId;
@@ -59,10 +59,12 @@ namespace LaunchDarkly.EventSource
 
         public override int GetHashCode()
         {
-            int result = _data != null ? _data.GetHashCode() : 0;
-            result = 31 * result + (_lastEventId != null ? _lastEventId.GetHashCode() : 0);
-            result = 31 * result + (_origin != null ? _origin.GetHashCode() : 0);
-            return result;
+            int hash = 17;
+
+            hash = hash * 31 + (_data != null ? _data.GetHashCode() : 0);
+            hash = hash * 31 + (_lastEventId != null ? _lastEventId.GetHashCode() : 0);
+            hash = hash * 31 + (_origin != null ? _origin.GetHashCode() : 0);
+            return hash;
         }
 
     }

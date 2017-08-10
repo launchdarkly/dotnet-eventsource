@@ -4,10 +4,11 @@ namespace LaunchDarkly.EventSource
 {
     public class StateChangedEventArgs : EventArgs
     {
-        public ReadyState State { get; private set; }
-        public StateChangedEventArgs(ReadyState state)
+        public ReadyState ReadyState { get; private set; }
+
+        public StateChangedEventArgs(ReadyState readyState)
         {
-            State = state;
+            ReadyState = readyState;
         }
     }
 }
