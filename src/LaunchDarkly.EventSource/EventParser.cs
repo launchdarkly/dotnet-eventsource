@@ -5,94 +5,55 @@ using System.Text.RegularExpressions;
 
 namespace LaunchDarkly.EventSource
 {
-    public class EventParser
+    public static class EventParser
     {
 
-        //public void ParseLine(string line)
-        //{
-        //    if (string.IsNullOrEmpty(line.Trim()))
-        //    {
-        //        dispatchEvent();
-        //    }
-        //    else if (line.StartsWith(":", StringComparison.OrdinalIgnoreCase))
-        //    {
-        //        ProcessComment(line.Substring(1).Trim());
-        //    }
-        //    else if (line.IndexOf(":", StringComparison.Ordinal) != -1)
-        //    {
-        //        var colonIndex = line.IndexOf(":", StringComparison.Ordinal);
+        public static bool IsComment(string value)
+        {
+            return value.StartsWith(":", StringComparison.OrdinalIgnoreCase);
+        }
 
-        //        string field = line.Substring(0, colonIndex);
-        //        string value = line.Substring(colonIndex + 1).TrimStart(' ');
+        public static bool IsDataField(string value)
+        {
+            return Constants.DataField.Equals(value, StringComparison.OrdinalIgnoreCase);
+        }
 
-        //        ProcessField(field, value);
-        //    }
-        //    else
-        //    {
-        //        ProcessField(line.Trim(), string.Empty);
-        //    }
-        //}
+        public static bool IsIdField(string value)
+        {
+            return Constants.IdField.Equals(value, StringComparison.OrdinalIgnoreCase);
+        }
 
-        //private void ProcessComment(String comment)
-        //{
-        //    try
-        //    {
-        //        handler.onComment(comment);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        handler.onError(e);
-        //    }
-        //}
+        public static bool IsEventField(string value)
+        {
+            return Constants.EventField.Equals(value, StringComparison.OrdinalIgnoreCase);
+        }
 
-        //private void ProcessField(string field, string value)
-        //{
-        //    if (Constants.DataField.Equals(field, StringComparison.OrdinalIgnoreCase))
-        //    {
-        //        data.append(value).append("\n");
-        //    }
-        //    else if (Constants.IdField.Equals(field, StringComparison.OrdinalIgnoreCase))
-        //    {
-        //        lastEventId = value;
-        //    }
-        //    else if (Constants.EventField.Equals(field, StringComparison.OrdinalIgnoreCase))
-        //    {
-        //        eventName = value;
-        //    }
-        //    else if (Constants.RetryField.Equals(field, StringComparison.OrdinalIgnoreCase) && IsNumeric(value))
-        //    {
-        //        connectionHandler.setReconnectionTimeMs(Long.parseLong(value));
-        //    }
-        //}
+        public static bool IsRetryField(string value)
+        {
+            return Constants.RetryField.Equals(value, StringComparison.OrdinalIgnoreCase);
+        }
 
-        //private bool IsNumeric(string input)
-        //{
-        //    return Regex.IsMatch(input, @"^[\d]+$");
-        //}
+        public static bool ContainsField(string value)
+        {
+            return value.IndexOf(":", StringComparison.Ordinal) > 0;
+        }
 
-        //private void dispatchEvent()
-        //{
-        //    if (data.length() == 0)
-        //    {
-        //        return;
-        //    }
-        //    String dataString = data.toString();
-        //    if (dataString.endsWith("\n"))
-        //    {
-        //        dataString = dataString.substring(0, dataString.length() - 1);
-        //    }
-        //    MessageEvent message = new MessageEvent(dataString, lastEventId, origin);
-        //    connectionHandler.setLastEventId(lastEventId);
-        //    try
-        //    {
-        //        handler.onMessage(eventName, message);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        handler.onError(e);
-        //    }
-        //    data = new StringBuffer();
-        //    eventName = DEFAULT_EVENT;
-        //}
+        public static KeyValuePair<string, string> GetFieldFromLine(string value)
+        {
+            if (!ContainsField(value)) return new KeyValuePair<string, string>();
+
+            var colonIndex = value.IndexOf(":", StringComparison.Ordinal);
+
+            var fieldName = value.Substring(0, colonIndex);
+            var fieldValue = value.Substring(colonIndex + 1).TrimStart(' ');
+
+            return new KeyValuePair<string, string>(fieldName, fieldValue);
+        }
+
+        public static bool IsStringNumeric(string input)
+        {
+            return Regex.IsMatch(input, @"^[\d]+$");
+        }
+        
     }
 }
