@@ -22,15 +22,15 @@ namespace EventSource_ConsoleApp
 
             var logFactory = new LoggerFactory();
 
-            Configuration config = new Configuration
-            {
-                ConnectionTimeOut = TimeSpan.FromMinutes(10),
-                DelayRetryDuration = TimeSpan.FromMilliseconds(3000),
-                Uri = new Uri("https://stream.launchdarkly.com/flags"),
-                RequestHeaders = headers,
-                Logger = logFactory.CreateLogger<EventSource>()
+            Console.WriteLine("Current Time:{0}", DateTime.UtcNow);
 
-            };
+            Configuration config = new Configuration(
+                uri: new Uri("https://stream.launchdarkly.com/flags"),
+                connectionTimeOut: TimeSpan.FromMinutes(2),
+                delayRetryDuration: TimeSpan.FromMilliseconds(3000),
+                requestHeaders: headers,
+                logger: logFactory.CreateLogger<EventSource>()
+            );
 
             logFactory.AddConsole(LogLevel.Trace);
 
@@ -42,8 +42,18 @@ namespace EventSource_ConsoleApp
             evt.MessageReceived += Evt_MessageReceived;
             evt.Closed += Evt_Closed;
 
-            evt.Start().Wait();
-            
+
+            try
+            {
+                evt.Start().Wait();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Current Time:{0}", DateTime.UtcNow);
+                Console.WriteLine(ex);
+            }
+
+            Console.ReadKey();
         }
 
         private static void Evt_Closed(object sender, StateChangedEventArgs e)

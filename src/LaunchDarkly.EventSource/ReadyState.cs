@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LaunchDarkly.EventSource
+﻿namespace LaunchDarkly.EventSource
 {
     /// <summary>
     /// Represents the state of the connection in the <see cref="EventSource"/> class.

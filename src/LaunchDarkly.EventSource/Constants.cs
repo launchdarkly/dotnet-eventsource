@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LaunchDarkly.EventSource
+﻿namespace LaunchDarkly.EventSource
 {
     /// <summary>
     /// An internal class used to hold static values used when processing Server Sent Events.

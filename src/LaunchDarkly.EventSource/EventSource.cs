@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,6 +25,14 @@ namespace LaunchDarkly.EventSource
         //private TimeSpan _connectionTimeout = Timeout.InfiniteTimeSpan;
         private List<string> _eventBuffer;
         private string _eventName = Constants.MessageField;
+        private string _lastEventId;
+        private TimeSpan _retryDelay = TimeSpan.FromSeconds(1);
+
+        internal static readonly string Version = ((AssemblyInformationalVersionAttribute)typeof(EventSource)
+                .GetTypeInfo()
+                .Assembly
+                .GetCustomAttribute(typeof(AssemblyInformationalVersionAttribute)))
+            .InformationalVersion;
 
         #endregion
 
@@ -71,31 +80,21 @@ namespace LaunchDarkly.EventSource
         #region Public Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventSource"/> class.
+        /// Initializes a new instance of the <see cref="EventSource" /> class.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
-        public EventSource(Configuration configuration) : this (new HttpClient(), configuration)
+        /// <exception cref="ArgumentNullException">client
+        /// or
+        /// configuration</exception>
+        public EventSource(Configuration configuration)
         {
             //System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls12;
-        }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EventSource"/> class.
-        /// </summary>
-        /// <param name="client">The HttpClient.</param>
-        /// <param name="configuration">The configuration.</param>
-        /// <exception cref="ArgumentNullException">
-        /// client
-        /// or
-        /// configuration
-        /// </exception>
-        public EventSource(HttpClient client, Configuration configuration)
-        {
             ReadyState = ReadyState.Raw;
 
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+
+            _client = new HttpClient(_configuration.MessageHandler);
 
             _logger = _configuration.Logger ?? new LoggerFactory().CreateLogger<EventSource>();
             
@@ -211,7 +210,7 @@ namespace LaunchDarkly.EventSource
             }
             else if (EventParser.IsIdField(field))
             {
-                _configuration.LastEventId = value;
+                _lastEventId = value;
             }
             else if (EventParser.IsEventField(field))
             {
@@ -222,7 +221,7 @@ namespace LaunchDarkly.EventSource
                 long retry;
 
                 if (long.TryParse(value, out retry))
-                    _configuration.DelayRetryDuration = TimeSpan.FromMilliseconds(retry);
+                    _retryDelay = TimeSpan.FromMilliseconds(retry);
             }
         }
 
@@ -230,7 +229,7 @@ namespace LaunchDarkly.EventSource
         {
             if (_eventBuffer.Count == 0) return;
 
-            var message = new MessageEvent(string.Concat(_eventBuffer), _configuration.LastEventId, _configuration.Uri);
+            var message = new MessageEvent(string.Concat(_eventBuffer), _lastEventId, _configuration.Uri);
 
             OnMessageReceived(new MessageReceivedEventArgs(message, _eventName));
             

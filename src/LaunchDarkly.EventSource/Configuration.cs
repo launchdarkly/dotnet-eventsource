@@ -1,9 +1,7 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
-using System.Net.Http.Headers;
-using System.Reflection;
-using System.Text;
-using Microsoft.Extensions.Logging;
+using System.Net.Http;
 
 namespace LaunchDarkly.EventSource
 {
@@ -16,70 +14,53 @@ namespace LaunchDarkly.EventSource
         #region Private Fields
 
         private readonly Uri _defaultUri = new Uri("https://stream.launchdarkly.com/flags");
-        private Uri _uri;
-
-        internal static readonly string Version = ((AssemblyInformationalVersionAttribute)typeof(EventSource)
-                .GetTypeInfo()
-                .Assembly
-                .GetCustomAttribute(typeof(AssemblyInformationalVersionAttribute)))
-            .InformationalVersion;
 
         #endregion
 
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets the <see cref="System.Uri"/> used when connecting to an EventSource API.
+        /// Gets the <see cref="System.Uri"/> used when connecting to an EventSource API.
         /// </summary>
         /// <value>
         /// The <see cref="System.Uri"/>.
         /// </value>
-        public Uri Uri
-        {
-            get
-            {
-                if (_uri == null)
-                    return _defaultUri;
-
-                return _uri;
-            }
-            set { _uri = value; }
-        }
+        public Uri Uri { get; }
 
         /// <summary>
-        /// Gets or sets the connection time out value used when connecting to the EventSource API.
+        /// Gets the connection time out value used when connecting to the EventSource API.
         /// </summary>
         /// <value>
         /// The connection time out.
         /// </value>
-        public TimeSpan ConnectionTimeOut { get; set; }
+        public TimeSpan ConnectionTimeOut { get; }
 
         /// <summary>
-        /// Gets or sets the duration to wait before attempting to reconnect to the EventSource API.
+        /// Gets the duration to wait before attempting to reconnect to the EventSource API.
         /// </summary>
         /// <value>
         /// The duration of the retry delay.
         /// </value>
-        public TimeSpan DelayRetryDuration { get; set; }
+        public TimeSpan DelayRetryDuration { get; }
 
         /// <summary>
-        /// Gets or sets the last event identifier.
+        /// Gets the last event identifier.
         /// </summary>
         /// <remarks>
-        /// Setting the LastEventId will add an HTTP request header named "Last-Event-ID" when connecting to the EventSource API
+        /// Setting the LastEventId in the constructor will add an HTTP request header named "Last-Event-ID" when connecting to the EventSource API
         /// </remarks>
         /// <value>
         /// The last event identifier.
         /// </value>
-        public string LastEventId { get; set; }
+        public string LastEventId { get; }
 
         /// <summary>
-        /// Gets or sets the <see cref="Microsoft.Extensions.Logging.ILogger"/> used internally in the <see cref="EventSource"/> class.
+        /// Gets the <see cref="Microsoft.Extensions.Logging.ILogger"/> used internally in the <see cref="EventSource"/> class.
         /// </summary>
         /// <value>
         /// The ILogger to use for internal logging.
         /// </value>
-        public ILogger Logger { get; set; }
+        public ILogger Logger { get; }
 
         /// <summary>
         /// Gets or sets the request headers used when connecting to the EventSource API.
@@ -87,17 +68,33 @@ namespace LaunchDarkly.EventSource
         /// <value>
         /// The request headers.
         /// </value>
-        public Dictionary<string, string> RequestHeaders { get; set; }
+        public IDictionary<string, string> RequestHeaders { get; }
+
+        public HttpMessageHandler MessageHandler { get; }
 
         #endregion
 
         #region Public Constructor
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Configuration"/> class.
+        /// Initializes a new instance of the <see cref="Configuration" /> class.
         /// </summary>
-        public Configuration()
+        /// <param name="uri">The URI used to connect to the remote EventSource API.</param>
+        /// <param name="messageHandler">The message handler to use when sending API requests.</param>
+        /// <param name="connectionTimeOut">The connection time out. If null, defaults to 10 seconds.</param>
+        /// <param name="delayRetryDuration">Duration of the delay retry. if null, defaults to 1 second.</param>
+        /// <param name="requestHeaders">Request headers used when connecting to the remote EventSource API.</param>
+        /// <param name="lastEventId">The last event identifier.</param>
+        /// <param name="logger">The logger used for logging internal messages.</param>
+        public Configuration(Uri uri, HttpMessageHandler messageHandler = null, TimeSpan? connectionTimeOut = null, TimeSpan? delayRetryDuration = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, ILogger logger = null)
         {
+            Uri = uri ?? _defaultUri;
+            MessageHandler = messageHandler ?? new HttpClientHandler();
+            ConnectionTimeOut = connectionTimeOut ?? TimeSpan.FromMilliseconds(10000);
+            DelayRetryDuration = delayRetryDuration ?? TimeSpan.FromMilliseconds(1000);
+            RequestHeaders = requestHeaders;
+            LastEventId = lastEventId;
+            Logger = logger;
         }
 
         #endregion
