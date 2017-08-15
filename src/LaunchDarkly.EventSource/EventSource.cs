@@ -8,8 +8,15 @@ using System.Threading.Tasks;
 
 namespace LaunchDarkly.EventSource
 {
+    /// <summary>
+    /// Provides an EventSource client for consuming Server Sent Events. Additional details on the Server Sent Events spec 
+    /// can be found at https://html.spec.whatwg.org/multipage/server-sent-events.html
+    /// </summary>
     public sealed class EventSource
     {
+
+        #region Private Fields
+
         private readonly HttpClient _client;
         private readonly Configuration _configuration;
         private readonly ILogger _logger;
@@ -18,23 +25,70 @@ namespace LaunchDarkly.EventSource
         private List<string> _eventBuffer;
         private string _eventName = Constants.MessageField;
 
+        #endregion
+
+        #region Public Events
+
+        /// <summary>
+        /// Occurs when the connection to the EventSource API has been opened.
+        /// </summary>
         public event EventHandler<StateChangedEventArgs> Opened;
+        /// <summary>
+        /// Occurs when the connection to the EventSource API has been closed.
+        /// </summary>
         public event EventHandler<StateChangedEventArgs> Closed;
+        /// <summary>
+        /// Occurs when a Server Sent Event from the EventSource API has been received.
+        /// </summary>
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
+        /// <summary>
+        /// Occurs when a comment has been received from the EventSource API.
+        /// </summary>
         public event EventHandler<CommentReceivedEventArgs> CommentReceived;
+        /// <summary>
+        /// Occurs when an error has happened when the EventSource is open and processing Server Sent Events.
+        /// </summary>
         public event EventHandler<ExceptionEventArgs> Error;
 
+        #endregion Public Events
+
+        #region Public Properties
+
+        /// <summary>
+        /// Gets the state of the EventSource connection.
+        /// </summary>
+        /// <value>
+        /// One of the <see cref="EventSource.ReadyState"/> values, which represents the state of the EventSource connection.
+        /// </value>
         public ReadyState ReadyState
         {
             get;
             private set;
         }
 
+        #endregion
+
+        #region Public Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventSource"/> class.
+        /// </summary>
+        /// <param name="configuration">The configuration.</param>
         public EventSource(Configuration configuration) : this (new HttpClient(), configuration)
         {
             //System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls12;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventSource"/> class.
+        /// </summary>
+        /// <param name="client">The HttpClient.</param>
+        /// <param name="configuration">The configuration.</param>
+        /// <exception cref="ArgumentNullException">
+        /// client
+        /// or
+        /// configuration
+        /// </exception>
         public EventSource(HttpClient client, Configuration configuration)
         {
             ReadyState = ReadyState.Raw;
@@ -43,12 +97,19 @@ namespace LaunchDarkly.EventSource
 
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
-            var loggerFactory = _configuration.LoggerFactory ?? new LoggerFactory();
-
-            _logger = loggerFactory.CreateLogger<EventSource>();
-
+            _logger = _configuration.Logger ?? new LoggerFactory().CreateLogger<EventSource>();
+            
         }
-        
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Initiates the request to the EventSource API and parses Server Sent Events received by the API.
+        /// </summary>
+        /// <returns>A <see cref="System.Threading.Tasks.Task"/> A task that represents the work queued to execute in the ThreadPool.</returns>
+        /// <exception cref="InvalidOperationException">The method was called after the connection <see cref="ReadyState"/> was Open or Connecting.</exception> 
         public async Task Start()
         {
             if (ReadyState == ReadyState.Connecting || ReadyState == ReadyState.Open)
@@ -122,6 +183,25 @@ namespace LaunchDarkly.EventSource
             }
         }
 
+        /// <summary>
+        /// Closes the connection to the EventSource API.
+        /// </summary>
+        public void Close()
+        {
+            if (ReadyState == ReadyState.Raw || ReadyState == ReadyState.Shutdown) return;
+
+            ReadyState = ReadyState.Shutdown;
+            OnClosed(new StateChangedEventArgs(ReadyState));
+
+            _client.CancelPendingRequests();
+            _logger.LogInformation("EventSource.Close called");
+
+        }
+
+        #endregion
+
+        #region Private Methods
+
         private void ProcessField(string field, string value)
         {
             if (EventParser.IsDataField(field))
@@ -158,17 +238,6 @@ namespace LaunchDarkly.EventSource
             _eventName = Constants.MessageField;
         }
 
-        public void Close()
-        {
-            if (ReadyState == ReadyState.Raw || ReadyState == ReadyState.Shutdown) return;
-
-            ReadyState = ReadyState.Shutdown;
-            OnClosed(new StateChangedEventArgs(ReadyState));
-
-            _client.CancelPendingRequests();
-            _logger.LogInformation("EventSource.Close called");
-
-        }
 
         private void ConfigureRequestHeaders()
         {
@@ -233,6 +302,8 @@ namespace LaunchDarkly.EventSource
                 Error(this, e);
             }
         }
+
+        #endregion
 
     }
 }

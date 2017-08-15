@@ -20,17 +20,19 @@ namespace EventSource_ConsoleApp
             headers.Add("User-Agent", "DotNetClient/0.0.1");
             headers.Add("Authorization", "sdk-16c73e2d-5402-4b1b-840e-cb32a4c00ce2");
 
+            var logFactory = new LoggerFactory();
+
             Configuration config = new Configuration
             {
                 ConnectionTimeOut = TimeSpan.FromMinutes(10),
                 DelayRetryDuration = TimeSpan.FromMilliseconds(3000),
                 Uri = new Uri("https://stream.launchdarkly.com/flags"),
                 RequestHeaders = headers,
-                LoggerFactory = new LoggerFactory()
+                Logger = logFactory.CreateLogger<EventSource>()
 
             };
 
-            config.LoggerFactory.AddConsole(LogLevel.Trace);
+            logFactory.AddConsole(LogLevel.Trace);
 
             EventSource evt = new EventSource(config);
 
