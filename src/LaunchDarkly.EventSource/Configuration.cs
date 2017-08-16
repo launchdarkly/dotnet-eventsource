@@ -8,7 +8,7 @@ namespace LaunchDarkly.EventSource
     /// <summary>
     /// A class used 
     /// </summary>
-    public class Configuration
+    public sealed class Configuration
     {
 
         #region Private Fields

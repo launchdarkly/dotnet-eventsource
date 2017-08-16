@@ -5,7 +5,7 @@ namespace LaunchDarkly.EventSource
     /// <summary>
     /// Represents the Server Sent Event message received by an EventSource API.
     /// </summary>
-    public class MessageEvent
+    public sealed class MessageEvent
     {
         #region Private Fields
 

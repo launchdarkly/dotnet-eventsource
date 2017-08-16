@@ -135,7 +135,7 @@ namespace LaunchDarkly.EventSource
 
                     using (var reader = new System.IO.StreamReader(stream))
                     {
-                        while (true) //(!reader.EndOfStream)
+                        while (!reader.EndOfStream)
                         {
                             var content = reader.ReadLine();
 
@@ -228,6 +228,8 @@ namespace LaunchDarkly.EventSource
         private void DispatchEvent()
         {
             if (_eventBuffer.Count == 0) return;
+
+            _eventBuffer.RemoveAll(item => item.Equals("\n"));
 
             var message = new MessageEvent(string.Concat(_eventBuffer), _lastEventId, _configuration.Uri);
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using LaunchDarkly.EventSource;
 using Microsoft.Extensions.Logging;
@@ -26,7 +27,7 @@ namespace EventSource_ConsoleApp
 
             Configuration config = new Configuration(
                 uri: new Uri("https://stream.launchdarkly.com/flags"),
-                connectionTimeOut: TimeSpan.FromMinutes(2),
+                connectionTimeOut: Timeout.InfiniteTimeSpan,
                 delayRetryDuration: TimeSpan.FromMilliseconds(3000),
                 requestHeaders: headers,
                 logger: logFactory.CreateLogger<EventSource>()
