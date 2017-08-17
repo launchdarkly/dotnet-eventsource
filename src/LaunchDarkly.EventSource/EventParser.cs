@@ -19,6 +19,8 @@ namespace LaunchDarkly.EventSource
         /// </returns>
         public static bool IsComment(string value)
         {
+            if (string.IsNullOrWhiteSpace(value)) return false;
+
             return value.StartsWith(":", StringComparison.OrdinalIgnoreCase);
         }
 
@@ -29,7 +31,7 @@ namespace LaunchDarkly.EventSource
         /// <returns>
         ///   <c>true</c> if the specified value is a data field; otherwise, <c>false</c>.
         /// </returns>
-        public static bool IsDataField(string value)
+        public static bool IsDataFieldName(string value)
         {
             return Constants.DataField.Equals(value, StringComparison.OrdinalIgnoreCase);
         }
@@ -41,7 +43,7 @@ namespace LaunchDarkly.EventSource
         /// <returns>
         ///   <c>true</c> if the specified value is an ID field; otherwise, <c>false</c>.
         /// </returns>
-        public static bool IsIdField(string value)
+        public static bool IsIdFieldName(string value)
         {
             return Constants.IdField.Equals(value, StringComparison.OrdinalIgnoreCase);
         }
@@ -53,7 +55,7 @@ namespace LaunchDarkly.EventSource
         /// <returns>
         ///   <c>true</c> if the specified value is an event field; otherwise, <c>false</c>.
         /// </returns>
-        public static bool IsEventField(string value)
+        public static bool IsEventFieldName(string value)
         {
             return Constants.EventField.Equals(value, StringComparison.OrdinalIgnoreCase);
         }
@@ -65,7 +67,7 @@ namespace LaunchDarkly.EventSource
         /// <returns>
         ///   <c>true</c> if the specified value is a retry field; otherwise, <c>false</c>.
         /// </returns>
-        public static bool IsRetryField(string value)
+        public static bool IsRetryFieldName(string value)
         {
             return Constants.RetryField.Equals(value, StringComparison.OrdinalIgnoreCase);
         }
@@ -82,6 +84,8 @@ namespace LaunchDarkly.EventSource
         /// </returns>
         public static bool ContainsField(string value)
         {
+            if (string.IsNullOrWhiteSpace(value)) return false;
+
             return value.IndexOf(":", StringComparison.Ordinal) > 0;
         }
 
@@ -114,6 +118,8 @@ namespace LaunchDarkly.EventSource
         /// </returns>
         public static bool IsStringNumeric(string value)
         {
+            if (string.IsNullOrWhiteSpace(value)) return false;
+
             return Regex.IsMatch(value, @"^[\d]+$");
         }
         

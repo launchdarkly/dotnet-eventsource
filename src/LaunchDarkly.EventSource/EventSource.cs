@@ -7,6 +7,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
+// Added to allow the Test Project to access internal types and methods.
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("LaunchDarkly.EventSource.Tests")]
+
 namespace LaunchDarkly.EventSource
 {
     /// <summary>
@@ -203,20 +206,20 @@ namespace LaunchDarkly.EventSource
 
         private void ProcessField(string field, string value)
         {
-            if (EventParser.IsDataField(field))
+            if (EventParser.IsDataFieldName(field))
             {
                 _eventBuffer.Add(value);
                 _eventBuffer.Add("\n");
             }
-            else if (EventParser.IsIdField(field))
+            else if (EventParser.IsIdFieldName(field))
             {
                 _lastEventId = value;
             }
-            else if (EventParser.IsEventField(field))
+            else if (EventParser.IsEventFieldName(field))
             {
                 _eventName = value;
             }
-            else if (EventParser.IsRetryField(field) && EventParser.IsStringNumeric(value))
+            else if (EventParser.IsRetryFieldName(field) && EventParser.IsStringNumeric(value))
             {
                 long retry;
 
