@@ -14,7 +14,7 @@ namespace LaunchDarkly.EventSource
         /// <value>
         /// One of the <see cref="EventSource.ReadyState"/> values, which represents the state of the EventSource connection.
         /// </value>
-        public ReadyState ReadyState { get; private set; }
+        public ReadyState ReadyState { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StateChangedEventArgs"/> class.

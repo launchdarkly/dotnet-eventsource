@@ -14,7 +14,7 @@ namespace LaunchDarkly.EventSource
         /// <value>
         /// The exception.
         /// </value>
-        public Exception Exception { get; private set; }
+        public Exception Exception { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExceptionEventArgs"/> class.

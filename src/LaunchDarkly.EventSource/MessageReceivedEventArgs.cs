@@ -14,7 +14,7 @@ namespace LaunchDarkly.EventSource
         /// <value>
         /// The <see cref="MessageEvent"/> data recieved by the Server Sent Event.
         /// </value>
-        public MessageEvent Message { get; private set; }
+        public MessageEvent Message { get; }
 
         /// <summary>
         /// Gets the name of the event type received by the Server Sent Event.
@@ -22,7 +22,7 @@ namespace LaunchDarkly.EventSource
         /// <value>
         /// The name of the event type.
         /// </value>
-        public string EventName { get; private set; }
+        public string EventName { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageReceivedEventArgs"/> class.

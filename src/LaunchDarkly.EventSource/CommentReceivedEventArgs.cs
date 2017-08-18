@@ -16,7 +16,7 @@ namespace LaunchDarkly.EventSource
         /// <value>
         /// The comment.
         /// </value>
-        public string Comment { get; private set; }
+        public string Comment { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommentReceivedEventArgs"/> class.
