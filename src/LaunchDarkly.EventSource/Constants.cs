@@ -18,7 +18,7 @@
         /// <summary>
         /// The HTTP header value for the Content Type.
         /// </summary>
-        internal static string ContentType = "text/event-stream";
+        internal static string EventStreamContentType = "text/event-stream";
 
         /// <summary>
         /// The event type name for a Retry in a Server Sent Event.

@@ -38,7 +38,7 @@ namespace LaunchDarkly.EventSource.Tests
             var response =
                 new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(content, System.Text.Encoding.UTF8)
+                    Content = new StringContent(content, System.Text.Encoding.UTF8, "text/event-stream")
                 };
 
             _responses.Enqueue(response);

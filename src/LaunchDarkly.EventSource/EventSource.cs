@@ -3,8 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reflection;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 // Added to allow the Test Project to access internal types and methods.
@@ -21,7 +22,6 @@ namespace LaunchDarkly.EventSource
 
         #region Private Fields
 
-        private readonly HttpClient _client;
         private readonly Configuration _configuration;
         private readonly ILogger _logger;
 
@@ -96,9 +96,7 @@ namespace LaunchDarkly.EventSource
             ReadyState = ReadyState.Raw;
 
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-
-            _client = new HttpClient(_configuration.MessageHandler);
-
+            
             _logger = _configuration.Logger ?? new LoggerFactory().CreateLogger<EventSource>();
             
         }
@@ -112,7 +110,7 @@ namespace LaunchDarkly.EventSource
         /// </summary>
         /// <returns>A <see cref="System.Threading.Tasks.Task"/> A task that represents the work queued to execute in the ThreadPool.</returns>
         /// <exception cref="InvalidOperationException">The method was called after the connection <see cref="ReadyState"/> was Open or Connecting.</exception> 
-        public async Task Start()
+        public async Task StartAsync()
         {
             if (ReadyState == ReadyState.Connecting || ReadyState == ReadyState.Open)
             {
@@ -121,50 +119,44 @@ namespace LaunchDarkly.EventSource
                 throw new InvalidOperationException(error);
             }
 
-            ConfigureRequestHeaders();
+            SetReadyState(ReadyState.Connecting);
 
-            _client.Timeout = _configuration.ConnectionTimeOut;
+            var requestMessage = CreateHttpRequestMessage(_configuration.Uri);
 
-            ReadyState = ReadyState.Connecting;
+            var client = GetHttpClient();
 
             try
             {
-                using (var stream = await _client.GetStreamAsync(_configuration.Uri))
+                using (var response = await client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead,
+                    CancellationToken.None).ConfigureAwait(false))
                 {
-                    _eventBuffer = new List<string>();
+                    // According to Specs, a client can be told to stop reconnecting using the HTTP 204 No Content response code
+                    if (HandleNoContent(response)) return;
 
-                    ReadyState = ReadyState.Open;
-                    OnOpened(new StateChangedEventArgs(ReadyState));
+                    // According to Specs, HTTP 200 OK responses that have a Content-Type specifying an unsupported type, 
+                    // or that have no Content-Type at all, must cause the user agent to fail the connection.
+                    if (HandleIncorrectMediaType(response)) return;
 
-                    using (var reader = new System.IO.StreamReader(stream))
+                    using (var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
                     {
-                        while (!reader.EndOfStream)
+                        _eventBuffer = new List<string>();
+
+                        SetReadyState(ReadyState.Open, OnOpened);
+
+                        using (var reader = new StreamReader(stream))
                         {
-                            var content = reader.ReadLine();
+                            //while (!cancellationToken.IsCancellationRequested && !reader.EndOfStream)
+                            while (ReadyState == ReadyState.Open && !reader.EndOfStream)
+                            {
+                                var content = await reader.ReadLineAsync().ConfigureAwait(false);
 
-                            if (string.IsNullOrEmpty(content))
-                            {
-                                DispatchEvent();
-                            }
-                            else if (EventParser.IsComment(content))
-                            {
-                                OnCommentReceived(new CommentReceivedEventArgs(content));
-                            }
-                            else if (EventParser.ContainsField(content))
-                            {
-                                var field = EventParser.GetFieldFromLine(content);
-
-                                ProcessField(field.Key, field.Value);
-                            }
-                            else
-                            {
-                                ProcessField(content.Trim(), string.Empty);
+                                ProcessResponseContent(content);
                             }
 
-                            //_logger.LogInformation("Content Received: {0}", content);
                         }
                     }
                 }
+
             }
             catch (Exception e)
             {
@@ -172,17 +164,20 @@ namespace LaunchDarkly.EventSource
                     "Encountered exception in LaunchDarkly EventSource.Start method. Exception Message: {0} {1} {2}",
                     e.Message, Environment.NewLine, e.StackTrace);
 
-                OnError(new ExceptionEventArgs(e));
+                CloseAndRaiseError(e);
 
                 // TODO: Implement Retry
-
-                throw;
+                //throw;
             }
             finally
             {
-                ReadyState = ReadyState.Closed;
-                OnClosed(new StateChangedEventArgs(ReadyState));
+                if (client != null)
+                {
+                    client.Dispose();
+                }
             }
+
+            SetReadyState(ReadyState.Closed, OnClosed);
         }
 
         /// <summary>
@@ -192,18 +187,92 @@ namespace LaunchDarkly.EventSource
         {
             if (ReadyState == ReadyState.Raw || ReadyState == ReadyState.Shutdown) return;
 
-            ReadyState = ReadyState.Shutdown;
-            OnClosed(new StateChangedEventArgs(ReadyState));
-
-            _client.CancelPendingRequests();
-            _logger.LogInformation("EventSource.Close called");
-
+            Close(ReadyState.Shutdown);
         }
-
+        
         #endregion
 
         #region Private Methods
 
+        private HttpClient GetHttpClient()
+        {
+            return new HttpClient(_configuration.MessageHandler, false) { Timeout = _configuration.ConnectionTimeOut };
+        }
+
+        private void Close(ReadyState state)
+        {
+            ReadyState = state;
+            OnClosed(new StateChangedEventArgs(ReadyState));
+
+            //_client.CancelPendingRequests();
+            _logger.LogInformation("EventSource.Close called");
+        }
+
+        private void CloseAndRaiseError(Exception ex)
+        {
+            if (ex == null)
+                throw new ArgumentNullException(nameof(ex));
+
+            Close(ReadyState.Closed);
+
+            OnError(new ExceptionEventArgs(ex));
+        }
+        
+        private bool HandleNoContent(HttpResponseMessage response)
+        {
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+            {
+                CloseAndRaiseError(new OperationCanceledException(
+                    "Remote EventSource API returned Http Status Code 204."));
+                return true;
+            }
+            return false;
+        }
+
+        private bool HandleIncorrectMediaType(HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode && response.Content.Headers.ContentType.MediaType !=
+                Constants.EventStreamContentType)
+            {
+                CloseAndRaiseError(new OperationCanceledException(
+                    "HTTP Content-Type returned from the remote EventSource API does not match 'text/event-stream'."));
+                return true;
+            }
+            return false;
+        }
+
+        private void ProcessResponseContent(string content)
+        {
+            if (string.IsNullOrEmpty(content))
+            {
+                DispatchEvent();
+            }
+            else if (EventParser.IsComment(content))
+            {
+                OnCommentReceived(new CommentReceivedEventArgs(content));
+            }
+            else if (EventParser.ContainsField(content))
+            {
+                var field = EventParser.GetFieldFromLine(content);
+
+                ProcessField(field.Key, field.Value);
+            }
+            else
+            {
+                ProcessField(content.Trim(), string.Empty);
+            }
+        }
+
+        private void SetReadyState(ReadyState state, Action<StateChangedEventArgs> action = null)
+        {
+            if (ReadyState == state) return;
+
+            ReadyState = state;
+
+            if (action != null)
+                action(new StateChangedEventArgs(ReadyState));
+        }
+        
         private void ProcessField(string field, string value)
         {
             if (EventParser.IsDataFieldName(field))
@@ -243,28 +312,31 @@ namespace LaunchDarkly.EventSource
         }
 
 
-        private void ConfigureRequestHeaders()
+        private HttpRequestMessage CreateHttpRequestMessage(Uri uri)
         {
-            //_client.DefaultRequestHeaders.Add("Authorization", "sdk-16c73e2d-5402-4b1b-840e-cb32a4c00ce2");
+            var request = new HttpRequestMessage(HttpMethod.Get, uri);
 
             // Add all headers provided in the Configuration Headers. This allows a consumer to provide any request headers to the EventSource API
             if (_configuration.RequestHeaders != null)
             {
                 foreach (var item in _configuration.RequestHeaders)
                 {
-                    if (!_client.DefaultRequestHeaders.Contains(item.Key))
-                        _client.DefaultRequestHeaders.Add(item.Key, item.Value);
+                    request.Headers.Add(item.Key, item.Value);
                 }
             }
 
             // If the EventSource Configuration was provided with a LastEventId, include it as a header to the API request.
-            if (!string.IsNullOrWhiteSpace(_configuration.LastEventId) && !_client.DefaultRequestHeaders.Contains(Constants.LastEventIdHttpHeader))
-                _client.DefaultRequestHeaders.Add(Constants.LastEventIdHttpHeader, _configuration.LastEventId);
+            if (!string.IsNullOrWhiteSpace(_configuration.LastEventId) && !request.Headers.Contains(Constants.LastEventIdHttpHeader))
+                request.Headers.Add(Constants.LastEventIdHttpHeader, _configuration.LastEventId);
 
             // Add the Accept Header if it wasn't provided in the Configuration
-            if (!_client.DefaultRequestHeaders.Contains(Constants.AcceptHttpHeader))
-                _client.DefaultRequestHeaders.Add(Constants.AcceptHttpHeader, Constants.ContentType);
+            if (!request.Headers.Contains(Constants.AcceptHttpHeader))
+                request.Headers.Add(Constants.AcceptHttpHeader, Constants.EventStreamContentType);
 
+            request.Headers.ExpectContinue = false;
+            request.Headers.CacheControl = new CacheControlHeaderValue { NoCache = true };
+
+            return request;
         }
 
         private void OnOpened(StateChangedEventArgs e)

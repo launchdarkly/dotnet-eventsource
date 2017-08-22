@@ -23,7 +23,7 @@ namespace EventSource_ConsoleApp
 
             var logFactory = new LoggerFactory();
 
-            Console.WriteLine("Current Time:{0}", DateTime.UtcNow);
+            Log("Starting...");
 
             Configuration config = new Configuration(
                 uri: new Uri("https://stream.launchdarkly.com/flags"),
@@ -46,7 +46,8 @@ namespace EventSource_ConsoleApp
 
             try
             {
-                evt.Start().Wait();
+                //evt.Start().Wait();
+                evt.StartAsync();
             }
             catch (Exception ex)
             {
@@ -57,31 +58,36 @@ namespace EventSource_ConsoleApp
             Console.ReadKey();
         }
 
+        private static void Log(string format, params object[] args)
+        {
+            Console.WriteLine("{0}: {1}", DateTime.Now, string.Format(format, args));
+        }
+
         private static void Evt_Closed(object sender, StateChangedEventArgs e)
         {
-            Console.WriteLine("EventSource Closed. Current State {0}", e.ReadyState);
+            Log("EventSource Closed. Current State {0}", e.ReadyState);
         }
 
         private static void Evt_MessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            Console.WriteLine("EventSource Message Received. Event Name: {0}", e.EventName);
-            Console.WriteLine("EventSource Message Properties: {0}\tLast Event Id: {1}{0}\tOrigin: {2}{0}\tData: {3}",
+            Log("EventSource Message Received. Event Name: {0}", e.EventName);
+            Log("EventSource Message Properties: {0}\tLast Event Id: {1}{0}\tOrigin: {2}{0}\tData: {3}",
                 Environment.NewLine, e.Message.LastEventId, e.Message.Origin, e.Message.Data);
         }
 
         private static void Evt_CommentReceived(object sender, CommentReceivedEventArgs e)
         {
-            Console.WriteLine("EventSource Comment Received: {0}", e.Comment);
+            Log("EventSource Comment Received: {0}", e.Comment);
         }
 
         private static void Evt_Error(object sender, ExceptionEventArgs e)
         {
-            Console.WriteLine("EventSource Error Occurred. Details: {0}", e.Exception);
+            Log("EventSource Error Occurred. Details: {0}", e.Exception);
         }
 
         private static void Evt_Opened(object sender, StateChangedEventArgs e)
         {
-            Console.WriteLine("EventSource Opened. Current State: {0}", e.ReadyState);
+            Log("EventSource Opened. Current State: {0}", e.ReadyState);
         }
     }
 }
