@@ -5,6 +5,8 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Polly;
+using Polly.NoOp;
 using Xunit;
 
 namespace LaunchDarkly.EventSource.Tests
@@ -28,6 +30,7 @@ namespace LaunchDarkly.EventSource.Tests
              messageHandler: handler);
 
             var evt = new EventSource(config);
+
 
             string commentReceived = string.Empty;
             var wasCommentEventRaised = false;
@@ -138,7 +141,7 @@ namespace LaunchDarkly.EventSource.Tests
             };
 
             //// Act
-            await evt.StartAsync();
+            await evt.StartAsync(Policy.NoOpAsync());
 
             //// Assert
             Assert.Equal("200", message.LastEventId);
@@ -163,7 +166,7 @@ namespace LaunchDarkly.EventSource.Tests
             var evt = new EventSource(config);
 
             //// Act
-            await evt.StartAsync();
+            await evt.StartAsync(Policy.NoOpAsync());
 
             var request = handler.GetRequests().First();
 
@@ -195,7 +198,7 @@ namespace LaunchDarkly.EventSource.Tests
             var evt = new EventSource(config);
 
             //// Act
-            await evt.StartAsync();
+            await evt.StartAsync(Policy.NoOpAsync());
             var request = handler.GetRequests().First();
 
             IEnumerable<string> headerValues;
@@ -222,14 +225,13 @@ namespace LaunchDarkly.EventSource.Tests
             var evt = new EventSource(config);
 
             //// Act
-            await evt.StartAsync();
+            await evt.StartAsync(Policy.NoOpAsync());
 
             var request = handler.GetRequests().First();
 
             //// Assert
             Assert.True(headers.All(
                     item =>
-
                         request.Headers.Contains(item.Key) &&
                         request.Headers.GetValues(item.Key).Contains(item.Value)
             ));
@@ -278,11 +280,11 @@ namespace LaunchDarkly.EventSource.Tests
 
             var eventSource = new EventSource(new Configuration(_uri, handler));
 
-            //// Act
+            //Act
             var raisedEvent = await Assert.RaisesAsync<ExceptionEventArgs>(
                 h => eventSource.Error += h,
                 h => eventSource.Error -= h,
-                () => eventSource.StartAsync());
+                () => eventSource.StartAsync(Policy.NoOpAsync()));
 
             //// Assert
             Assert.NotNull(raisedEvent);
@@ -290,6 +292,32 @@ namespace LaunchDarkly.EventSource.Tests
             Assert.IsType<OperationCanceledException>(raisedEvent.Arguments.Exception);
             Assert.True(eventSource.ReadyState == ReadyState.Closed);
         }
+        
 
+        [Theory]
+        [InlineData(HttpStatusCode.InternalServerError)]
+        [InlineData(HttpStatusCode.BadRequest)]
+        [InlineData(HttpStatusCode.RequestTimeout)]
+        public async Task Given_status_code_when_the_http_response_is_recieved_then_error_event_should_occur(HttpStatusCode statusCode)
+        {
+            // Arrange
+            var handler = new StubMessageHandler();
+
+            handler.QueueResponse(new HttpResponseMessage(statusCode));
+
+            var eventSource = new EventSource(new Configuration(_uri, handler));
+
+            //Act
+            var raisedEvent = await Assert.RaisesAsync<ExceptionEventArgs>(
+                h => eventSource.Error += h,
+                h => eventSource.Error -= h,
+                () => eventSource.StartAsync(Policy.NoOpAsync()));
+
+            //// Assert
+            Assert.NotNull(raisedEvent);
+            Assert.Equal(eventSource, raisedEvent.Sender);
+            Assert.IsType<OperationCanceledException>(raisedEvent.Arguments.Exception);
+            Assert.True(eventSource.ReadyState == ReadyState.Closed);
+        }
     }
 }

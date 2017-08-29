@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
+using Polly;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,17 +25,11 @@ namespace LaunchDarkly.EventSource
         private readonly Configuration _configuration;
         private readonly ILogger _logger;
 
-        //private TimeSpan _connectionTimeout = Timeout.InfiniteTimeSpan;
         private List<string> _eventBuffer;
         private string _eventName = Constants.MessageField;
         private string _lastEventId;
-        private TimeSpan _retryDelay = TimeSpan.FromSeconds(1);
-
-        internal static readonly string Version = ((AssemblyInformationalVersionAttribute)typeof(EventSource)
-                .GetTypeInfo()
-                .Assembly
-                .GetCustomAttribute(typeof(AssemblyInformationalVersionAttribute)))
-            .InformationalVersion;
+        private TimeSpan _retryDelay;
+        private CancellationTokenSource _pendingRequest;
 
         #endregion
 
@@ -91,19 +85,35 @@ namespace LaunchDarkly.EventSource
         /// configuration</exception>
         public EventSource(Configuration configuration)
         {
-            //System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls12;
-
             ReadyState = ReadyState.Raw;
 
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            
+
             _logger = _configuration.Logger ?? new LoggerFactory().CreateLogger<EventSource>();
-            
+
+            _pendingRequest = new CancellationTokenSource();
+
+            _retryDelay = _configuration.DelayRetryDuration;
         }
 
         #endregion
 
-        #region Public Methods
+        #region Public Methods        
+        /// <summary>
+        /// Internal method that allows for a Polly Policy to be injected.
+        /// </summary>
+        /// <param name="policy">The policy.</param>
+        /// <returns></returns>
+        internal async Task StartAsync(Policy policy)
+        {
+            var cancellationToken = _pendingRequest.Token;
+
+            await policy.ExecuteAsync(async token =>
+            {
+                await ConnectToEventSourceAsync(cancellationToken);
+
+            }, cancellationToken);
+        }
 
         /// <summary>
         /// Initiates the request to the EventSource API and parses Server Sent Events received by the API.
@@ -112,72 +122,19 @@ namespace LaunchDarkly.EventSource
         /// <exception cref="InvalidOperationException">The method was called after the connection <see cref="ReadyState"/> was Open or Connecting.</exception> 
         public async Task StartAsync()
         {
-            if (ReadyState == ReadyState.Connecting || ReadyState == ReadyState.Open)
-            {
-                var error = string.Format("Invalid attempt to call Start() while the connection is {0}.", ReadyState);
-                _logger.LogError(error);
-                throw new InvalidOperationException(error);
-            }
 
-            SetReadyState(ReadyState.Connecting);
-
-            var requestMessage = CreateHttpRequestMessage(_configuration.Uri);
-
-            var client = GetHttpClient();
-
-            try
-            {
-                using (var response = await client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead,
-                    CancellationToken.None).ConfigureAwait(false))
-                {
-                    // According to Specs, a client can be told to stop reconnecting using the HTTP 204 No Content response code
-                    if (HandleNoContent(response)) return;
-
-                    // According to Specs, HTTP 200 OK responses that have a Content-Type specifying an unsupported type, 
-                    // or that have no Content-Type at all, must cause the user agent to fail the connection.
-                    if (HandleIncorrectMediaType(response)) return;
-
-                    using (var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+            var policy = Policy
+                .Handle<HttpRequestException>()
+                .Or<TaskCanceledException>()
+                .Or<IOException>()
+                .WaitAndRetryForeverAsync(
+                    retryAttempt => TimeSpan.FromSeconds(_retryDelay.Seconds * Math.Pow(2, retryAttempt)), // Exponential Back off.  2, 4, 8, 16 etc times 1/4-second
+                    (exception, calculatedWaitDuration) =>
                     {
-                        _eventBuffer = new List<string>();
+                        _logger.LogInformation(Resources.EventSource_Logger_Disconnected, calculatedWaitDuration.TotalMilliseconds, exception);
+                    });
 
-                        SetReadyState(ReadyState.Open, OnOpened);
-
-                        using (var reader = new StreamReader(stream))
-                        {
-                            //while (!cancellationToken.IsCancellationRequested && !reader.EndOfStream)
-                            while (ReadyState == ReadyState.Open && !reader.EndOfStream)
-                            {
-                                var content = await reader.ReadLineAsync().ConfigureAwait(false);
-
-                                ProcessResponseContent(content);
-                            }
-
-                        }
-                    }
-                }
-
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(
-                    "Encountered exception in LaunchDarkly EventSource.Start method. Exception Message: {0} {1} {2}",
-                    e.Message, Environment.NewLine, e.StackTrace);
-
-                CloseAndRaiseError(e);
-
-                // TODO: Implement Retry
-                //throw;
-            }
-            finally
-            {
-                if (client != null)
-                {
-                    client.Dispose();
-                }
-            }
-
-            SetReadyState(ReadyState.Closed, OnClosed);
+            await StartAsync(policy);
         }
 
         /// <summary>
@@ -187,58 +144,66 @@ namespace LaunchDarkly.EventSource
         {
             if (ReadyState == ReadyState.Raw || ReadyState == ReadyState.Shutdown) return;
 
+            CancellationTokenSource cancellationTokenSource = Interlocked.Exchange(ref _pendingRequest, new CancellationTokenSource());
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource.Dispose();
+
             Close(ReadyState.Shutdown);
         }
-        
+
         #endregion
 
         #region Private Methods
 
-        private HttpClient GetHttpClient()
+        private async Task ConnectToEventSourceAsync(CancellationToken cancellationToken)
         {
-            return new HttpClient(_configuration.MessageHandler, false) { Timeout = _configuration.ConnectionTimeOut };
+            if (ReadyState == ReadyState.Connecting || ReadyState == ReadyState.Open)
+            {
+                var errorMessage = string.Format(Resources.EventSource_Already_Started, ReadyState);
+                _logger.LogError(errorMessage);
+                throw new InvalidOperationException(errorMessage);
+            }
+
+            SetReadyState(ReadyState.Connecting);
+
+            try
+            {
+                _eventBuffer = new List<string>();
+
+                EventSourceService svc = new EventSourceService(_configuration);
+
+                svc.ConnectionOpened += (o, e) => { SetReadyState(ReadyState.Open, OnOpened); };
+                svc.ConnectionClosed += (o, e) => { SetReadyState(ReadyState.Closed, OnClosed); };
+
+                await svc.GetDataAsync(
+                    ProcessResponseContent,
+                    cancellationToken
+                );
+            }
+            catch (OperationCanceledException e)
+            {
+                CloseAndRaiseError(e);
+            }
+            catch (Exception e)
+            {
+                CloseAndRaiseError(e);
+
+                throw;
+            }
         }
 
         private void Close(ReadyState state)
         {
-            ReadyState = state;
-            OnClosed(new StateChangedEventArgs(ReadyState));
+            SetReadyState(state, OnClosed);
 
-            //_client.CancelPendingRequests();
-            _logger.LogInformation("EventSource.Close called");
+            _logger.LogInformation(Resources.EventSource_Logger_Closed);
         }
 
         private void CloseAndRaiseError(Exception ex)
         {
-            if (ex == null)
-                throw new ArgumentNullException(nameof(ex));
-
             Close(ReadyState.Closed);
 
             OnError(new ExceptionEventArgs(ex));
-        }
-        
-        private bool HandleNoContent(HttpResponseMessage response)
-        {
-            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
-            {
-                CloseAndRaiseError(new OperationCanceledException(
-                    "Remote EventSource API returned Http Status Code 204."));
-                return true;
-            }
-            return false;
-        }
-
-        private bool HandleIncorrectMediaType(HttpResponseMessage response)
-        {
-            if (response.IsSuccessStatusCode && response.Content.Headers.ContentType.MediaType !=
-                Constants.EventStreamContentType)
-            {
-                CloseAndRaiseError(new OperationCanceledException(
-                    "HTTP Content-Type returned from the remote EventSource API does not match 'text/event-stream'."));
-                return true;
-            }
-            return false;
         }
 
         private void ProcessResponseContent(string content)
@@ -272,7 +237,7 @@ namespace LaunchDarkly.EventSource
             if (action != null)
                 action(new StateChangedEventArgs(ReadyState));
         }
-        
+
         private void ProcessField(string field, string value)
         {
             if (EventParser.IsDataFieldName(field))
@@ -306,37 +271,9 @@ namespace LaunchDarkly.EventSource
             var message = new MessageEvent(string.Concat(_eventBuffer), _lastEventId, _configuration.Uri);
 
             OnMessageReceived(new MessageReceivedEventArgs(message, _eventName));
-            
+
             _eventBuffer.Clear();
             _eventName = Constants.MessageField;
-        }
-
-
-        private HttpRequestMessage CreateHttpRequestMessage(Uri uri)
-        {
-            var request = new HttpRequestMessage(HttpMethod.Get, uri);
-
-            // Add all headers provided in the Configuration Headers. This allows a consumer to provide any request headers to the EventSource API
-            if (_configuration.RequestHeaders != null)
-            {
-                foreach (var item in _configuration.RequestHeaders)
-                {
-                    request.Headers.Add(item.Key, item.Value);
-                }
-            }
-
-            // If the EventSource Configuration was provided with a LastEventId, include it as a header to the API request.
-            if (!string.IsNullOrWhiteSpace(_configuration.LastEventId) && !request.Headers.Contains(Constants.LastEventIdHttpHeader))
-                request.Headers.Add(Constants.LastEventIdHttpHeader, _configuration.LastEventId);
-
-            // Add the Accept Header if it wasn't provided in the Configuration
-            if (!request.Headers.Contains(Constants.AcceptHttpHeader))
-                request.Headers.Add(Constants.AcceptHttpHeader, Constants.EventStreamContentType);
-
-            request.Headers.ExpectContinue = false;
-            request.Headers.CacheControl = new CacheControlHeaderValue { NoCache = true };
-
-            return request;
         }
 
         private void OnOpened(StateChangedEventArgs e)

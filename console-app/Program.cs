@@ -1,53 +1,52 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using LaunchDarkly.EventSource;
+﻿using LaunchDarkly.EventSource;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
 
 namespace EventSource_ConsoleApp
 {
     class Program
     {
+        private static EventSource _evt;
+
         static void Main(string[] args)
         {
-            HttpClient client = new HttpClient();
-            
-            Dictionary<string, string> headers = new Dictionary<string, string>();
 
-            headers.Add("User-Agent", "DotNetClient/0.0.1");
-            headers.Add("Authorization", "sdk-16c73e2d-5402-4b1b-840e-cb32a4c00ce2");
+            Dictionary<string, string> headers =
+                new Dictionary<string, string> {{"Authorization", "sdk-16c73e2d-5402-4b1b-840e-cb32a4c00ce2"}};
 
             var logFactory = new LoggerFactory();
 
             Log("Starting...");
 
+            //var url = "http://live-test-scores.herokuapp.com/scores";
+            var url = "https://stream.launchdarkly.com/flags";
+
             Configuration config = new Configuration(
-                uri: new Uri("https://stream.launchdarkly.com/flags"),
+                uri: new Uri(url),
                 connectionTimeOut: Timeout.InfiniteTimeSpan,
-                delayRetryDuration: TimeSpan.FromMilliseconds(3000),
+                delayRetryDuration: TimeSpan.FromMilliseconds(1000),
+                readTimeout: TimeSpan.FromMilliseconds(1000),
                 requestHeaders: headers,
                 logger: logFactory.CreateLogger<EventSource>()
             );
 
             logFactory.AddConsole(LogLevel.Trace);
 
-            EventSource evt = new EventSource(config);
+            _evt = new EventSource(config);
 
-            evt.Opened += Evt_Opened;
-            evt.Error += Evt_Error;
-            evt.CommentReceived += Evt_CommentReceived;
-            evt.MessageReceived += Evt_MessageReceived;
-            evt.Closed += Evt_Closed;
-
-
+            _evt.Opened += Evt_Opened;
+            _evt.Error += Evt_Error;
+            _evt.CommentReceived += Evt_CommentReceived;
+            _evt.MessageReceived += Evt_MessageReceived;
+            _evt.Closed += Evt_Closed;
+            
             try
             {
                 //evt.Start().Wait();
-                evt.StartAsync();
+                _evt.StartAsync();
             }
             catch (Exception ex)
             {
