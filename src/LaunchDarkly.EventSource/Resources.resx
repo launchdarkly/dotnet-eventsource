@@ -147,4 +147,7 @@
   <data name="EventSource_Logger_Disconnected" xml:space="preserve">
     <value>EventSource Disconnected. Automatically delaying {0}ms before reconnecting. Exception: {1}.</value>
   </data>
+  <data name="EventSource_Response_Content_Empty" xml:space="preserve">
+    <value>Http Response contained no content.</value>
+  </data>
 </root>

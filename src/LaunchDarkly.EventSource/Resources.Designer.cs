@@ -143,6 +143,15 @@ namespace LaunchDarkly.EventSource {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Http Response contained no content..
+        /// </summary>
+        internal static string EventSource_Response_Content_Empty {
+            get {
+                return ResourceManager.GetString("EventSource_Response_Content_Empty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A timeout occurred while reading the request from the remote EventSource API.
         /// </summary>
         internal static string EventSourceService_Read_Timeout {

@@ -30,6 +30,7 @@ namespace LaunchDarkly.EventSource
         private string _lastEventId;
         private TimeSpan _retryDelay;
         private CancellationTokenSource _pendingRequest;
+        private readonly Policy _retryPolicy;
 
         #endregion
 
@@ -94,6 +95,16 @@ namespace LaunchDarkly.EventSource
             _pendingRequest = new CancellationTokenSource();
 
             _retryDelay = _configuration.DelayRetryDuration;
+
+            _retryPolicy = Policy
+                .Handle<Exception>(ex => !(ex is EventSourceServiceCancelledException))
+                .WaitAndRetryForeverAsync(
+                    retryAttempt => TimeSpan.FromSeconds(_retryDelay.Seconds * Math.Pow(2, retryAttempt)), // Exponential Back off.  2, 4, 8, 16 etc times 1/4-second
+                    (exception, calculatedWaitDuration) =>
+                    {
+                        _logger.LogInformation(Resources.EventSource_Logger_Disconnected, calculatedWaitDuration.TotalMilliseconds, exception);
+                    });
+
         }
 
         #endregion
@@ -106,13 +117,21 @@ namespace LaunchDarkly.EventSource
         /// <returns></returns>
         internal async Task StartAsync(Policy policy)
         {
+            if (policy == null)
+            {
+                throw new ArgumentNullException(nameof(policy));
+            }
+
             var cancellationToken = _pendingRequest.Token;
 
-            await policy.ExecuteAsync(async token =>
+            while (!cancellationToken.IsCancellationRequested)
             {
-                await ConnectToEventSourceAsync(cancellationToken);
+                await policy.ExecuteAsync(async token =>
+                {
+                    await ConnectToEventSourceAsync(token);
 
-            }, cancellationToken);
+                }, cancellationToken);
+            }
         }
 
         /// <summary>
@@ -122,19 +141,7 @@ namespace LaunchDarkly.EventSource
         /// <exception cref="InvalidOperationException">The method was called after the connection <see cref="ReadyState"/> was Open or Connecting.</exception> 
         public async Task StartAsync()
         {
-
-            var policy = Policy
-                .Handle<HttpRequestException>()
-                .Or<TaskCanceledException>()
-                .Or<IOException>()
-                .WaitAndRetryForeverAsync(
-                    retryAttempt => TimeSpan.FromSeconds(_retryDelay.Seconds * Math.Pow(2, retryAttempt)), // Exponential Back off.  2, 4, 8, 16 etc times 1/4-second
-                    (exception, calculatedWaitDuration) =>
-                    {
-                        _logger.LogInformation(Resources.EventSource_Logger_Disconnected, calculatedWaitDuration.TotalMilliseconds, exception);
-                    });
-
-            await StartAsync(policy);
+            await StartAsync(_retryPolicy);
         }
 
         /// <summary>
@@ -144,9 +151,8 @@ namespace LaunchDarkly.EventSource
         {
             if (ReadyState == ReadyState.Raw || ReadyState == ReadyState.Shutdown) return;
 
-            CancellationTokenSource cancellationTokenSource = Interlocked.Exchange(ref _pendingRequest, new CancellationTokenSource());
-            cancellationTokenSource.Cancel();
-            cancellationTokenSource.Dispose();
+            // Cancel token to cancel requests.
+            CancelToken();
 
             Close(ReadyState.Shutdown);
         }
@@ -154,6 +160,13 @@ namespace LaunchDarkly.EventSource
         #endregion
 
         #region Private Methods
+
+        private void CancelToken()
+        {
+            CancellationTokenSource cancellationTokenSource = Interlocked.Exchange(ref _pendingRequest, new CancellationTokenSource());
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource.Dispose();
+        }
 
         private async Task ConnectToEventSourceAsync(CancellationToken cancellationToken)
         {
@@ -180,8 +193,10 @@ namespace LaunchDarkly.EventSource
                     cancellationToken
                 );
             }
-            catch (OperationCanceledException e)
+            catch (EventSourceServiceCancelledException e)
             {
+                CancelToken();
+
                 CloseAndRaiseError(e);
             }
             catch (Exception e)

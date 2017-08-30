@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Polly;
-using Polly.NoOp;
 using Xunit;
 
 namespace LaunchDarkly.EventSource.Tests
@@ -24,14 +23,10 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
 
             handler.QueueStringResponse(commentSent);
+            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var config = new Configuration(
-             uri: _uri,
-             messageHandler: handler);
-
-            var evt = new EventSource(config);
-
-
+            var evt = new EventSource(new Configuration(_uri, handler));
+            
             string commentReceived = string.Empty;
             var wasCommentEventRaised = false;
             evt.CommentReceived += (_, e) =>
@@ -46,7 +41,6 @@ namespace LaunchDarkly.EventSource.Tests
             //// Assert
             Assert.Equal(commentSent, commentReceived);
             Assert.True(wasCommentEventRaised);
-
         }
 
         [Fact]
@@ -59,12 +53,9 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
 
             handler.QueueStringResponse(sse);
+            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var config = new Configuration(
-                uri: _uri,
-                messageHandler: handler);
-
-            var evt = new EventSource(config);
+            var evt = new EventSource(new Configuration(_uri, handler));
 
             MessageEvent message = null;
             var wasMessageReceivedEventRaised = false;
@@ -92,12 +83,9 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
 
             handler.QueueStringResponse(sse);
+            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var config = new Configuration(
-                uri: _uri,
-                messageHandler: handler);
-
-            var evt = new EventSource(config);
+            var evt = new EventSource(new Configuration(_uri, handler));
 
             var wasMessageReceivedEventRaised = false;
             var eventName = "message";
@@ -125,12 +113,9 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
 
             handler.QueueStringResponse(sse);
+            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var config = new Configuration(
-                uri: _uri,
-                messageHandler: handler);
-
-            var evt = new EventSource(config);
+            var evt = new EventSource(new Configuration(_uri, handler));
 
             MessageEvent message = null;
             var wasMessageReceivedEventRaised = false;
@@ -158,15 +143,12 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
 
             handler.QueueStringResponse(sse);
+            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var config = new Configuration(
-                uri: _uri,
-                messageHandler: handler);
-
-            var evt = new EventSource(config);
+            var evt = new EventSource(new Configuration(_uri, handler));
 
             //// Act
-            await evt.StartAsync(Policy.NoOpAsync());
+            await evt.StartAsync();
 
             var request = handler.GetRequests().First();
 
@@ -189,6 +171,7 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
 
             handler.QueueStringResponse(sse);
+            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
             var config = new Configuration(
                 uri: _uri,
@@ -217,10 +200,11 @@ namespace LaunchDarkly.EventSource.Tests
 
             var handler = new StubMessageHandler();
             handler.QueueStringResponse(sse);
+            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
             var headers = new Dictionary<string, string> { { "User-Agent", "mozilla" }, { "Authorization", "testing" } };
 
-            var config = new Configuration(uri: _uri, messageHandler: handler, requestHeaders: headers);
+            var config = new Configuration(_uri, handler, requestHeaders: headers);
 
             var evt = new EventSource(config);
 
@@ -252,7 +236,7 @@ namespace LaunchDarkly.EventSource.Tests
 
             handler.QueueResponse(response);
 
-            var config = new Configuration(uri: _uri, messageHandler: handler);
+            var config = new Configuration( _uri, handler);
 
             var evt = new EventSource(config);
 
@@ -284,12 +268,12 @@ namespace LaunchDarkly.EventSource.Tests
             var raisedEvent = await Assert.RaisesAsync<ExceptionEventArgs>(
                 h => eventSource.Error += h,
                 h => eventSource.Error -= h,
-                () => eventSource.StartAsync(Policy.NoOpAsync()));
+                () => eventSource.StartAsync());
 
             //// Assert
             Assert.NotNull(raisedEvent);
             Assert.Equal(eventSource, raisedEvent.Sender);
-            Assert.IsType<OperationCanceledException>(raisedEvent.Arguments.Exception);
+            Assert.IsType<EventSourceServiceCancelledException>(raisedEvent.Arguments.Exception);
             Assert.True(eventSource.ReadyState == ReadyState.Closed);
         }
         
@@ -311,12 +295,12 @@ namespace LaunchDarkly.EventSource.Tests
             var raisedEvent = await Assert.RaisesAsync<ExceptionEventArgs>(
                 h => eventSource.Error += h,
                 h => eventSource.Error -= h,
-                () => eventSource.StartAsync(Policy.NoOpAsync()));
+                () => eventSource.StartAsync());
 
             //// Assert
             Assert.NotNull(raisedEvent);
             Assert.Equal(eventSource, raisedEvent.Sender);
-            Assert.IsType<OperationCanceledException>(raisedEvent.Arguments.Exception);
+            Assert.IsType<EventSourceServiceCancelledException>(raisedEvent.Arguments.Exception);
             Assert.True(eventSource.ReadyState == ReadyState.Closed);
         }
     }

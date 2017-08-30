@@ -84,14 +84,7 @@ namespace LaunchDarkly.EventSource
                     HttpCompletionOption.ResponseHeadersRead,
                     cancellationToken).ConfigureAwait(false))
                 {
-                    HandleUnsuccessfulStatusCodes(response);
-
-                    // According to Specs, a client can be told to stop reconnecting using the HTTP 204 No Content response code
-                    HandleNoContent(response);
-
-                    // According to Specs, HTTP 200 OK responses that have a Content-Type specifying an unsupported type, 
-                    // or that have no Content-Type at all, must cause the user agent to fail the connection.
-                    HandleIncorrectMediaType(response);
+                    HandleInvalidResponses(response);
                     
                     OnConnectionOpened();
 
@@ -173,20 +166,38 @@ namespace LaunchDarkly.EventSource
             return request;
         }
 
+        private void HandleInvalidResponses(HttpResponseMessage response)
+        {
+            HandleUnsuccessfulStatusCodes(response);
+
+            // According to Specs, a client can be told to stop reconnecting using the HTTP 204 No Content response code
+            HandleNoContent(response);
+            
+            // According to Specs, HTTP 200 OK responses that have a Content-Type specifying an unsupported type, 
+            // or that have no Content-Type at all, must cause the user agent to fail the connection.
+            HandleIncorrectMediaType(response);
+        }
+
         private void HandleNoContent(HttpResponseMessage response)
         {
             if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
             {
-                throw new OperationCanceledException(Resources.EventSource_204_Response);
+
+                throw new EventSourceServiceCancelledException(Resources.EventSource_204_Response);
+            }
+
+            if (response.Content == null)
+            {
+                throw new EventSourceServiceCancelledException(Resources.EventSource_Response_Content_Empty);
             }
         }
 
         private void HandleIncorrectMediaType(HttpResponseMessage response)
         {
-            if (response.IsSuccessStatusCode && response.Content.Headers.ContentType.MediaType !=
+            if (response.IsSuccessStatusCode && response.Content != null && response.Content.Headers.ContentType.MediaType !=
                 Constants.EventStreamContentType)
             {
-                throw new OperationCanceledException(Resources.EventSource_Invalid_MediaType);
+                throw new EventSourceServiceCancelledException(Resources.EventSource_Invalid_MediaType);
             }
         }
 
@@ -194,7 +205,7 @@ namespace LaunchDarkly.EventSource
         {
             if (response.IsSuccessStatusCode == false)
             {
-                throw new OperationCanceledException(string.Format(Resources.EventSource_HttpResponse_Not_Successful, (int)response.StatusCode));
+                throw new EventSourceServiceCancelledException(string.Format(Resources.EventSource_HttpResponse_Not_Successful, (int)response.StatusCode));
             }
         }
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,13 +9,15 @@ namespace LaunchDarkly.EventSource.Tests
 {
     public class StubMessageHandler : HttpMessageHandler
     {
+
         // Responses to return
         private readonly Queue<HttpResponseMessage> _responses =
-            new Queue<System.Net.Http.HttpResponseMessage>();
+            new Queue<HttpResponseMessage>();
 
         // Requests that were sent via the handler
         private readonly List<HttpRequestMessage> _requests =
-            new List<System.Net.Http.HttpRequestMessage>();
+            new List<HttpRequestMessage>();
+
 
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
