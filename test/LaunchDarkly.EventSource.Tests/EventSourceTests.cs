@@ -126,7 +126,7 @@ namespace LaunchDarkly.EventSource.Tests
             };
 
             //// Act
-            await evt.StartAsync(Policy.NoOpAsync());
+            await evt.StartAsync();
 
             //// Assert
             Assert.Equal("200", message.LastEventId);
@@ -181,7 +181,7 @@ namespace LaunchDarkly.EventSource.Tests
             var evt = new EventSource(config);
 
             //// Act
-            await evt.StartAsync(Policy.NoOpAsync());
+            await evt.StartAsync();
             var request = handler.GetRequests().First();
 
             IEnumerable<string> headerValues;
@@ -209,7 +209,7 @@ namespace LaunchDarkly.EventSource.Tests
             var evt = new EventSource(config);
 
             //// Act
-            await evt.StartAsync(Policy.NoOpAsync());
+            await evt.StartAsync();
 
             var request = handler.GetRequests().First();
 

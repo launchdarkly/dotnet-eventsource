@@ -150,11 +150,12 @@ namespace LaunchDarkly.EventSource
         public void Close()
         {
             if (ReadyState == ReadyState.Raw || ReadyState == ReadyState.Shutdown) return;
+            
+            Close(ReadyState.Shutdown);
 
             // Cancel token to cancel requests.
             CancelToken();
 
-            Close(ReadyState.Shutdown);
         }
 
         #endregion
@@ -201,9 +202,12 @@ namespace LaunchDarkly.EventSource
             }
             catch (Exception e)
             {
-                CloseAndRaiseError(e);
+                // If the user called Close(), ReadyState = Shutdown. Don't rethrow.
+                if (ReadyState != ReadyState.Shutdown)
+                {
+                    CloseAndRaiseError(e);
+                }
 
-                throw;
             }
         }
 
