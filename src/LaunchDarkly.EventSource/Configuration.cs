@@ -15,9 +15,9 @@ namespace LaunchDarkly.EventSource
         #region Private Fields
 
         private readonly TimeSpan _defaultDelayRetryDuration = TimeSpan.FromMilliseconds(1000);
-        private readonly TimeSpan _maximumRetryDuration = TimeSpan.FromMilliseconds(30000);
         private readonly TimeSpan _defaultConnectionTimeout = TimeSpan.FromMilliseconds(10000);
         private readonly TimeSpan _defaultReadTimeout = TimeSpan.FromMinutes(5);
+        private readonly TimeSpan _maximumRetryDuration = TimeSpan.FromMilliseconds(30000);
 
         #endregion
 
@@ -90,6 +90,21 @@ namespace LaunchDarkly.EventSource
         /// The <see cref="HttpMessageHandler"/>.
         /// </value>
         public HttpMessageHandler MessageHandler { get; }
+        
+        /// <summary>
+        /// Gets the maximum amount of time to wait before attempting to reconnect to the EventSource API. 
+        /// This value is read-only and cannot be set.
+        /// </summary>
+        /// <value>
+        /// The maximum duration of the retry.
+        /// </value>
+        public TimeSpan MaximumDelayRetryDuration
+        {
+            get
+            {
+                return _maximumRetryDuration;
+            }
+        }
 
         #endregion
 
@@ -115,7 +130,7 @@ namespace LaunchDarkly.EventSource
             if (connectionTimeOut.HasValue && connectionTimeOut.Value != Timeout.InfiniteTimeSpan && connectionTimeOut.Value < TimeSpan.Zero)
                 throw new ArgumentOutOfRangeException(nameof(connectionTimeOut), Resources.Configuration_Value_Greater_Than_Zero);
 
-            if (delayRetryDuration.HasValue && delayRetryDuration.Value > _maximumRetryDuration)
+            if (delayRetryDuration.HasValue && delayRetryDuration.Value > MaximumDelayRetryDuration)
                 throw new ArgumentOutOfRangeException(nameof(delayRetryDuration), string.Format(Resources.Configuration_RetryDuration_Exceeded, _maximumRetryDuration.Milliseconds));
 
             if (readTimeout.HasValue && readTimeout.Value < TimeSpan.Zero)

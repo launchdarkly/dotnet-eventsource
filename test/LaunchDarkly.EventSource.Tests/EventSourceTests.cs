@@ -15,6 +15,36 @@ namespace LaunchDarkly.EventSource.Tests
         private readonly Uri _uri = new Uri("http://test.com");
 
         [Fact]
+        public void Exponential_backoff_should_not_exceed_maximum()
+        {
+            double max = 30000;
+            ExponentialBackoffWithDecorrelation expo =
+                new ExponentialBackoffWithDecorrelation(1000, max);
+
+            var backoff = expo.GetBackOff();
+
+            Assert.True(backoff < TimeSpan.FromMilliseconds(max));
+        }
+
+        [Fact]
+        public void Exponential_backoff_should_not_exceed_maximum_in_test_loop()
+        {
+            double max = 30000;
+
+            ExponentialBackoffWithDecorrelation expo =
+                new ExponentialBackoffWithDecorrelation(1000, max);
+
+            for (int i = 0; i < 100; i++)
+            {
+
+                var backoff = expo.GetBackOff();
+
+                Assert.True(backoff <= TimeSpan.FromMilliseconds(max));
+            }
+
+        }
+
+        [Fact]
         public async Task When_a_comment_SSE_is_received_then_a_comment_event_is_raised()
         {
             // Arrange
@@ -302,6 +332,43 @@ namespace LaunchDarkly.EventSource.Tests
             Assert.Equal(eventSource, raisedEvent.Sender);
             Assert.IsType<EventSourceServiceCancelledException>(raisedEvent.Arguments.Exception);
             Assert.True(eventSource.ReadyState == ReadyState.Closed);
+        }
+
+        [Fact]
+        public async Task Given_bad_http_responses_then_retry_delay_durations_should_be_random()
+        {
+            // Arrange
+            var handler = new StubMessageHandler();
+
+            for (int i = 0; i < 3; i++)
+            {
+                var response = new HttpResponseMessageWithError();
+
+                response.StatusCode = HttpStatusCode.OK;
+                response.ShouldThrowError = true;
+                response.Content = new StringContent("Content " + i, System.Text.Encoding.UTF8,
+                    "text/event-stream");
+
+                handler.QueueResponse(response);
+
+            }
+
+            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
+            
+            var eventSource = new EventSource(new Configuration(_uri, handler));
+
+            var backoffs = new List<TimeSpan>();
+            eventSource.Error += (_, e) =>
+            {
+                backoffs.Add(eventSource.BackOffDelay);
+            };
+
+            //Act
+            await eventSource.StartAsync();
+
+            //// Assert
+            Assert.NotEmpty(backoffs);
+            Assert.True(backoffs.Distinct().Count() == backoffs.Count());
         }
     }
 }

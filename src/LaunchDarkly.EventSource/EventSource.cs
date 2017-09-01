@@ -31,6 +31,7 @@ namespace LaunchDarkly.EventSource
         private TimeSpan _retryDelay;
         private CancellationTokenSource _pendingRequest;
         private readonly Policy _retryPolicy;
+        private readonly ExponentialBackoffWithDecorrelation _backOff;
 
         #endregion
 
@@ -73,6 +74,12 @@ namespace LaunchDarkly.EventSource
             private set;
         }
 
+        internal TimeSpan BackOffDelay
+        {
+            get;
+            private set;
+        }
+
         #endregion
 
         #region Public Constructors
@@ -96,10 +103,13 @@ namespace LaunchDarkly.EventSource
 
             _retryDelay = _configuration.DelayRetryDuration;
 
+            _backOff = new ExponentialBackoffWithDecorrelation(_retryDelay.TotalMilliseconds,
+                _configuration.MaximumDelayRetryDuration.TotalMilliseconds);
+
             _retryPolicy = Policy
                 .Handle<Exception>(ex => !(ex is EventSourceServiceCancelledException))
                 .WaitAndRetryForeverAsync(
-                    retryAttempt => TimeSpan.FromSeconds(_retryDelay.Seconds * Math.Pow(2, retryAttempt)), // Exponential Back off.  2, 4, 8, 16 etc times 1/4-second
+                    GetDecorrelatedWaitDuration,
                     (exception, calculatedWaitDuration) =>
                     {
                         _logger.LogInformation(Resources.EventSource_Logger_Disconnected, calculatedWaitDuration.TotalMilliseconds, exception);
@@ -162,6 +172,15 @@ namespace LaunchDarkly.EventSource
 
         #region Private Methods
 
+        private TimeSpan GetDecorrelatedWaitDuration(int retryAttempt)
+        {
+            // Using a Decorrelated Jitter - adapted from https://www.awsarchitectureblog.com/2015/03/backoff.html
+            BackOffDelay = _backOff.GetBackOff();
+
+            return BackOffDelay;
+
+        }
+        
         private void CancelToken()
         {
             CancellationTokenSource cancellationTokenSource = Interlocked.Exchange(ref _pendingRequest, new CancellationTokenSource());
@@ -206,6 +225,8 @@ namespace LaunchDarkly.EventSource
                 if (ReadyState != ReadyState.Shutdown)
                 {
                     CloseAndRaiseError(e);
+
+                    throw;
                 }
 
             }

@@ -27,9 +27,23 @@ namespace LaunchDarkly.EventSource.Tests
                 throw new InvalidOperationException("No response configured");
 
             _requests.Add(request);
+
+
             var response = _responses.Dequeue();
+
+            /* Custom Response Message class provides the ability to throw an exception
+              This is useful for testing the retry capabilities. 
+            */ 
+            var responseMessageWithError = response as HttpResponseMessageWithError;
+            if (responseMessageWithError != null)
+            {
+                if (responseMessageWithError.ShouldThrowError)
+                    throw new HttpRequestException("Unit Test Exception Message");
+            }
+            
             return Task.FromResult(response);
         }
+
 
         public void QueueResponse(HttpResponseMessage response) =>
             _responses.Enqueue(response);
@@ -47,5 +61,14 @@ namespace LaunchDarkly.EventSource.Tests
 
         public IEnumerable<HttpRequestMessage> GetRequests() =>
             _requests;
+    }
+
+    public class HttpResponseMessageWithError : HttpResponseMessage
+    {
+        public bool ShouldThrowError
+        {
+            get;
+            set;
+        }
     }
 }

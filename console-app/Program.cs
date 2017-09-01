@@ -15,18 +15,19 @@ namespace EventSource_ConsoleApp
         {
 
             Dictionary<string, string> headers =
-                new Dictionary<string, string> {{"Authorization", "sdk-16c73e2d-5402-4b1b-840e-cb32a4c00ce2"}};
+                new Dictionary<string, string> {{"Authorization", "<Insert Auth Key>"}};
 
             var logFactory = new LoggerFactory();
 
             Log("Starting...");
 
-            //var url = "http://live-test-scores.herokuapp.com/scores";
-            var url = "https://stream.launchdarkly.com/flags";
+            var url = "<Insert API URL Here>";
+
+            var connnectionTimeout = TimeSpan.FromSeconds(20); //Use Timeout.Infinite if you want a connection that does not time out.
 
             Configuration config = new Configuration(
                 uri: new Uri(url),
-                connectionTimeOut: Timeout.InfiniteTimeSpan,
+                connectionTimeOut: connnectionTimeout,
                 delayRetryDuration: TimeSpan.FromMilliseconds(1000),
                 readTimeout: TimeSpan.FromMilliseconds(1000),
                 requestHeaders: headers,
@@ -45,13 +46,11 @@ namespace EventSource_ConsoleApp
             
             try
             {
-                //evt.Start().Wait();
                 _evt.StartAsync();
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Current Time:{0}", DateTime.UtcNow);
-                Console.WriteLine(ex);
+                Log("General Exception: {0}", ex);
             }
 
             Console.ReadKey();
@@ -81,7 +80,7 @@ namespace EventSource_ConsoleApp
 
         private static void Evt_Error(object sender, ExceptionEventArgs e)
         {
-            Log("EventSource Error Occurred. Details: {0}", e.Exception);
+            Log("EventSource Error Occurred. Details: {0}", e.Exception.Message);
         }
 
         private static void Evt_Opened(object sender, StateChangedEventArgs e)
