@@ -2,12 +2,27 @@
 
 namespace LaunchDarkly.EventSource
 {
+    /// <summary>
+    /// Provides data for the state of the <see cref="EventSource"/> connection.
+    /// </summary>
+    /// <seealso cref="System.EventArgs" />
     public class StateChangedEventArgs : EventArgs
     {
-        public ReadyState State { get; private set; }
-        public StateChangedEventArgs(ReadyState state)
+        /// <summary>
+        /// Gets the state of the EventSource connection.
+        /// </summary>
+        /// <value>
+        /// One of the <see cref="EventSource.ReadyState"/> values, which represents the state of the EventSource connection.
+        /// </value>
+        public ReadyState ReadyState { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StateChangedEventArgs"/> class.
+        /// </summary>
+        /// <param name="readyState">One of the <see cref="EventSource.ReadyState"/> values, which represents the state of the EventSource connection.</param>
+        public StateChangedEventArgs(ReadyState readyState)
         {
-            State = state;
+            ReadyState = readyState;
         }
     }
 }
