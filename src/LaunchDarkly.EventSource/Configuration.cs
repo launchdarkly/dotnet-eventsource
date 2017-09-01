@@ -14,7 +14,6 @@ namespace LaunchDarkly.EventSource
 
         #region Private Fields
 
-        private readonly Uri _defaultUri = new Uri("https://stream.launchdarkly.com/flags");
         private readonly TimeSpan _defaultDelayRetryDuration = TimeSpan.FromMilliseconds(1000);
         private readonly TimeSpan _maximumRetryDuration = TimeSpan.FromMilliseconds(30000);
         private readonly TimeSpan _defaultConnectionTimeout = TimeSpan.FromMilliseconds(10000);
@@ -110,6 +109,9 @@ namespace LaunchDarkly.EventSource
         /// <exception cref="ArgumentOutOfRangeException">If the delayRetryDuration value is greater than 30 seconds, an ArgumentOutOfRangeException will be thrown.</exception>
         public Configuration(Uri uri, HttpMessageHandler messageHandler = null, TimeSpan? connectionTimeOut = null, TimeSpan? delayRetryDuration = null, TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, ILogger logger = null)
         {
+            if (uri == null)
+                throw new ArgumentNullException(nameof(uri));
+
             if (connectionTimeOut.HasValue && connectionTimeOut.Value != Timeout.InfiniteTimeSpan && connectionTimeOut.Value < TimeSpan.Zero)
                 throw new ArgumentOutOfRangeException(nameof(connectionTimeOut), Resources.Configuration_Value_Greater_Than_Zero);
 
@@ -119,7 +121,7 @@ namespace LaunchDarkly.EventSource
             if (readTimeout.HasValue && readTimeout.Value < TimeSpan.Zero)
                 throw new ArgumentOutOfRangeException(nameof(readTimeout), Resources.Configuration_Value_Greater_Than_Zero);
 
-            Uri = uri ?? _defaultUri;
+            Uri = uri;
             MessageHandler = messageHandler ?? new HttpClientHandler();
             ConnectionTimeOut = connectionTimeOut ?? _defaultConnectionTimeout;
             DelayRetryDuration = delayRetryDuration ?? _defaultDelayRetryDuration;

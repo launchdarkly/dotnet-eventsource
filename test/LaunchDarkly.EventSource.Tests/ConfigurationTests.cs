@@ -9,20 +9,21 @@ namespace LaunchDarkly.EventSource.Tests
         private readonly Uri _uri = new Uri("http://test.com");
 
         [Fact]
-        public void Configuration_uri_defaults_to_value_when_constructor_parameter_is_null()
+        public void Configuration_constructor_throws_exception_when_uri_is_null()
         {
-           var config = new Configuration(uri: null);
+            var e = Record.Exception(() => new Configuration(null));
 
-            Assert.NotNull(config.Uri);
+            Assert.NotNull(e);
+            Assert.IsType<ArgumentNullException>(e);
         }
 
         [Fact]
         public void Configuration_constructor_throws_exception_when_connection_timeout_is_negative()
         {
             var e = Record.Exception(() => new Configuration(
-                uri: _uri, 
+                uri: _uri,
                 connectionTimeOut: new TimeSpan(-1)));
-            
+
             Assert.NotNull(e);
             Assert.IsType<ArgumentOutOfRangeException>(e);
         }
