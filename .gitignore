@@ -64,9 +64,8 @@ local.properties
 *.dotCover
 
 ## TODO: If you have NuGet Package Restore enabled, uncomment this
-packages/
-src/packages/
-src/LaunchDarkly.Tests/App.config
+packages
+src/LaunchDarkly.EventSource/packages/
 
 # Visual C++ cache files
 ipch/
