@@ -4,41 +4,52 @@
 Project Information
 -----------
 
-TODO
+The LaunchDarkly EventSource SDK is a .NET library that allows developers to consume Server Sent Events from a remote API. The server sent events spec is defined here: [https://html.spec.whatwg.org/multipage/server-sent-events.html](http://example.com)
 
+This library supports .NET 4.5+ and .NET Standard 1.6+.
 
 Quick setup
 -----------
 
-TODO -
+**Nuget Restore**
+1. If you have nuget package restore automatically enabled, Visual Studio will attempt to restore the nuget packages upon opening the LaunchDarkly.EventSource.sln
+2. Otherwise, after you open LaunchDarkly.EventSource.sln, Right+Click on the solution and select "Restore NuGet Packages"
+
+**Build Solution**
+1. In Visual Studio, Build the LaunchDarkly.EventSource.sln solution
+
+**Running the example Console App**
+
+Included in the solution is a Console App that shows example usage for using the LaunchDarkly EventSource library.
+
+NOTE: You'll need your LaunchDarkly API Key before running the Console app.
+
+1. Compile and Run the EventSource-ConsoleApp project. 
+   1. Select the EventSource-ConsoleApp project in the Solution Explorer.
+   2. Open the Program.cs file.
+   3. Replace "Insert Auth Key" with your LaunchDarkly API key.
+   4. Go to the Debug menu and select Start Debugging (or hit the F5 key). 
 
 
 Learn more
 -----------
 
-Check out our [documentation](http://docs.launchdarkly.com) for in-depth instructions on configuring and using LaunchDarkly. You can also head straight to the [complete reference guide for this SDK](http://docs.launchdarkly.com/docs/dotnet-sdk-reference).
+Check out our [documentation](http://docs.launchdarkly.com) for in-depth instructions on configuring and using LaunchDarkly.
 
 Testing
 -------
 
 We run integration tests for all our SDKs using a centralized test harness. This approach gives us the ability to test for consistency across SDKs, as well as test networking behavior in a long-running application. These tests cover each method in the SDK, and verify that event sending, flag evaluation, stream reconnection, and other aspects of the SDK all behave correctly.
 
+**Running Unit Tests Locally**
+
+The included LaunchDarkly.EventSource.Tests project contains units tests which use XUnit. To run the unit tests:
+1. In Visual Studio, go to the Test Menu and select Run -> All Tests (or Ctrl+R, A).
+
 Contributing
 ------------
 
 See [Contributing](https://github.com/launchdarkly/dotnet-eventsource/blob/master/CONTRIBUTING.md).
-
-Signing
--------
-The artifacts generated from this repo are signed by LaunchDarkly. The public key file is in this repo at `LaunchDarkly.pk` as well as here:
-
-```
-Public Key:
-
-#TODO
-
-Public Key Token: 
-```
 
 About LaunchDarkly
 -----------
