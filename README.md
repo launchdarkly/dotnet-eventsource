@@ -1,10 +1,10 @@
-﻿LaunchDarkly Event Source SDK for .NET
+.NET EventSource implementation
 ===========================
 
 Project Information
 -----------
 
-The LaunchDarkly EventSource SDK is a .NET library that allows developers to consume Server Sent Events from a remote API. The server sent events spec is defined here: [https://html.spec.whatwg.org/multipage/server-sent-events.html](http://example.com)
+This libary allows .NET developers to consume Server Sent Events from a remote API. The server sent events spec is defined here: [https://html.spec.whatwg.org/multipage/server-sent-events.html](https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events)
 
 This library supports .NET 4.5+ and .NET Standard 1.6+.
 
