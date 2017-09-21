@@ -31,26 +31,6 @@ NOTE: You'll need your LaunchDarkly API Key before running the Console app.
    4. Go to the Debug menu and select Start Debugging (or hit the F5 key). 
 
 
-Learn more
------------
-
-Check out our [documentation](http://docs.launchdarkly.com) for in-depth instructions on configuring and using LaunchDarkly.
-
-Testing
--------
-
-We run integration tests for all our SDKs using a centralized test harness. This approach gives us the ability to test for consistency across SDKs, as well as test networking behavior in a long-running application. These tests cover each method in the SDK, and verify that event sending, flag evaluation, stream reconnection, and other aspects of the SDK all behave correctly.
-
-**Running Unit Tests Locally**
-
-The included LaunchDarkly.EventSource.Tests project contains units tests which use XUnit. To run the unit tests:
-1. In Visual Studio, go to the Test Menu and select Run -> All Tests (or Ctrl+R, A).
-
-Contributing
-------------
-
-See [Contributing](https://github.com/launchdarkly/dotnet-eventsource/blob/master/CONTRIBUTING.md).
-
 About LaunchDarkly
 -----------
 
