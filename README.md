@@ -20,9 +20,9 @@ Quick setup
 
 **Running the example Console App**
 
-Included in the solution is a Console App that shows example usage for using the LaunchDarkly EventSource library.
+Included in the solution is a Console App that shows example usage for using the LaunchDarkly EventSource library against LaunchDarkly's streaming API.
 
-NOTE: You'll need your LaunchDarkly API Key before running the Console app.
+NOTE: You'll need your LaunchDarkly SDK Key before running the Console app.
 
 1. Compile and Run the EventSource-ConsoleApp project. 
    1. Select the EventSource-ConsoleApp project in the Solution Explorer.
