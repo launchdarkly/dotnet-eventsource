@@ -10,5 +10,4 @@ dependencies:
     - dotnet build src/LaunchDarkly.EventSource -f netstandard1.6
 test:
   override:
-    - dotnet restore
-    - dotnet test test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj -f netstandard1.6
+    - dotnet test test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj
