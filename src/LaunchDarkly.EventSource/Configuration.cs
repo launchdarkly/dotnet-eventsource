@@ -32,7 +32,7 @@ namespace LaunchDarkly.EventSource
         public Uri Uri { get; }
 
         /// <summary>
-        /// Gets the connection time out value used when connecting to the EventSource API.
+        /// Gets the connection timeout value used when connecting to the EventSource API.
         /// </summary>
         /// <value>
         /// The <see cref="TimeSpan"/> before the connection times out. The default value is 10,000 milliseconds (10 seconds).
@@ -115,9 +115,9 @@ namespace LaunchDarkly.EventSource
         /// </summary>
         /// <param name="uri">The URI used to connect to the remote EventSource API.</param>
         /// <param name="messageHandler">The message handler to use when sending API requests. If null, the <see cref="HttpClientHandler"/> is used.</param>
-        /// <param name="connectionTimeOut">The connection time out. If null, defaults to 10 seconds.</param>
+        /// <param name="connectionTimeOut">The connection timeout. If null, defaults to 10 seconds.</param>
         /// <param name="delayRetryDuration">The time to wait before attempting to reconnect to the EventSource API. If null, defaults to 1 second.</param>
-        /// <param name="readTimeout">The time out when reading data from the EventSource API. If null, defaults to 5 minutes.</param>
+        /// <param name="readTimeout">The timeout when reading data from the EventSource API. If null, defaults to 5 minutes.</param>
         /// <param name="requestHeaders">Request headers used when connecting to the remote EventSource API.</param>
         /// <param name="lastEventId">The last event identifier.</param>
         /// <param name="logger">The logger used for logging internal messages.</param>
