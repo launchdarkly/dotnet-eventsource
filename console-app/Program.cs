@@ -23,7 +23,7 @@ namespace EventSource_ConsoleApp
 
             var url = "<Insert API URL Here>";
 
-            var connnectionTimeout = TimeSpan.FromSeconds(20); //Use Timeout.Infinite if you want a connection that does not time out.
+            var connnectionTimeout = TimeSpan.FromSeconds(20); //Use Timeout.Infinite if you want a connection that does not timeout.
 
             Configuration config = new Configuration(
                 uri: new Uri(url),
