@@ -2,7 +2,9 @@
 
   <PropertyGroup>    
     <TargetFrameworks>netcoreapp1.1</TargetFrameworks>    
-    <Copyright>Copyright ©  2017</Copyright>
+    <Copyright>Copyright ©  2017</Copyright>    
+    <SignAssembly>true</SignAssembly>    
+    <AssemblyOriginatorKeyFile>LaunchDarkly.EventSource.snk</AssemblyOriginatorKeyFile>    
   </PropertyGroup>
 
   <ItemGroup>
