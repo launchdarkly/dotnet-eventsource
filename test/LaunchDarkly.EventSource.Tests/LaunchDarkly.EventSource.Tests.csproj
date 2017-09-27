@@ -4,7 +4,8 @@
     <TargetFrameworks>netcoreapp1.1</TargetFrameworks>    
     <Copyright>Copyright ©  2017</Copyright>    
     <SignAssembly>true</SignAssembly>    
-    <AssemblyOriginatorKeyFile>LaunchDarkly.EventSource.snk</AssemblyOriginatorKeyFile>    
+    <AssemblyOriginatorKeyFile>../../LaunchDarkly.EventSource.snk</AssemblyOriginatorKeyFile>
+    <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
   </PropertyGroup>
 
   <ItemGroup>
