@@ -8,9 +8,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-// Added to allow the Test Project to access internal types and methods.
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("LaunchDarkly.EventSource.Tests")]
-
 namespace LaunchDarkly.EventSource
 {
     /// <summary>
