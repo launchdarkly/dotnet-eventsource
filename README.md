@@ -30,6 +30,16 @@ NOTE: You'll need your LaunchDarkly SDK Key before running the Console app.
    3. Replace "Insert Auth Key" with your LaunchDarkly API key.
    4. Go to the Debug menu and select Start Debugging (or hit the F5 key). 
 
+Signing
+-----------
+Public key (hash algorithm: sha1):
+002400000480000094000000060200000024000052534131000400000100010015ba095c5a95ac
+efa557867cec3f488906ec0ef6fe6728a7cfdeef861fcce49ea79357ba825d95d56d67597bc9cc
+9a473438f5607908186fc477fdeafc68f387552061ebf57d6e585317d5047a57bd496034ff854a
+417236776003bcba328fa8bf4a024c4d212ba4fb4033ebfb14116c12cde63d16551b9f48c20ee5
+4a417deb
+
+Public key token is 18e8c36453e3060f
 
 About LaunchDarkly
 -----------
