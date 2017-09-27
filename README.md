@@ -32,6 +32,9 @@ NOTE: You'll need your LaunchDarkly SDK Key before running the Console app.
 
 Signing
 -----------
+The artifacts generated from this repo are signed by LaunchDarkly. The public key file is in this repo at `LaunchDarkly.EventSource.pk` as well as here:
+
+```
 Public key (hash algorithm: sha1):
 002400000480000094000000060200000024000052534131000400000100010015ba095c5a95ac
 efa557867cec3f488906ec0ef6fe6728a7cfdeef861fcce49ea79357ba825d95d56d67597bc9cc
@@ -40,6 +43,7 @@ efa557867cec3f488906ec0ef6fe6728a7cfdeef861fcce49ea79357ba825d95d56d67597bc9cc
 4a417deb
 
 Public key token is 18e8c36453e3060f
+```
 
 About LaunchDarkly
 -----------

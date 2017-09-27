@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <PackageId>LaunchDarkly.EventSource</PackageId>
     <Company>LaunchDarkly</Company>
-    <Copyright>Copyright 2017 LaunchDarkly</Copyright>
+    <Copyright>Copyright 2017 Catamorphic, Co.</Copyright>
     <Description>LaunchDarkly .NET Event Source library for Server Sent Events</Description>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>../../LaunchDarkly.EventSource.snk</AssemblyOriginatorKeyFile>
