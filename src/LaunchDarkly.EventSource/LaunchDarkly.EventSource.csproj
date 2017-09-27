@@ -12,7 +12,7 @@
     <Description>LaunchDarkly .NET Event Source library for Server Sent Events</Description>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>../../LaunchDarkly.EventSource.snk</AssemblyOriginatorKeyFile>
-    <PublicSign Condition=“‘$(OS)’ != ‘Windows_NT’“>true</PublicSign>
+    <PublicSign Condition="‘$(OS)’ != ‘Windows_NT’">true</PublicSign>
   </PropertyGroup>
 
   <ItemGroup>
