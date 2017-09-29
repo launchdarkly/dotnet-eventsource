@@ -92,7 +92,7 @@ namespace LaunchDarkly.EventSource
                     {
                         using (var reader = new StreamReader(stream))
                         {
-                            while (!cancellationToken.IsCancellationRequested && !reader.EndOfStream)
+                            while (!cancellationToken.IsCancellationRequested)
                             {
                                 var readTimeoutTask = Task.Delay(_configuration.ReadTimeOut);
 
@@ -114,8 +114,12 @@ namespace LaunchDarkly.EventSource
                     OnConnectionClosed();
                 }
             }
+            catch (HttpRequestException e) {
+                OnConnectionClosed();
+                _logger.LogWarning(e.Message);
+            }
             catch (Exception e)
-            {
+            {       
                 _logger.LogError(Resources.EventSource_Logger_Connection_Error,
                     e.Message, Environment.NewLine, e.StackTrace);
 
