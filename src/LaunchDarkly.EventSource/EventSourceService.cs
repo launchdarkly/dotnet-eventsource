@@ -119,7 +119,7 @@ namespace LaunchDarkly.EventSource
                 _logger.LogWarning(e.Message);
             }
             catch (Exception e)
-            {       
+            {
                 _logger.LogError(Resources.EventSource_Logger_Connection_Error,
                     e.Message, Environment.NewLine, e.StackTrace);
 
