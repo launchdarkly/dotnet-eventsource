@@ -62,11 +62,11 @@ namespace LaunchDarkly.EventSource
         /// Initiates the request to the EventSource API and parses Server Sent Events received by the API.
         /// </summary>
         /// <returns>A <see cref="System.Threading.Tasks.Task"/> A task that represents the work queued to execute in the ThreadPool.</returns>
-        public async Task GetDataAsync(Action<string> processResponse, CancellationToken cancellationToken)
+        public async Task GetDataAsync(Action<string> processResponse, bool closeOnEndOfStream, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            await ConnectToEventSourceApi(processResponse, cancellationToken);
+            await ConnectToEventSourceApi(processResponse, closeOnEndOfStream, cancellationToken);
 
         }
 
@@ -74,7 +74,7 @@ namespace LaunchDarkly.EventSource
 
         #region Private Methods
 
-        private async Task ConnectToEventSourceApi(Action<string> processResponse, CancellationToken cancellationToken)
+        private async Task ConnectToEventSourceApi(Action<string> processResponse, bool closeOnEndOfStream, CancellationToken cancellationToken)
         {
             var client = GetHttpClient();
 
@@ -107,6 +107,11 @@ namespace LaunchDarkly.EventSource
                                 }
 
                                 processResponse(readLineTask.Result);
+
+                                if (closeOnEndOfStream && reader.EndOfStream)
+                                {
+                                    break;
+                                }
                             }
                         }
                     }

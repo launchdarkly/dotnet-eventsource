@@ -106,6 +106,13 @@ namespace LaunchDarkly.EventSource
             }
         }
 
+        /// <summary>
+        /// Gets the <see cref="System.Uri"/> used when connecting to an EventSource API.
+        /// </summary>
+        /// <value>
+        /// The <see cref="System.Uri"/>.
+        /// </value>
+        public bool CloseOnEndOfStream { get; }
         #endregion
 
         #region Public Constructor
@@ -121,8 +128,9 @@ namespace LaunchDarkly.EventSource
         /// <param name="requestHeaders">Request headers used when connecting to the remote EventSource API.</param>
         /// <param name="lastEventId">The last event identifier.</param>
         /// <param name="logger">The logger used for logging internal messages.</param>
+        /// <param name="closeOnEndOfStream>If true, the EventSource connection will be closed when the end of the stream is reached.</param>
         /// <exception cref="ArgumentOutOfRangeException">If the delayRetryDuration value is greater than 30 seconds, an ArgumentOutOfRangeException will be thrown.</exception>
-        public Configuration(Uri uri, HttpMessageHandler messageHandler = null, TimeSpan? connectionTimeOut = null, TimeSpan? delayRetryDuration = null, TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, ILogger logger = null)
+        public Configuration(Uri uri, HttpMessageHandler messageHandler = null, TimeSpan? connectionTimeOut = null, TimeSpan? delayRetryDuration = null, TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, ILogger logger = null, bool closeOnEndOfStream = false)
         {
             if (uri == null)
                 throw new ArgumentNullException(nameof(uri));
@@ -144,6 +152,7 @@ namespace LaunchDarkly.EventSource
             RequestHeaders = requestHeaders;
             LastEventId = lastEventId;
             Logger = logger;
+            CloseOnEndOfStream = closeOnEndOfStream;
         }
 
         #endregion
