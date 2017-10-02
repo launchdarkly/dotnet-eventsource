@@ -117,6 +117,7 @@ namespace LaunchDarkly.EventSource
         #endregion
 
         #region Public Methods        
+
         /// <summary>
         /// Internal method that allows for a Polly Policy to be injected.
         /// </summary>
@@ -135,7 +136,7 @@ namespace LaunchDarkly.EventSource
             {
                 await policy.ExecuteAsync(async token =>
                 {
-                    await ConnectToEventSourceAsync(token);
+                    await ConnectToEventSourceAsync(_configuration.CloseOnEndOfStream, token);
 
                 }, cancellationToken);
             }
@@ -185,7 +186,7 @@ namespace LaunchDarkly.EventSource
             cancellationTokenSource.Dispose();
         }
 
-        private async Task ConnectToEventSourceAsync(CancellationToken cancellationToken)
+        private async Task ConnectToEventSourceAsync(bool closeOnEndOfStream, CancellationToken cancellationToken)
         {
             if (ReadyState == ReadyState.Connecting || ReadyState == ReadyState.Open)
             {
@@ -207,6 +208,7 @@ namespace LaunchDarkly.EventSource
 
                 await svc.GetDataAsync(
                     ProcessResponseContent,
+                    closeOnEndOfStream,
                     cancellationToken
                 );
             }

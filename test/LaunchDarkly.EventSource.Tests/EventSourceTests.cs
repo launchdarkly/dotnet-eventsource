@@ -55,7 +55,7 @@ namespace LaunchDarkly.EventSource.Tests
             handler.QueueStringResponse(commentSent);
             handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var evt = new EventSource(new Configuration(_uri, handler));
+            var evt = new EventSource(new Configuration(_uri, handler, closeOnEndOfStream: true));
             
             string commentReceived = string.Empty;
             var wasCommentEventRaised = false;
@@ -85,7 +85,7 @@ namespace LaunchDarkly.EventSource.Tests
             handler.QueueStringResponse(sse);
             handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var evt = new EventSource(new Configuration(_uri, handler));
+            var evt = new EventSource(new Configuration(_uri, handler, closeOnEndOfStream: true));
 
             MessageEvent message = null;
             var wasMessageReceivedEventRaised = false;
@@ -115,7 +115,7 @@ namespace LaunchDarkly.EventSource.Tests
             handler.QueueStringResponse(sse);
             handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var evt = new EventSource(new Configuration(_uri, handler));
+            var evt = new EventSource(new Configuration(_uri, handler, closeOnEndOfStream: true));
 
             var wasMessageReceivedEventRaised = false;
             var eventName = "message";
@@ -145,7 +145,7 @@ namespace LaunchDarkly.EventSource.Tests
             handler.QueueStringResponse(sse);
             handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var evt = new EventSource(new Configuration(_uri, handler));
+            var evt = new EventSource(new Configuration(_uri, handler, closeOnEndOfStream: true));
 
             MessageEvent message = null;
             var wasMessageReceivedEventRaised = false;
@@ -175,7 +175,7 @@ namespace LaunchDarkly.EventSource.Tests
             handler.QueueStringResponse(sse);
             handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var evt = new EventSource(new Configuration(_uri, handler));
+            var evt = new EventSource(new Configuration(_uri, handler, closeOnEndOfStream: true));
 
             //// Act
             await evt.StartAsync();
@@ -206,7 +206,8 @@ namespace LaunchDarkly.EventSource.Tests
             var config = new Configuration(
                 uri: _uri,
                 messageHandler: handler,
-                lastEventId: lastEventId);
+                lastEventId: lastEventId,
+                closeOnEndOfStream: true);
 
             var evt = new EventSource(config);
 
@@ -234,7 +235,7 @@ namespace LaunchDarkly.EventSource.Tests
 
             var headers = new Dictionary<string, string> { { "User-Agent", "mozilla" }, { "Authorization", "testing" } };
 
-            var config = new Configuration(_uri, handler, requestHeaders: headers);
+            var config = new Configuration(_uri, handler, requestHeaders: headers, closeOnEndOfStream: true);
 
             var evt = new EventSource(config);
 
@@ -266,7 +267,7 @@ namespace LaunchDarkly.EventSource.Tests
 
             handler.QueueResponse(response);
 
-            var config = new Configuration( _uri, handler);
+            var config = new Configuration( _uri, handler, closeOnEndOfStream: true);
 
             var evt = new EventSource(config);
 
@@ -292,7 +293,7 @@ namespace LaunchDarkly.EventSource.Tests
 
             handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var eventSource = new EventSource(new Configuration(_uri, handler));
+            var eventSource = new EventSource(new Configuration(_uri, handler, closeOnEndOfStream: true));
 
             //Act
             var raisedEvent = await Assert.RaisesAsync<ExceptionEventArgs>(
@@ -319,7 +320,7 @@ namespace LaunchDarkly.EventSource.Tests
 
             handler.QueueResponse(new HttpResponseMessage(statusCode));
 
-            var eventSource = new EventSource(new Configuration(_uri, handler));
+            var eventSource = new EventSource(new Configuration(_uri, handler, closeOnEndOfStream: true));
 
             //Act
             var raisedEvent = await Assert.RaisesAsync<ExceptionEventArgs>(
@@ -355,7 +356,7 @@ namespace LaunchDarkly.EventSource.Tests
 
             handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
             
-            var eventSource = new EventSource(new Configuration(_uri, handler));
+            var eventSource = new EventSource(new Configuration(_uri, handler, closeOnEndOfStream: true));
 
             var backoffs = new List<TimeSpan>();
             eventSource.Error += (_, e) =>
