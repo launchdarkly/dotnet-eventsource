@@ -14,7 +14,6 @@ namespace LaunchDarkly.EventSource
         #region Private Fields
 
         private readonly Configuration _configuration;
-        private readonly ILogger _logger;
 
         private const string UserAgentProduct = "DotNetClient";
         internal static readonly string UserAgentVersion = ((AssemblyInformationalVersionAttribute)typeof(EventSource)
@@ -50,8 +49,6 @@ namespace LaunchDarkly.EventSource
         public EventSourceService(Configuration configuration)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-
-            _logger = _configuration.Logger ?? new LoggerFactory().CreateLogger<EventSource>();
         }
 
         #endregion
@@ -62,11 +59,11 @@ namespace LaunchDarkly.EventSource
         /// Initiates the request to the EventSource API and parses Server Sent Events received by the API.
         /// </summary>
         /// <returns>A <see cref="System.Threading.Tasks.Task"/> A task that represents the work queued to execute in the ThreadPool.</returns>
-        public async Task GetDataAsync(Action<string> processResponse, bool closeOnEndOfStream, CancellationToken cancellationToken)
+        public async Task GetDataAsync(Action<string> processResponse, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            await ConnectToEventSourceApi(processResponse, closeOnEndOfStream, cancellationToken);
+            await ConnectToEventSourceApi(processResponse, cancellationToken);
 
         }
 
@@ -74,7 +71,7 @@ namespace LaunchDarkly.EventSource
 
         #region Private Methods
 
-        private async Task ConnectToEventSourceApi(Action<string> processResponse, bool closeOnEndOfStream, CancellationToken cancellationToken)
+        private async Task ConnectToEventSourceApi(Action<string> processResponse, CancellationToken cancellationToken)
         {
             var client = GetHttpClient();
 
@@ -85,50 +82,19 @@ namespace LaunchDarkly.EventSource
                     cancellationToken).ConfigureAwait(false))
                 {
                     HandleInvalidResponses(response);
-                    
+
                     OnConnectionOpened();
 
                     using (var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
                     {
-                        using (var reader = new StreamReader(stream))
+                        using (var reader = GetStreamReader(stream))
                         {
-                            while (!cancellationToken.IsCancellationRequested)
-                            {
-                                var readTimeoutTask = Task.Delay(_configuration.ReadTimeOut);
-
-                                var readLineTask = reader.ReadLineAsync();
-
-                                var completedTask = await Task.WhenAny(readLineTask, readTimeoutTask);
-
-                                if (completedTask == readTimeoutTask)
-                                {
-                                    // Reading Timed out.
-                                    throw new HttpRequestException(Resources.EventSourceService_Read_Timeout);
-                                }
-
-                                processResponse(readLineTask.Result);
-
-                                if (closeOnEndOfStream && reader.EndOfStream)
-                                {
-                                    break;
-                                }
-                            }
+                            await ProcessResponseFromReaderAsync(processResponse, reader, cancellationToken);
                         }
                     }
 
                     OnConnectionClosed();
                 }
-            }
-            catch (HttpRequestException e) {
-                OnConnectionClosed();
-                _logger.LogWarning(e.Message);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(Resources.EventSource_Logger_Connection_Error,
-                    e.Message, Environment.NewLine, e.StackTrace);
-
-                throw;
             }
             finally
             {
@@ -138,6 +104,36 @@ namespace LaunchDarkly.EventSource
                 }
             }
 
+        }
+
+        protected virtual IStreamReader GetStreamReader(Stream stream)
+        {
+            return new EventSourceStreamReader(stream);
+        }
+
+        protected virtual async Task ProcessResponseFromReaderAsync(Action<string> processResponse, IStreamReader reader,
+            CancellationToken cancellationToken)
+        {
+
+            // In a loop, reading from a stream. while reading from the stream, process the lines in the stream.
+            // Reset the timer after processing each line (reading from the stream).
+            // If the read time out occurs, throw exception and exit method.
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var readTimeoutTask = Task.Delay(_configuration.ReadTimeOut);
+
+                var readLineTask = reader.ReadLineAsync();
+
+                var completedTask = await Task.WhenAny(readLineTask, readTimeoutTask);
+
+                if (completedTask == readTimeoutTask)
+                {
+                    throw new HttpRequestException(Resources.EventSourceService_Read_Timeout);
+                }
+
+                processResponse(readLineTask.Result);
+            }
         }
 
         private HttpClient GetHttpClient()
@@ -181,7 +177,7 @@ namespace LaunchDarkly.EventSource
 
             // According to Specs, a client can be told to stop reconnecting using the HTTP 204 No Content response code
             HandleNoContent(response);
-            
+
             // According to Specs, HTTP 200 OK responses that have a Content-Type specifying an unsupported type, 
             // or that have no Content-Type at all, must cause the user agent to fail the connection.
             HandleIncorrectMediaType(response);

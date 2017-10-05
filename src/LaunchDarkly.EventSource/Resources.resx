@@ -142,10 +142,10 @@
     <value>EventSource.Close called</value>
   </data>
   <data name="EventSource_Logger_Connection_Error" xml:space="preserve">
-    <value>Encountered exception in LaunchDarkly EventSource.Start method. Exception Message: {0} {1} {2}</value>
+    <value>Encountered exception in EventSourceService.ConnectToEventSourceApi method. Exception Message: {0}</value>
   </data>
   <data name="EventSource_Logger_Disconnected" xml:space="preserve">
-    <value>EventSource Disconnected. Automatically delaying {0}ms before reconnecting. Exception: {1}.</value>
+    <value>EventSource Disconnected. Automatically delaying {0}ms before reconnecting.</value>
   </data>
   <data name="EventSource_Response_Content_Empty" xml:space="preserve">
     <value>Http Response contained no content.</value>
