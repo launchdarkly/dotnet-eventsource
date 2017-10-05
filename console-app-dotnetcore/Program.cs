@@ -15,7 +15,7 @@ namespace EventSource_ConsoleApp_DotNetCore
         {
 
             Dictionary<string, string> headers =
-                new Dictionary<string, string> { { "Authorization", "<Insert Auth Key>" } };
+                new Dictionary<string, string> {{ "Authorization", "<Insert Auth Key>" }};
 
             var logFactory = new LoggerFactory();
             _logger = logFactory.CreateLogger<EventSource>();

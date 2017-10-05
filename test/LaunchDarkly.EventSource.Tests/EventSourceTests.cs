@@ -391,12 +391,10 @@ namespace LaunchDarkly.EventSource.Tests
         [Fact]
         public async Task When_response_exceeds_read_timeout_then_read_timeout_exception_occurs()
         {
-            // Arrange
             var commentSent = ":";
 
             var handler = new StubMessageHandler();
             handler.QueueStringResponse(commentSent);
-            //handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
             TimeSpan readTimeout = TimeSpan.FromSeconds(4);
             TimeSpan timeout = readTimeout.Add(TimeSpan.FromSeconds(1));
@@ -427,7 +425,6 @@ namespace LaunchDarkly.EventSource.Tests
         [Fact]
         public async Task When_response_does_not_exceed_read_timeout_then_expected_message_event_occurs()
         {
-            // Arrange
             var sse = "event: put\ndata: this is a test message\n\n";
 
             var handler = new StubMessageHandler();
@@ -449,10 +446,8 @@ namespace LaunchDarkly.EventSource.Tests
                 evt.Close();
             };
 
-            //// Act
             await evt.StartAsync();
 
-            //// Assert
             Assert.Equal("put", eventName);
             Assert.True(wasMessageReceivedEventRaised);
             
