@@ -14,7 +14,7 @@ namespace LaunchDarkly.EventSource
     /// Provides an EventSource client for consuming Server Sent Events. Additional details on the Server Sent Events spec 
     /// can be found at https://html.spec.whatwg.org/multipage/server-sent-events.html
     /// </summary>
-    public sealed class EventSource
+    public class EventSource
     {
 
         #region Private Fields
@@ -109,7 +109,7 @@ namespace LaunchDarkly.EventSource
                     GetDecorrelatedWaitDuration,
                     (exception, calculatedWaitDuration) =>
                     {
-                        _logger.LogInformation(Resources.EventSource_Logger_Disconnected, calculatedWaitDuration.TotalMilliseconds, exception);
+                        _logger.LogInformation(Resources.EventSource_Logger_Disconnected, calculatedWaitDuration.TotalMilliseconds, exception.Message);
                     });
 
         }
@@ -136,7 +136,7 @@ namespace LaunchDarkly.EventSource
             {
                 await policy.ExecuteAsync(async token =>
                 {
-                    await ConnectToEventSourceAsync(_configuration.CloseOnEndOfStream, token);
+                    await ConnectToEventSourceAsync(token);
 
                 }, cancellationToken);
             }
@@ -176,7 +176,6 @@ namespace LaunchDarkly.EventSource
             BackOffDelay = _backOff.GetBackOff();
 
             return BackOffDelay;
-
         }
         
         private void CancelToken()
@@ -186,13 +185,16 @@ namespace LaunchDarkly.EventSource
             cancellationTokenSource.Dispose();
         }
 
-        private async Task ConnectToEventSourceAsync(bool closeOnEndOfStream, CancellationToken cancellationToken)
+        internal virtual EventSourceService GetEventSourceService(Configuration configuration)
+        {
+            return new EventSourceService(configuration);
+        }
+
+        private async Task ConnectToEventSourceAsync(CancellationToken cancellationToken)
         {
             if (ReadyState == ReadyState.Connecting || ReadyState == ReadyState.Open)
             {
-                var errorMessage = string.Format(Resources.EventSource_Already_Started, ReadyState);
-                _logger.LogError(errorMessage);
-                throw new InvalidOperationException(errorMessage);
+                throw new InvalidOperationException(string.Format(Resources.EventSource_Already_Started, ReadyState));
             }
 
             SetReadyState(ReadyState.Connecting);
@@ -201,14 +203,13 @@ namespace LaunchDarkly.EventSource
             {
                 _eventBuffer = new List<string>();
 
-                EventSourceService svc = new EventSourceService(_configuration);
+                var svc = GetEventSourceService(_configuration);
 
                 svc.ConnectionOpened += (o, e) => { SetReadyState(ReadyState.Open, OnOpened); };
                 svc.ConnectionClosed += (o, e) => { SetReadyState(ReadyState.Closed, OnClosed); };
 
                 await svc.GetDataAsync(
                     ProcessResponseContent,
-                    closeOnEndOfStream,
                     cancellationToken
                 );
             }
@@ -234,8 +235,6 @@ namespace LaunchDarkly.EventSource
         private void Close(ReadyState state)
         {
             SetReadyState(state, OnClosed);
-
-            _logger.LogInformation(Resources.EventSource_Logger_Closed);
         }
 
         private void CloseAndRaiseError(Exception ex)

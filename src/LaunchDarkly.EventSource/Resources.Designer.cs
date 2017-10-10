@@ -125,7 +125,7 @@ namespace LaunchDarkly.EventSource {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Encountered exception in LaunchDarkly EventSource.Start method. Exception Message: {0} {1} {2}.
+        ///   Looks up a localized string similar to Encountered exception in EventSourceService.ConnectToEventSourceApi method. Exception Message: {0}.
         /// </summary>
         internal static string EventSource_Logger_Connection_Error {
             get {
@@ -134,7 +134,7 @@ namespace LaunchDarkly.EventSource {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to EventSource Disconnected. Automatically delaying {0}ms before reconnecting. Exception: {1}..
+        ///   Looks up a localized string similar to EventSource Disconnected. Automatically delaying {0}ms before reconnecting..
         /// </summary>
         internal static string EventSource_Logger_Disconnected {
             get {

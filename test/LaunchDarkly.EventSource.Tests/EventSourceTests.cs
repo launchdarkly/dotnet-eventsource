@@ -1,3 +1,4 @@
+using LaunchDarkly.EventSource.Tests.Stubs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,7 +6,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Polly;
 using Xunit;
 
 namespace LaunchDarkly.EventSource.Tests
@@ -13,6 +13,7 @@ namespace LaunchDarkly.EventSource.Tests
     public class EventSourceTests
     {
         private readonly Uri _uri = new Uri("http://test.com");
+        private readonly TimeSpan _defaultReadTimeout = TimeSpan.FromSeconds(1);
 
         [Fact]
         public void Exponential_backoff_should_not_exceed_maximum()
@@ -53,9 +54,8 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
 
             handler.QueueStringResponse(commentSent);
-            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var evt = new EventSource(new Configuration(_uri, handler, closeOnEndOfStream: true));
+            var evt = new EventSource(new Configuration(_uri, handler, readTimeout:_defaultReadTimeout));
             
             string commentReceived = string.Empty;
             var wasCommentEventRaised = false;
@@ -63,6 +63,8 @@ namespace LaunchDarkly.EventSource.Tests
             {
                 commentReceived = e.Comment;
                 wasCommentEventRaised = true;
+
+                evt.Close();
             };
 
             //// Act
@@ -83,9 +85,8 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
 
             handler.QueueStringResponse(sse);
-            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var evt = new EventSource(new Configuration(_uri, handler, closeOnEndOfStream: true));
+            var evt = new EventSource(new Configuration(_uri, handler, readTimeout:_defaultReadTimeout));
 
             MessageEvent message = null;
             var wasMessageReceivedEventRaised = false;
@@ -93,6 +94,8 @@ namespace LaunchDarkly.EventSource.Tests
             {
                 message = e.Message;
                 wasMessageReceivedEventRaised = true;
+
+                evt.Close();
             };
 
             //// Act
@@ -113,9 +116,8 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
 
             handler.QueueStringResponse(sse);
-            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var evt = new EventSource(new Configuration(_uri, handler, closeOnEndOfStream: true));
+            var evt = new EventSource(new Configuration(_uri, handler, readTimeout:_defaultReadTimeout));
 
             var wasMessageReceivedEventRaised = false;
             var eventName = "message";
@@ -123,6 +125,8 @@ namespace LaunchDarkly.EventSource.Tests
             {
                 eventName = e.EventName;
                 wasMessageReceivedEventRaised = true;
+
+                evt.Close();
             };
 
             //// Act
@@ -143,9 +147,8 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
 
             handler.QueueStringResponse(sse);
-            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var evt = new EventSource(new Configuration(_uri, handler, closeOnEndOfStream: true));
+            var evt = new EventSource(new Configuration(_uri, handler, readTimeout:_defaultReadTimeout));
 
             MessageEvent message = null;
             var wasMessageReceivedEventRaised = false;
@@ -153,6 +156,8 @@ namespace LaunchDarkly.EventSource.Tests
             {
                 message = e.Message;
                 wasMessageReceivedEventRaised = true;
+
+                evt.Close();
             };
 
             //// Act
@@ -173,9 +178,12 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
 
             handler.QueueStringResponse(sse);
-            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var evt = new EventSource(new Configuration(_uri, handler, closeOnEndOfStream: true));
+            var evt = new EventSource(new Configuration(_uri, handler, readTimeout:_defaultReadTimeout));
+            evt.CommentReceived += (_, e) =>
+            {
+                evt.Close();
+            };
 
             //// Act
             await evt.StartAsync();
@@ -201,15 +209,19 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
 
             handler.QueueStringResponse(sse);
-            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
             var config = new Configuration(
                 uri: _uri,
                 messageHandler: handler,
-                lastEventId: lastEventId,
-                closeOnEndOfStream: true);
+                readTimeout:_defaultReadTimeout,
+                lastEventId: lastEventId);
 
             var evt = new EventSource(config);
+
+            evt.CommentReceived += (_, e) =>
+            {
+                evt.Close();
+            };
 
             //// Act
             await evt.StartAsync();
@@ -231,13 +243,16 @@ namespace LaunchDarkly.EventSource.Tests
 
             var handler = new StubMessageHandler();
             handler.QueueStringResponse(sse);
-            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
             var headers = new Dictionary<string, string> { { "User-Agent", "mozilla" }, { "Authorization", "testing" } };
 
-            var config = new Configuration(_uri, handler, requestHeaders: headers, closeOnEndOfStream: true);
+            var config = new Configuration(_uri, handler, requestHeaders: headers, readTimeout:_defaultReadTimeout);
 
             var evt = new EventSource(config);
+            evt.CommentReceived += (_, e) =>
+            {
+                evt.Close();
+            };
 
             //// Act
             await evt.StartAsync();
@@ -267,7 +282,7 @@ namespace LaunchDarkly.EventSource.Tests
 
             handler.QueueResponse(response);
 
-            var config = new Configuration( _uri, handler, closeOnEndOfStream: true);
+            var config = new Configuration( _uri, handler);
 
             var evt = new EventSource(config);
 
@@ -293,19 +308,19 @@ namespace LaunchDarkly.EventSource.Tests
 
             handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var eventSource = new EventSource(new Configuration(_uri, handler, closeOnEndOfStream: true));
+            var evt = new EventSource(new Configuration(_uri, handler));
 
             //Act
             var raisedEvent = await Assert.RaisesAsync<ExceptionEventArgs>(
-                h => eventSource.Error += h,
-                h => eventSource.Error -= h,
-                () => eventSource.StartAsync());
+                h => evt.Error += h,
+                h => evt.Error -= h,
+                () => evt.StartAsync());
 
             //// Assert
             Assert.NotNull(raisedEvent);
-            Assert.Equal(eventSource, raisedEvent.Sender);
+            Assert.Equal(evt, raisedEvent.Sender);
             Assert.IsType<EventSourceServiceCancelledException>(raisedEvent.Arguments.Exception);
-            Assert.True(eventSource.ReadyState == ReadyState.Closed);
+            Assert.True(evt.ReadyState == ReadyState.Closed);
         }
         
 
@@ -320,19 +335,19 @@ namespace LaunchDarkly.EventSource.Tests
 
             handler.QueueResponse(new HttpResponseMessage(statusCode));
 
-            var eventSource = new EventSource(new Configuration(_uri, handler, closeOnEndOfStream: true));
+            var evt = new EventSource(new Configuration(_uri, handler));
 
             //Act
             var raisedEvent = await Assert.RaisesAsync<ExceptionEventArgs>(
-                h => eventSource.Error += h,
-                h => eventSource.Error -= h,
-                () => eventSource.StartAsync());
+                h => evt.Error += h,
+                h => evt.Error -= h,
+                () => evt.StartAsync());
 
             //// Assert
             Assert.NotNull(raisedEvent);
-            Assert.Equal(eventSource, raisedEvent.Sender);
+            Assert.Equal(evt, raisedEvent.Sender);
             Assert.IsType<EventSourceServiceCancelledException>(raisedEvent.Arguments.Exception);
-            Assert.True(eventSource.ReadyState == ReadyState.Closed);
+            Assert.True(evt.ReadyState == ReadyState.Closed);
         }
 
         [Fact]
@@ -341,7 +356,7 @@ namespace LaunchDarkly.EventSource.Tests
             // Arrange
             var handler = new StubMessageHandler();
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 2; i++)
             {
                 var response = new HttpResponseMessageWithError();
 
@@ -356,20 +371,86 @@ namespace LaunchDarkly.EventSource.Tests
 
             handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
             
-            var eventSource = new EventSource(new Configuration(_uri, handler, closeOnEndOfStream: true));
+            var evt = new EventSource(new Configuration(_uri, handler, readTimeout:_defaultReadTimeout));
 
             var backoffs = new List<TimeSpan>();
-            eventSource.Error += (_, e) =>
+            evt.Error += (_, e) =>
             {
-                backoffs.Add(eventSource.BackOffDelay);
+                backoffs.Add(evt.BackOffDelay);
             };
 
             //Act
-            await eventSource.StartAsync();
+            await evt.StartAsync();
 
             //// Assert
             Assert.NotEmpty(backoffs);
             Assert.True(backoffs.Distinct().Count() == backoffs.Count());
+        }
+
+
+        [Fact]
+        public async Task When_response_exceeds_read_timeout_then_read_timeout_exception_occurs()
+        {
+            var commentSent = ":";
+
+            var handler = new StubMessageHandler();
+            handler.QueueStringResponse(commentSent);
+
+            TimeSpan readTimeout = TimeSpan.FromSeconds(4);
+            TimeSpan timeout = readTimeout.Add(TimeSpan.FromSeconds(1));
+
+            var evt = new StubEventSource(new Configuration(_uri, handler, readTimeout: readTimeout), (int)timeout.TotalMilliseconds);
+
+            var exceptionMessage = string.Empty;
+
+            try
+            {
+
+                evt.Error += (_, e) =>
+                {
+                    exceptionMessage = e.Exception.Message;
+                    evt.Close();
+                };
+
+                await evt.StartAsync();
+
+            }
+            catch (TaskCanceledException tce) {}
+            
+            Assert.Contains(exceptionMessage, Resources.EventSourceService_Read_Timeout);
+            Assert.True(evt.ReadyState == ReadyState.Shutdown);
+          
+        }
+
+        [Fact]
+        public async Task When_response_does_not_exceed_read_timeout_then_expected_message_event_occurs()
+        {
+            var sse = "event: put\ndata: this is a test message\n\n";
+
+            var handler = new StubMessageHandler();
+            handler.QueueStringResponse(sse);
+            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
+
+            TimeSpan readTimeout = TimeSpan.FromSeconds(4);
+            TimeSpan timeout = readTimeout.Subtract(TimeSpan.FromSeconds(1));
+
+            var evt = new StubEventSource(new Configuration(_uri, handler, readTimeout: readTimeout), (int)timeout.TotalMilliseconds);
+
+            var wasMessageReceivedEventRaised = false;
+            var eventName = "message";
+            evt.MessageReceived += (_, e) =>
+            {
+                eventName = e.EventName;
+                wasMessageReceivedEventRaised = true;
+
+                evt.Close();
+            };
+
+            await evt.StartAsync();
+
+            Assert.Equal("put", eventName);
+            Assert.True(wasMessageReceivedEventRaised);
+            
         }
     }
 }
