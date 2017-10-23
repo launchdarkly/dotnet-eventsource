@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace LaunchDarkly.EventSource
 {
     /// <summary>
-    /// Provides an EventSource client for consuming Server Sent Events. Additional details on the Server Sent Events spec 
+    /// Provides an EventSource client for consuming Server Sent Events. Additional details on the Server Sent Events spec
     /// can be found at https://html.spec.whatwg.org/multipage/server-sent-events.html
     /// </summary>
     public class EventSource
@@ -116,7 +116,7 @@ namespace LaunchDarkly.EventSource
 
         #endregion
 
-        #region Public Methods        
+        #region Public Methods
 
         /// <summary>
         /// Internal method that allows for a Polly Policy to be injected.
@@ -146,7 +146,7 @@ namespace LaunchDarkly.EventSource
         /// Initiates the request to the EventSource API and parses Server Sent Events received by the API.
         /// </summary>
         /// <returns>A <see cref="System.Threading.Tasks.Task"/> A task that represents the work queued to execute in the ThreadPool.</returns>
-        /// <exception cref="InvalidOperationException">The method was called after the connection <see cref="ReadyState"/> was Open or Connecting.</exception> 
+        /// <exception cref="InvalidOperationException">The method was called after the connection <see cref="ReadyState"/> was Open or Connecting.</exception>
         public async Task StartAsync()
         {
             await StartAsync(_retryPolicy);
@@ -158,7 +158,7 @@ namespace LaunchDarkly.EventSource
         public void Close()
         {
             if (ReadyState == ReadyState.Raw || ReadyState == ReadyState.Shutdown) return;
-            
+
             Close(ReadyState.Shutdown);
 
             // Cancel token to cancel requests.
@@ -177,7 +177,7 @@ namespace LaunchDarkly.EventSource
 
             return BackOffDelay;
         }
-        
+
         private void CancelToken()
         {
             CancellationTokenSource cancellationTokenSource = Interlocked.Exchange(ref _pendingRequest, new CancellationTokenSource());
@@ -246,7 +246,7 @@ namespace LaunchDarkly.EventSource
 
         private void ProcessResponseContent(string content)
         {
-            if (string.IsNullOrEmpty(content))
+            if (string.IsNullOrEmpty(content.Trim()))
             {
                 DispatchEvent();
             }
