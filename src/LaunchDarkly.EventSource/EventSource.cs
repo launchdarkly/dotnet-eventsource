@@ -227,8 +227,7 @@ namespace LaunchDarkly.EventSource
 
         private void ProcessResponseContent(string content)
         {
-      Console.WriteLine(content);
-      if (string.IsNullOrEmpty(content.Trim()))
+            if (string.IsNullOrEmpty(content.Trim()))
             {
                 DispatchEvent();
             }

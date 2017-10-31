@@ -7,8 +7,8 @@ namespace LaunchDarkly.EventSource
     internal class ExponentialBackoffWithDecorrelation
     {
         private readonly double _minimumDelay;
-    private readonly double _maximumDelay;
-    private readonly Random _jitterer = new Random();
+        private readonly double _maximumDelay;
+        private readonly Random _jitterer = new Random();
 
         public ExponentialBackoffWithDecorrelation(double minimumDelay, double maximumDelay)
         {
