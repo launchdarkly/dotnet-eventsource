@@ -136,6 +136,7 @@ namespace LaunchDarkly.EventSource
             {
                 TimeSpan sleepTime = _backOff.GetBackOff(reconnectAttempts);
                 _logger.LogInformation("Waiting " + sleepTime.TotalMilliseconds + " milliseconds before reconnecting...");
+                BackOffDelay = sleepTime;
                 await Task.Delay(sleepTime);
             }
         }

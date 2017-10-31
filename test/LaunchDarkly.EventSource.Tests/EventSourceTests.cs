@@ -22,7 +22,7 @@ namespace LaunchDarkly.EventSource.Tests
             ExponentialBackoffWithDecorrelation expo =
                 new ExponentialBackoffWithDecorrelation(1000, max);
 
-            var backoff = expo.GetBackOff();
+            var backoff = expo.GetBackOff(10);
 
             Assert.True(backoff < TimeSpan.FromMilliseconds(max));
         }
@@ -38,7 +38,7 @@ namespace LaunchDarkly.EventSource.Tests
             for (int i = 0; i < 100; i++)
             {
 
-                var backoff = expo.GetBackOff();
+                var backoff = expo.GetBackOff(i);
 
                 Assert.True(backoff <= TimeSpan.FromMilliseconds(max));
             }
@@ -56,7 +56,7 @@ namespace LaunchDarkly.EventSource.Tests
             handler.QueueStringResponse(commentSent);
 
             var evt = new EventSource(new Configuration(_uri, handler, readTimeout:_defaultReadTimeout));
-            
+
             string commentReceived = string.Empty;
             var wasCommentEventRaised = false;
             evt.CommentReceived += (_, e) =>
@@ -322,7 +322,7 @@ namespace LaunchDarkly.EventSource.Tests
             Assert.IsType<EventSourceServiceCancelledException>(raisedEvent.Arguments.Exception);
             Assert.True(evt.ReadyState == ReadyState.Closed);
         }
-        
+
 
         [Theory]
         [InlineData(HttpStatusCode.InternalServerError)]
@@ -370,7 +370,7 @@ namespace LaunchDarkly.EventSource.Tests
             }
 
             handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
-            
+
             var evt = new EventSource(new Configuration(_uri, handler, readTimeout:_defaultReadTimeout));
 
             var backoffs = new List<TimeSpan>();
@@ -416,10 +416,10 @@ namespace LaunchDarkly.EventSource.Tests
 
             }
             catch (TaskCanceledException tce) {}
-            
+
             Assert.Contains(exceptionMessage, Resources.EventSourceService_Read_Timeout);
             Assert.True(evt.ReadyState == ReadyState.Shutdown);
-          
+
         }
 
         [Fact]
@@ -450,7 +450,7 @@ namespace LaunchDarkly.EventSource.Tests
 
             Assert.Equal("put", eventName);
             Assert.True(wasMessageReceivedEventRaised);
-            
+
         }
     }
 }
