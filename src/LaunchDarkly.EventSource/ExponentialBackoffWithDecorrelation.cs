@@ -7,30 +7,20 @@ namespace LaunchDarkly.EventSource
     internal class ExponentialBackoffWithDecorrelation
     {
         private readonly double _minimumDelay;
-        private readonly double _maximumDelay;
-        private double _currentDelay;
-        private readonly Random _jitterer = new Random();
+    private readonly double _maximumDelay;
+    private readonly Random _jitterer = new Random();
 
         public ExponentialBackoffWithDecorrelation(double minimumDelay, double maximumDelay)
         {
             _minimumDelay = minimumDelay;
             _maximumDelay = maximumDelay;
-            _currentDelay = _minimumDelay;
         }
 
-        public TimeSpan GetBackOff()
+        public TimeSpan GetBackOff(int reconnectAttempts)
         {
-            var nextJitter = _jitterer.NextDouble();
-            var nextDelay = _currentDelay;
-
-            nextDelay = Math.Min(_maximumDelay, Math.Max(_minimumDelay, _currentDelay * 3 * nextJitter));
-
-            if (nextDelay == _currentDelay)
-                nextDelay = GetBackOff().TotalMilliseconds;
-
-            _currentDelay = nextDelay;
-
-            return TimeSpan.FromMilliseconds(_currentDelay);
+            double nextDelay = Math.Min(_maximumDelay, _minimumDelay * Math.Pow(2, reconnectAttempts));
+            nextDelay = nextDelay / 2 + _jitterer.Next((int)nextDelay) / 2;
+            return TimeSpan.FromMilliseconds(nextDelay);
         }
 
 

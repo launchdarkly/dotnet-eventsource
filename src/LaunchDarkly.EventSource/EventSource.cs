@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Polly;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,7 +26,6 @@ namespace LaunchDarkly.EventSource
         private string _lastEventId;
         private TimeSpan _retryDelay;
         private CancellationTokenSource _pendingRequest;
-        private readonly Policy _retryPolicy;
         private readonly ExponentialBackoffWithDecorrelation _backOff;
 
         #endregion
@@ -103,44 +101,11 @@ namespace LaunchDarkly.EventSource
             _backOff = new ExponentialBackoffWithDecorrelation(_retryDelay.TotalMilliseconds,
                 _configuration.MaximumDelayRetryDuration.TotalMilliseconds);
 
-            _retryPolicy = Policy
-                .Handle<Exception>(ex => !(ex is EventSourceServiceCancelledException))
-                .WaitAndRetryForeverAsync(
-                    GetDecorrelatedWaitDuration,
-                    (exception, calculatedWaitDuration) =>
-                    {
-                        _logger.LogInformation(Resources.EventSource_Logger_Disconnected, calculatedWaitDuration.TotalMilliseconds, exception.Message);
-                    });
-
         }
 
         #endregion
 
         #region Public Methods
-
-        /// <summary>
-        /// Internal method that allows for a Polly Policy to be injected.
-        /// </summary>
-        /// <param name="policy">The policy.</param>
-        /// <returns></returns>
-        internal async Task StartAsync(Policy policy)
-        {
-            if (policy == null)
-            {
-                throw new ArgumentNullException(nameof(policy));
-            }
-
-            var cancellationToken = _pendingRequest.Token;
-
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                await policy.ExecuteAsync(async token =>
-                {
-                    await ConnectToEventSourceAsync(token);
-
-                }, cancellationToken);
-            }
-        }
 
         /// <summary>
         /// Initiates the request to the EventSource API and parses Server Sent Events received by the API.
@@ -149,7 +114,30 @@ namespace LaunchDarkly.EventSource
         /// <exception cref="InvalidOperationException">The method was called after the connection <see cref="ReadyState"/> was Open or Connecting.</exception>
         public async Task StartAsync()
         {
-            await StartAsync(_retryPolicy);
+            var cancellationToken = _pendingRequest.Token;
+            int reconnectAttempts = 0;
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                MaybeWaitWithBackOff(reconnectAttempts++);
+                try
+                {
+                    await ConnectToEventSourceAsync(cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError("Encountered an error connecting to EventSource: {0}", e.Message);
+                    _logger.LogDebug(e.ToString());
+                }
+            }
+        }
+
+        private async void MaybeWaitWithBackOff(int reconnectAttempts)  {
+            if (reconnectAttempts > 0 && _retryDelay > TimeSpan.FromMilliseconds(0))
+            {
+                TimeSpan sleepTime = _backOff.GetBackOff(reconnectAttempts);
+                _logger.LogInformation("Waiting " + sleepTime.TotalMilliseconds + " milliseconds before reconnecting...");
+                await Task.Delay(sleepTime);
+            }
         }
 
         /// <summary>
@@ -169,14 +157,6 @@ namespace LaunchDarkly.EventSource
         #endregion
 
         #region Private Methods
-
-        private TimeSpan GetDecorrelatedWaitDuration(int retryAttempt)
-        {
-            // Using a Decorrelated Jitter - adapted from https://www.awsarchitectureblog.com/2015/03/backoff.html
-            BackOffDelay = _backOff.GetBackOff();
-
-            return BackOffDelay;
-        }
 
         private void CancelToken()
         {
@@ -246,7 +226,8 @@ namespace LaunchDarkly.EventSource
 
         private void ProcessResponseContent(string content)
         {
-            if (string.IsNullOrEmpty(content.Trim()))
+      Console.WriteLine(content);
+      if (string.IsNullOrEmpty(content.Trim()))
             {
                 DispatchEvent();
             }
