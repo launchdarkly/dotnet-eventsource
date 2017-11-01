@@ -9,6 +9,7 @@ namespace LaunchDarkly.EventSource
         private readonly TimeSpan _minimumDelay;
         private readonly TimeSpan _maximumDelay;
         private readonly Random _jitterer = new Random();
+        private static int _reconnectAttempts;
 
         public ExponentialBackoffWithDecorrelation(TimeSpan minimumDelay, TimeSpan maximumDelay)
         {
@@ -16,13 +17,19 @@ namespace LaunchDarkly.EventSource
             _maximumDelay = maximumDelay;
         }
 
-        public TimeSpan GetBackOff(int reconnectAttempts)
+        public TimeSpan GetNextBackOff()
         {
-            int nextDelay = Convert.ToInt32(Math.Min(_maximumDelay.TotalMilliseconds, _minimumDelay.TotalMilliseconds * Math.Pow(2, reconnectAttempts)));
+            int nextDelay = Convert.ToInt32(Math.Min(_maximumDelay.TotalMilliseconds, _minimumDelay.TotalMilliseconds * Math.Pow(2, _reconnectAttempts++)));
             nextDelay = nextDelay / 2 + _jitterer.Next(nextDelay) / 2;
             return TimeSpan.FromMilliseconds(nextDelay);
         }
 
+        public int GetReconnectAttemptCount() {
+            return _reconnectAttempts;
+        }
 
+        public void IncrementReconnectAttemptCount() {
+            _reconnectAttempts++;
+        }
     }
 }

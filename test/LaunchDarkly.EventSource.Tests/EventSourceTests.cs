@@ -22,7 +22,7 @@ namespace LaunchDarkly.EventSource.Tests
             ExponentialBackoffWithDecorrelation expo =
                 new ExponentialBackoffWithDecorrelation(TimeSpan.FromMilliseconds(1000), max);
 
-            var backoff = expo.GetBackOff(10);
+            var backoff = expo.GetNextBackOff();
 
             Assert.True(backoff <= max);
         }
@@ -38,7 +38,7 @@ namespace LaunchDarkly.EventSource.Tests
             for (int i = 0; i < 100; i++)
             {
 
-                var backoff = expo.GetBackOff(i);
+                var backoff = expo.GetNextBackOff();
 
                 Assert.True(backoff <= max);
             }

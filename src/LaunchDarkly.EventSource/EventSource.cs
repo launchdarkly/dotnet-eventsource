@@ -115,10 +115,9 @@ namespace LaunchDarkly.EventSource
         public async Task StartAsync()
         {
             var cancellationToken = _pendingRequest.Token;
-            int reconnectAttempts = 0;
             while (!cancellationToken.IsCancellationRequested)
             {
-                MaybeWaitWithBackOff(reconnectAttempts++);
+                MaybeWaitWithBackOff();
                 try
                 {
                     await ConnectToEventSourceAsync(cancellationToken);
@@ -131,13 +130,16 @@ namespace LaunchDarkly.EventSource
             }
         }
 
-        private async void MaybeWaitWithBackOff(int reconnectAttempts)  {
-            if (reconnectAttempts > 0 && _retryDelay > TimeSpan.FromMilliseconds(0))
+        private async void MaybeWaitWithBackOff()  {
+            if (_backOff.GetReconnectAttemptCount() > 0 && _retryDelay > TimeSpan.FromMilliseconds(0))
             {
-                TimeSpan sleepTime = _backOff.GetBackOff(reconnectAttempts);
+                TimeSpan sleepTime = _backOff.GetNextBackOff();
                 _logger.LogInformation("Waiting " + sleepTime.TotalMilliseconds + " milliseconds before reconnecting...");
                 BackOffDelay = sleepTime;
                 await Task.Delay(sleepTime);
+            }
+            else {
+                _backOff.IncrementReconnectAttemptCount();
             }
         }
 
