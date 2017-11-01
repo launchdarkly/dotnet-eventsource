@@ -98,8 +98,8 @@ namespace LaunchDarkly.EventSource
 
             _retryDelay = _configuration.DelayRetryDuration;
 
-            _backOff = new ExponentialBackoffWithDecorrelation(_retryDelay.TotalMilliseconds,
-                _configuration.MaximumDelayRetryDuration.TotalMilliseconds);
+            _backOff = new ExponentialBackoffWithDecorrelation(_retryDelay,
+                _configuration.MaximumDelayRetryDuration);
 
         }
 

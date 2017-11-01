@@ -18,29 +18,29 @@ namespace LaunchDarkly.EventSource.Tests
         [Fact]
         public void Exponential_backoff_should_not_exceed_maximum()
         {
-            double max = 30000;
+            TimeSpan max = TimeSpan.FromMilliseconds(30000);
             ExponentialBackoffWithDecorrelation expo =
-                new ExponentialBackoffWithDecorrelation(1000, max);
+                new ExponentialBackoffWithDecorrelation(TimeSpan.FromMilliseconds(1000), max);
 
             var backoff = expo.GetBackOff(10);
 
-            Assert.True(backoff < TimeSpan.FromMilliseconds(max));
+            Assert.True(backoff <= max);
         }
 
         [Fact]
         public void Exponential_backoff_should_not_exceed_maximum_in_test_loop()
         {
-            double max = 30000;
+            TimeSpan max = TimeSpan.FromMilliseconds(30000);
 
             ExponentialBackoffWithDecorrelation expo =
-                new ExponentialBackoffWithDecorrelation(1000, max);
+                new ExponentialBackoffWithDecorrelation(TimeSpan.FromMilliseconds(1000), max);
 
             for (int i = 0; i < 100; i++)
             {
 
                 var backoff = expo.GetBackOff(i);
 
-                Assert.True(backoff <= TimeSpan.FromMilliseconds(max));
+                Assert.True(backoff <= max);
             }
 
         }

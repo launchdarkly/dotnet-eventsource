@@ -4,13 +4,13 @@ using System.Text;
 
 namespace LaunchDarkly.EventSource
 {
-    internal class ExponentialBackoffWithDecorrelation
+    public class ExponentialBackoffWithDecorrelation
     {
-        private readonly double _minimumDelay;
-        private readonly double _maximumDelay;
+        private readonly TimeSpan _minimumDelay;
+        private readonly TimeSpan _maximumDelay;
         private readonly Random _jitterer = new Random();
 
-        public ExponentialBackoffWithDecorrelation(double minimumDelay, double maximumDelay)
+        public ExponentialBackoffWithDecorrelation(TimeSpan minimumDelay, TimeSpan maximumDelay)
         {
             _minimumDelay = minimumDelay;
             _maximumDelay = maximumDelay;
@@ -18,8 +18,8 @@ namespace LaunchDarkly.EventSource
 
         public TimeSpan GetBackOff(int reconnectAttempts)
         {
-            double nextDelay = Math.Min(_maximumDelay, _minimumDelay * Math.Pow(2, reconnectAttempts));
-            nextDelay = nextDelay / 2 + _jitterer.Next((int)nextDelay) / 2;
+            int nextDelay = Convert.ToInt32(Math.Min(_maximumDelay.TotalMilliseconds, _minimumDelay.TotalMilliseconds * Math.Pow(2, reconnectAttempts)));
+            nextDelay = nextDelay / 2 + _jitterer.Next(nextDelay) / 2;
             return TimeSpan.FromMilliseconds(nextDelay);
         }
 
