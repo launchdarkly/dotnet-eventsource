@@ -31,5 +31,9 @@ namespace LaunchDarkly.EventSource
         public void IncrementReconnectAttemptCount() {
             _reconnectAttempts++;
         }
+
+        public void ResetReconnectAttemptCount() {
+            _reconnectAttempts = 0;
+        }
     }
 }

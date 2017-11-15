@@ -121,6 +121,7 @@ namespace LaunchDarkly.EventSource
                 try
                 {
                     await ConnectToEventSourceAsync(cancellationToken);
+                    _backOff.ResetReconnectAttemptCount();
                 }
                 catch (Exception e)
                 {
