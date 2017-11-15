@@ -46,6 +46,23 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
+        public void Exponential_backoff_should_reset_when_reconnect_count_resets()
+        {
+            TimeSpan max = TimeSpan.FromMilliseconds(30000);
+
+            ExponentialBackoffWithDecorrelation expo =
+                new ExponentialBackoffWithDecorrelation(TimeSpan.FromMilliseconds(1000), max);
+
+            for (int i = 0; i < 100; i++)
+            {
+                var backoff = expo.GetNextBackOff();
+            }
+            expo.ResetReconnectAttemptCount();
+            // Backoffs use jitter, so assert that the reset backoff time isn't more than double the minimum
+            Assert.True(expo.GetNextBackOff() <= TimeSpan.FromMilliseconds(2000));
+        }
+
+        [Fact]
         public async Task When_a_comment_SSE_is_received_then_a_comment_event_is_raised()
         {
             // Arrange
