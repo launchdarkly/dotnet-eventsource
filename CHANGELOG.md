@@ -14,7 +14,7 @@ All notable changes to the LaunchDarkly's EventSource implementation for C# will
 - Removed the `closeOnEndOfStream` property.
 - Modified the `EventSourceTests.cs` class to resolve the issue of tests not completing
 - Refactored the Event Source Service class to allow for unit testing read timeout by way of a test double.
-- Added 2 unit tests (positive and negative) to verify read timeout functionality.
+- Added 2 unit tests (positive and negative) to verify Rread timeout functionality.
 
 ## [1.1.0] 2017-10-02
 ### Added
