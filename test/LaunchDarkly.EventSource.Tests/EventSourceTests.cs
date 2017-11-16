@@ -18,31 +18,48 @@ namespace LaunchDarkly.EventSource.Tests
         [Fact]
         public void Exponential_backoff_should_not_exceed_maximum()
         {
-            double max = 30000;
+            TimeSpan max = TimeSpan.FromMilliseconds(30000);
             ExponentialBackoffWithDecorrelation expo =
-                new ExponentialBackoffWithDecorrelation(1000, max);
+                new ExponentialBackoffWithDecorrelation(TimeSpan.FromMilliseconds(1000), max);
 
-            var backoff = expo.GetBackOff();
+            var backoff = expo.GetNextBackOff();
 
-            Assert.True(backoff < TimeSpan.FromMilliseconds(max));
+            Assert.True(backoff <= max);
         }
 
         [Fact]
         public void Exponential_backoff_should_not_exceed_maximum_in_test_loop()
         {
-            double max = 30000;
+            TimeSpan max = TimeSpan.FromMilliseconds(30000);
 
             ExponentialBackoffWithDecorrelation expo =
-                new ExponentialBackoffWithDecorrelation(1000, max);
+                new ExponentialBackoffWithDecorrelation(TimeSpan.FromMilliseconds(1000), max);
 
             for (int i = 0; i < 100; i++)
             {
 
-                var backoff = expo.GetBackOff();
+                var backoff = expo.GetNextBackOff();
 
-                Assert.True(backoff <= TimeSpan.FromMilliseconds(max));
+                Assert.True(backoff <= max);
             }
 
+        }
+
+        [Fact]
+        public void Exponential_backoff_should_reset_when_reconnect_count_resets()
+        {
+            TimeSpan max = TimeSpan.FromMilliseconds(30000);
+
+            ExponentialBackoffWithDecorrelation expo =
+                new ExponentialBackoffWithDecorrelation(TimeSpan.FromMilliseconds(1000), max);
+
+            for (int i = 0; i < 100; i++)
+            {
+                var backoff = expo.GetNextBackOff();
+            }
+            expo.ResetReconnectAttemptCount();
+            // Backoffs use jitter, so assert that the reset backoff time isn't more than double the minimum
+            Assert.True(expo.GetNextBackOff() <= TimeSpan.FromMilliseconds(2000));
         }
 
         [Fact]
@@ -56,7 +73,7 @@ namespace LaunchDarkly.EventSource.Tests
             handler.QueueStringResponse(commentSent);
 
             var evt = new EventSource(new Configuration(_uri, handler, readTimeout:_defaultReadTimeout));
-            
+
             string commentReceived = string.Empty;
             var wasCommentEventRaised = false;
             evt.CommentReceived += (_, e) =>
@@ -322,7 +339,7 @@ namespace LaunchDarkly.EventSource.Tests
             Assert.IsType<EventSourceServiceCancelledException>(raisedEvent.Arguments.Exception);
             Assert.True(evt.ReadyState == ReadyState.Closed);
         }
-        
+
 
         [Theory]
         [InlineData(HttpStatusCode.InternalServerError)]
@@ -370,7 +387,7 @@ namespace LaunchDarkly.EventSource.Tests
             }
 
             handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
-            
+
             var evt = new EventSource(new Configuration(_uri, handler, readTimeout:_defaultReadTimeout));
 
             var backoffs = new List<TimeSpan>();
@@ -416,10 +433,10 @@ namespace LaunchDarkly.EventSource.Tests
 
             }
             catch (TaskCanceledException tce) {}
-            
+
             Assert.Contains(exceptionMessage, Resources.EventSourceService_Read_Timeout);
             Assert.True(evt.ReadyState == ReadyState.Shutdown);
-          
+
         }
 
         [Fact]
@@ -450,7 +467,7 @@ namespace LaunchDarkly.EventSource.Tests
 
             Assert.Equal("put", eventName);
             Assert.True(wasMessageReceivedEventRaised);
-            
+
         }
     }
 }

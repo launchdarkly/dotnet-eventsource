@@ -4,35 +4,36 @@ using System.Text;
 
 namespace LaunchDarkly.EventSource
 {
-    internal class ExponentialBackoffWithDecorrelation
+    public class ExponentialBackoffWithDecorrelation
     {
-        private readonly double _minimumDelay;
-        private readonly double _maximumDelay;
-        private double _currentDelay;
+        private readonly TimeSpan _minimumDelay;
+        private readonly TimeSpan _maximumDelay;
         private readonly Random _jitterer = new Random();
+        private static int _reconnectAttempts;
 
-        public ExponentialBackoffWithDecorrelation(double minimumDelay, double maximumDelay)
+        public ExponentialBackoffWithDecorrelation(TimeSpan minimumDelay, TimeSpan maximumDelay)
         {
             _minimumDelay = minimumDelay;
             _maximumDelay = maximumDelay;
-            _currentDelay = _minimumDelay;
         }
 
-        public TimeSpan GetBackOff()
+        public TimeSpan GetNextBackOff()
         {
-            var nextJitter = _jitterer.NextDouble();
-            var nextDelay = _currentDelay;
-
-            nextDelay = Math.Min(_maximumDelay, Math.Max(_minimumDelay, _currentDelay * 3 * nextJitter));
-
-            if (nextDelay == _currentDelay)
-                nextDelay = GetBackOff().TotalMilliseconds;
-
-            _currentDelay = nextDelay;
-
-            return TimeSpan.FromMilliseconds(_currentDelay);
+            int nextDelay = Convert.ToInt32(Math.Min(_maximumDelay.TotalMilliseconds, _minimumDelay.TotalMilliseconds * Math.Pow(2, _reconnectAttempts++)));
+            nextDelay = nextDelay / 2 + _jitterer.Next(nextDelay) / 2;
+            return TimeSpan.FromMilliseconds(nextDelay);
         }
 
+        public int GetReconnectAttemptCount() {
+            return _reconnectAttempts;
+        }
 
+        public void IncrementReconnectAttemptCount() {
+            _reconnectAttempts++;
+        }
+
+        public void ResetReconnectAttemptCount() {
+            _reconnectAttempts = 0;
+        }
     }
 }
