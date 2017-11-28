@@ -6,7 +6,7 @@ Project Information
 
 This libary allows .NET developers to consume Server Sent Events from a remote API. The server sent events spec is defined here: [https://html.spec.whatwg.org/multipage/server-sent-events.html](https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events)
 
-This library supports .NET 4.5+ and .NET Standard 1.6+.
+This library supports .NET 4.5+ and .NET Standard 1.4+.
 
 Quick setup
 -----------
@@ -24,11 +24,11 @@ Included in the solution is a Console App that shows example usage for using the
 
 NOTE: You'll need your LaunchDarkly SDK Key before running the Console app.
 
-1. Compile and Run the EventSource-ConsoleApp project. 
+1. Compile and Run the EventSource-ConsoleApp project.
    1. Select the EventSource-ConsoleApp project in the Solution Explorer.
    2. Open the Program.cs file.
    3. Replace "Insert Auth Key" with your LaunchDarkly API key.
-   4. Go to the Debug menu and select Start Debugging (or hit the F5 key). 
+   4. Go to the Debug menu and select Start Debugging (or hit the F5 key).
 
 Signing
 -----------
