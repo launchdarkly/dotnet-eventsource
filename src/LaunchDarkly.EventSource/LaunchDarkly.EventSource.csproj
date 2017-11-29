@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <VersionPrefix>2.1.0</VersionPrefix>
-    <TargetFrameworks>netstandard1.6;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard1.4;net45</TargetFrameworks>
     <AssemblyName>LaunchDarkly.EventSource</AssemblyName>
     <DebugType>portable</DebugType>
     <OutputType>Library</OutputType>
@@ -34,7 +34,7 @@
     <PackageReference Include="System.Net.Http" Version="4.3.2" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' ">
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
   </ItemGroup>
 

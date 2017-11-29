@@ -7,7 +7,7 @@ dependencies:
     - aws s3 cp s3://launchdarkly-pastebin/ci/dotnet/LaunchDarkly.EventSource.snk LaunchDarkly.EventSource.snk
   override:
     - dotnet restore
-    - dotnet build src/LaunchDarkly.EventSource -f netstandard1.6
+    - dotnet build src/LaunchDarkly.EventSource -f netstandard1.4
 test:
   override:
     - dotnet test test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj
