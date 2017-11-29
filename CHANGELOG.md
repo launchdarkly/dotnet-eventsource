@@ -2,6 +2,10 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [2.1.1] - 2017-11-29
+### Changed
+- Move from .NET Standard 1.6 to 1.4.
+
 ## [2.1.0] - 2017-11-16
 ### Added
 - Exposed the `ExponentialBackoffWithDecorrelation` as a public class. This class may be used to calculate exponential backoff with jitter.
