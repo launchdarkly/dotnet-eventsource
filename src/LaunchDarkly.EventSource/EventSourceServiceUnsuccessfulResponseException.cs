@@ -2,7 +2,11 @@ using System;
 
 namespace LaunchDarkly.EventSource
 {
-    internal class EventSourceServiceUnsuccessfulResponseException : EventSourceServiceCancelledException
+    /// <summary>
+    /// Indicates that the EventSource was able to establish an HTTP connection, but received a
+    /// non-successful status code.
+    /// </summary>
+    public class EventSourceServiceUnsuccessfulResponseException : EventSourceServiceCancelledException
     {
         #region Public Properties
 
