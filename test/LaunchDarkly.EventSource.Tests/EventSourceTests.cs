@@ -336,7 +336,8 @@ namespace LaunchDarkly.EventSource.Tests
             //// Assert
             Assert.NotNull(raisedEvent);
             Assert.Equal(evt, raisedEvent.Sender);
-            Assert.IsType<EventSourceServiceCancelledException>(raisedEvent.Arguments.Exception);
+            Assert.IsType<EventSourceServiceUnsuccessfulResponseException>(raisedEvent.Arguments.Exception);
+            Assert.Equal(204, ((EventSourceServiceUnsuccessfulResponseException)raisedEvent.Arguments.Exception).StatusCode);
             Assert.True(evt.ReadyState == ReadyState.Closed);
         }
 
@@ -345,6 +346,7 @@ namespace LaunchDarkly.EventSource.Tests
         [InlineData(HttpStatusCode.InternalServerError)]
         [InlineData(HttpStatusCode.BadRequest)]
         [InlineData(HttpStatusCode.RequestTimeout)]
+        [InlineData(HttpStatusCode.Unauthorized)]
         public async Task Given_status_code_when_the_http_response_is_recieved_then_error_event_should_occur(HttpStatusCode statusCode)
         {
             // Arrange
@@ -363,7 +365,8 @@ namespace LaunchDarkly.EventSource.Tests
             //// Assert
             Assert.NotNull(raisedEvent);
             Assert.Equal(evt, raisedEvent.Sender);
-            Assert.IsType<EventSourceServiceCancelledException>(raisedEvent.Arguments.Exception);
+            Assert.IsType<EventSourceServiceUnsuccessfulResponseException>(raisedEvent.Arguments.Exception);
+            Assert.Equal((int)statusCode, ((EventSourceServiceUnsuccessfulResponseException)raisedEvent.Arguments.Exception).StatusCode);
             Assert.True(evt.ReadyState == ReadyState.Closed);
         }
 
@@ -468,6 +471,24 @@ namespace LaunchDarkly.EventSource.Tests
             Assert.Equal("put", eventName);
             Assert.True(wasMessageReceivedEventRaised);
 
+        }
+
+        [Fact]
+        public async Task When_error_handler_closes_event_source_no_reconnect_attempt_is_made()
+        {
+            var handler = new StubMessageHandler();
+            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.Unauthorized));
+
+            var evt = new EventSource(new Configuration(_uri, handler));
+
+            evt.Error += (_, e) =>
+            {
+                evt.Close();
+            };
+
+            await evt.StartAsync();
+
+            Assert.Equal(1, handler.GetRequests().Count());
         }
     }
 }
