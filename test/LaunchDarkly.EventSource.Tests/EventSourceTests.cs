@@ -285,7 +285,7 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
-        public async Task Given_content_type_not_equal_to_eventstream_when_the_http_response_is_recieved_then_error_event_should_occur()
+        public async Task Given_content_type_not_equal_to_eventstream_when_the_http_response_is_received_then_error_event_should_occur()
         {
             // Arrange
             var handler = new StubMessageHandler();
@@ -318,7 +318,7 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
-        public async Task Given_204_when_the_http_response_is_recieved_then_error_event_should_occur()
+        public async Task Given_204_when_the_http_response_is_received_then_error_event_should_occur()
         {
             // Arrange
             var handler = new StubMessageHandler();
@@ -347,7 +347,7 @@ namespace LaunchDarkly.EventSource.Tests
         [InlineData(HttpStatusCode.BadRequest)]
         [InlineData(HttpStatusCode.RequestTimeout)]
         [InlineData(HttpStatusCode.Unauthorized)]
-        public async Task Given_status_code_when_the_http_response_is_recieved_then_error_event_should_occur(HttpStatusCode statusCode)
+        public async Task Given_status_code_when_the_http_response_is_received_then_error_event_should_occur(HttpStatusCode statusCode)
         {
             // Arrange
             var handler = new StubMessageHandler();
