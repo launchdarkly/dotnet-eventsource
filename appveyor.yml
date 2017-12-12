@@ -1,0 +1,23 @@
+version: 2.1.0-{build}
+
+image: Visual Studio 2017
+
+configuration: Release
+platform: Any CPU
+
+before_build:
+  - dotnet restore
+  - aws s3 cp s3://d2l-launch-darkly-signing-keys/LaunchDarkly.EventSource.snk LaunchDarkly.EventSource.snk
+
+build_script:
+  - dotnet build src\LaunchDarkly.EventSource\LaunchDarkly.EventSource.csproj --framework net45
+
+after_build:
+  - dotnet pack src\LaunchDarkly.EventSource\LaunchDarkly.EventSource.csproj
+
+test_script:
+  - dotnet test test\LaunchDarkly.EventSource.Tests\LaunchDarkly.EventSource.Tests.csproj
+
+artifacts:
+  - path: 'src\LaunchDarkly.EventSource\bin\**\*.nupkg'
+    name: Nuget

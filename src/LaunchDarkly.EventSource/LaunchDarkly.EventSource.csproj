@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <VersionPrefix>2.1.0</VersionPrefix>
-    <TargetFrameworks>netstandard1.6;net45</TargetFrameworks>
+    <TargetFrameworks>net45</TargetFrameworks>
     <AssemblyName>LaunchDarkly.EventSource</AssemblyName>
     <DebugType>portable</DebugType>
     <OutputType>Library</OutputType>
-    <PackageId>LaunchDarkly.EventSource</PackageId>
+    <PackageId>D2L.LaunchDarkly.EventSource</PackageId>
     <Company>LaunchDarkly</Company>
     <Copyright>Copyright 2017 Catamorphic, Co.</Copyright>
     <Description>LaunchDarkly .NET Event Source library for Server Sent Events</Description>
@@ -23,7 +23,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="1.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="6.0.6" />
     <PackageReference Include="System.Net.Http" Version="4.3.2" />
   </ItemGroup>
 
