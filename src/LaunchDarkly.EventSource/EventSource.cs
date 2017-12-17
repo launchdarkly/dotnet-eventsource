@@ -125,8 +125,8 @@ namespace LaunchDarkly.EventSource
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError("Encountered an error connecting to EventSource: {0}", e.Message);
-                    _logger.LogDebug(e.ToString());
+                    _logger.LogError( 0, e, "Encountered an error connecting to EventSource: {0}", e.Message);
+                    _logger.LogDebug( "{0}", e);
                 }
             }
         }
@@ -135,7 +135,7 @@ namespace LaunchDarkly.EventSource
             if (_backOff.GetReconnectAttemptCount() > 0 && _retryDelay > TimeSpan.FromMilliseconds(0))
             {
                 TimeSpan sleepTime = _backOff.GetNextBackOff();
-                _logger.LogInformation("Waiting " + sleepTime.TotalMilliseconds + " milliseconds before reconnecting...");
+                _logger.LogInformation("Waiting {0} milliseconds before reconnecting...", sleepTime.TotalMilliseconds);
                 BackOffDelay = sleepTime;
                 await Task.Delay(sleepTime);
             }
