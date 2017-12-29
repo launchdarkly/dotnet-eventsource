@@ -3,6 +3,7 @@
   <PropertyGroup>
     <VersionPrefix>2.1.1</VersionPrefix>
     <TargetFrameworks>netstandard1.4;net45</TargetFrameworks>
+    <PackageLicenseUrl>https://raw.github.com/LaunchDarkly/dotnet-eventsource/master/LICENSE</PackageLicenseUrl>
     <AssemblyName>LaunchDarkly.EventSource</AssemblyName>
     <DebugType>portable</DebugType>
     <OutputType>Library</OutputType>
