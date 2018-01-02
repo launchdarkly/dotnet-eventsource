@@ -435,7 +435,7 @@ namespace LaunchDarkly.EventSource.Tests
                 await evt.StartAsync();
 
             }
-            catch (TaskCanceledException tce) {}
+            catch (TaskCanceledException) {}
 
             Assert.Contains(exceptionMessage, Resources.EventSourceService_Read_Timeout);
             Assert.True(evt.ReadyState == ReadyState.Shutdown);
