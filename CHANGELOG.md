@@ -2,6 +2,9 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [2.2.1] - 2018-02-05
+- Downgrade Microsoft.Extensions.Logging to 1.0.2 to reduce dependencies brought in when building against .NET Framework.
+
 ## [2.2.0] - 2018-01-19
 ### Added
 - Exposed `EventSourceServiceCancelledException` as a public class.
