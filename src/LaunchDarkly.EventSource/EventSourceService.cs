@@ -188,7 +188,7 @@ namespace LaunchDarkly.EventSource
             if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
             {
 
-                throw new EventSourceServiceCancelledException(Resources.EventSource_204_Response);
+                throw new EventSourceServiceUnsuccessfulResponseException(Resources.EventSource_204_Response, (int)response.StatusCode);
             }
 
             if (response.Content == null)
@@ -210,7 +210,8 @@ namespace LaunchDarkly.EventSource
         {
             if (response.IsSuccessStatusCode == false)
             {
-                throw new EventSourceServiceCancelledException(string.Format(Resources.EventSource_HttpResponse_Not_Successful, (int)response.StatusCode));
+                throw new EventSourceServiceUnsuccessfulResponseException(string.Format(Resources.EventSource_HttpResponse_Not_Successful, (int)response.StatusCode),
+                    (int)response.StatusCode);
             }
         }
 
