@@ -4,7 +4,11 @@ using System.Text;
 
 namespace LaunchDarkly.EventSource
 {
-    internal class EventSourceServiceCancelledException : Exception
+    /// <summary>
+    /// General superclass for exceptions that caused the EventSource to disconnect or fail to establish
+    /// a connection.
+    /// </summary>
+    public class EventSourceServiceCancelledException : Exception
     {
 
         #region Public Constructors 
