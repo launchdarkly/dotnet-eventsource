@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Common.Logging;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -68,12 +68,12 @@ namespace LaunchDarkly.EventSource
         public string LastEventId { get; }
 
         /// <summary>
-        /// Gets the <see cref="Microsoft.Extensions.Logging.ILogger"/> used internally in the <see cref="EventSource"/> class.
+        /// Gets the <see cref="Common.Logging.ILog"/> used internally in the <see cref="EventSource"/> class.
         /// </summary>
         /// <value>
-        /// The ILogger to use for internal logging.
+        /// The ILog to use for internal logging.
         /// </value>
-        public ILogger Logger { get; }
+        public ILog Logger { get; }
 
         /// <summary>
         /// Gets or sets the request headers used when connecting to the EventSource API.
@@ -129,7 +129,7 @@ namespace LaunchDarkly.EventSource
         ///     <p>- or - </p>
         ///     <p><paramref name="readTimeout"/> is less than zero. </p>
         /// </exception>
-        public Configuration(Uri uri, HttpMessageHandler messageHandler = null, TimeSpan? connectionTimeOut = null, TimeSpan? delayRetryDuration = null, TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, ILogger logger = null)
+        public Configuration(Uri uri, HttpMessageHandler messageHandler = null, TimeSpan? connectionTimeOut = null, TimeSpan? delayRetryDuration = null, TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, ILog logger = null)
         {
             if (uri == null)
                 throw new ArgumentNullException(nameof(uri));

@@ -2,23 +2,18 @@
 using System.Collections.Generic;
 using System.Threading;
 using LaunchDarkly.EventSource;
-using Microsoft.Extensions.Logging;
 
 namespace EventSource_ConsoleApp_DotNetCore
 {
     class Program
     {
         private static EventSource _evt;
-        private static ILogger _logger;
 
         static void Main(string[] args)
         {
 
             Dictionary<string, string> headers =
                 new Dictionary<string, string> {{ "Authorization", "<Insert Auth Key>" }};
-
-            var logFactory = new LoggerFactory();
-            _logger = logFactory.CreateLogger<EventSource>();
 
             Log("Starting...");
 
@@ -31,11 +26,8 @@ namespace EventSource_ConsoleApp_DotNetCore
                 connectionTimeOut: connnectionTimeout,
                 delayRetryDuration: TimeSpan.FromMilliseconds(1000),
                 readTimeout: TimeSpan.FromMinutes(4),
-                requestHeaders: headers,
-                logger: _logger
+                requestHeaders: headers
             );
-
-            logFactory.AddConsole(LogLevel.Trace);
 
             _evt = new EventSource(config);
 
@@ -59,8 +51,7 @@ namespace EventSource_ConsoleApp_DotNetCore
 
         private static void Log(string format, params object[] args)
         {
-            _logger.LogInformation("{0}: {1}", DateTime.Now, string.Format(format, args));
-
+            Console.WriteLine("{0}: {1}", DateTime.Now, string.Format(format, args));
         }
 
         private static void Evt_Closed(object sender, StateChangedEventArgs e)
@@ -70,9 +61,9 @@ namespace EventSource_ConsoleApp_DotNetCore
 
         private static void Evt_MessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            Log("EventSource Message Received. Event Name: {0}", e.EventName);
-            Log("EventSource Message Properties: {0}\tLast Event Id: {1}{0}\tOrigin: {2}{0}\tData: {3}",
-                Environment.NewLine, e.Message.LastEventId, e.Message.Origin, e.Message.Data);
+            // Log("EventSource Message Received. Event Name: {0}", e.EventName);
+            // Log("EventSource Message Properties: {0}\tLast Event Id: {1}{0}\tOrigin: {2}{0}\tData: {3}",
+            //     Environment.NewLine, e.Message.LastEventId, e.Message.Origin, e.Message.Data);
         }
 
         private static void Evt_CommentReceived(object sender, CommentReceivedEventArgs e)
@@ -82,7 +73,7 @@ namespace EventSource_ConsoleApp_DotNetCore
 
         private static void Evt_Error(object sender, ExceptionEventArgs e)
         {
-            _logger.LogError("EventSource Error Occurred. Details: {0}", e.Exception.Message);
+            Log("EventSource Error Occurred. Details: {0}", e.Exception.Message);
         }
 
         private static void Evt_Opened(object sender, StateChangedEventArgs e)
