@@ -61,9 +61,9 @@ namespace EventSource_ConsoleApp_DotNetCore
 
         private static void Evt_MessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            // Log("EventSource Message Received. Event Name: {0}", e.EventName);
-            // Log("EventSource Message Properties: {0}\tLast Event Id: {1}{0}\tOrigin: {2}{0}\tData: {3}",
-            //     Environment.NewLine, e.Message.LastEventId, e.Message.Origin, e.Message.Data);
+            Log("EventSource Message Received. Event Name: {0}", e.EventName);
+            Log("EventSource Message Properties: {0}\tLast Event Id: {1}{0}\tOrigin: {2}{0}\tData: {3}",
+                Environment.NewLine, e.Message.LastEventId, e.Message.Origin, e.Message.Data);
         }
 
         private static void Evt_CommentReceived(object sender, CommentReceivedEventArgs e)
