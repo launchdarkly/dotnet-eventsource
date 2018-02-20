@@ -126,7 +126,7 @@ namespace LaunchDarkly.EventSource
                 catch (Exception e)
                 {
                     _logger.ErrorFormat("Encountered an error connecting to EventSource: {0}", e, e.Message);
-                    _logger.Debug( "{0}", e);
+                    _logger.Debug("", e);
                 }
             }
         }
