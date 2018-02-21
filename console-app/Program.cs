@@ -1,8 +1,6 @@
 ﻿using LaunchDarkly.EventSource;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading;
 
 namespace EventSource_ConsoleApp
@@ -17,8 +15,6 @@ namespace EventSource_ConsoleApp
             Dictionary<string, string> headers =
                 new Dictionary<string, string> {{ "Authorization", "<Insert Auth Key>" }};
 
-            var logFactory = new LoggerFactory();
-
             Log("Starting...");
 
             var url = "<Insert API URL Here>";
@@ -30,11 +26,8 @@ namespace EventSource_ConsoleApp
                 connectionTimeOut: connnectionTimeout,
                 delayRetryDuration: TimeSpan.FromMilliseconds(1000),
                 readTimeout: TimeSpan.FromMinutes(4),
-                requestHeaders: headers,
-                logger: logFactory.CreateLogger<EventSource>()
+                requestHeaders: headers
             );
-
-            logFactory.AddConsole(LogLevel.Trace);
 
             _evt = new EventSource(config);
 
@@ -43,7 +36,7 @@ namespace EventSource_ConsoleApp
             _evt.CommentReceived += Evt_CommentReceived;
             _evt.MessageReceived += Evt_MessageReceived;
             _evt.Closed += Evt_Closed;
-            
+
             try
             {
                 _evt.StartAsync();
@@ -63,7 +56,7 @@ namespace EventSource_ConsoleApp
 
         private static void Evt_Closed(object sender, StateChangedEventArgs e)
         {
-            Log("EventSource Closed. Current State {0}", e.ReadyState);
+            Log("EventSource Closed. Current State: {0}", e.ReadyState);
         }
 
         private static void Evt_MessageReceived(object sender, MessageReceivedEventArgs e)

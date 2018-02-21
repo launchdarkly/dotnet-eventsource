@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Common.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +19,7 @@ namespace LaunchDarkly.EventSource
         #region Private Fields
 
         private readonly Configuration _configuration;
-        private readonly ILogger _logger;
+        private readonly ILog _logger;
 
         private List<string> _eventBuffer;
         private string _eventName = Constants.MessageField;
@@ -92,7 +92,7 @@ namespace LaunchDarkly.EventSource
 
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
-            _logger = _configuration.Logger ?? new LoggerFactory().CreateLogger<EventSource>();
+            _logger = _configuration.Logger ?? LogManager.GetLogger(typeof(EventSource));
 
             _pendingRequest = new CancellationTokenSource();
 
@@ -125,8 +125,8 @@ namespace LaunchDarkly.EventSource
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError( 0, e, "Encountered an error connecting to EventSource: {0}", e.Message);
-                    _logger.LogDebug( "{0}", e);
+                    _logger.ErrorFormat("Encountered an error connecting to EventSource: {0}", e, e.Message);
+                    _logger.Debug("", e);
                 }
             }
         }
@@ -135,7 +135,7 @@ namespace LaunchDarkly.EventSource
             if (_backOff.GetReconnectAttemptCount() > 0 && _retryDelay > TimeSpan.FromMilliseconds(0))
             {
                 TimeSpan sleepTime = _backOff.GetNextBackOff();
-                _logger.LogInformation("Waiting {0} milliseconds before reconnecting...", sleepTime.TotalMilliseconds);
+                _logger.InfoFormat("Waiting {0} milliseconds before reconnecting...", sleepTime.TotalMilliseconds);
                 BackOffDelay = sleepTime;
                 await Task.Delay(sleepTime);
             }
