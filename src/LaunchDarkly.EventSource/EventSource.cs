@@ -13,7 +13,7 @@ namespace LaunchDarkly.EventSource
     /// Provides an EventSource client for consuming Server Sent Events. Additional details on the Server Sent Events spec
     /// can be found at https://html.spec.whatwg.org/multipage/server-sent-events.html
     /// </summary>
-    public class EventSource
+    public class EventSource : IEventSource
     {
 
         #region Private Fields
