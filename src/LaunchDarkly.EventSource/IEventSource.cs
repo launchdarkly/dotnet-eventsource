@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 namespace LaunchDarkly.EventSource
 {
+    /// <summary>
+    /// This interface defines the public members of <see cref="EventSource"/>.
+    /// </summary>
     public interface IEventSource
     {
         #region Public Events
