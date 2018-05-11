@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <VersionPrefix>3.0.0</VersionPrefix>
-    <TargetFrameworks>netstandard1.4;net45</TargetFrameworks>
+    <TargetFrameworks>net45</TargetFrameworks>
     <PackageLicenseUrl>https://raw.github.com/LaunchDarkly/dotnet-eventsource/master/LICENSE</PackageLicenseUrl>
     <AssemblyName>LaunchDarkly.EventSource</AssemblyName>
     <DebugType>portable</DebugType>
     <OutputType>Library</OutputType>
-    <PackageId>LaunchDarkly.EventSource</PackageId>
+    <PackageId>D2L.LaunchDarkly.EventSource</PackageId>
     <Company>LaunchDarkly</Company>
     <Copyright>Copyright 2017 Catamorphic, Co.</Copyright>
     <Description>LaunchDarkly .NET Event Source library for Server Sent Events</Description>
@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="Common.Logging" Version="3.4.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="6.0.6" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
