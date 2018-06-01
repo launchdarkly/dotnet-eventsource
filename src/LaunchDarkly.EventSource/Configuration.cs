@@ -17,12 +17,12 @@ namespace LaunchDarkly.EventSource
 
         #endregion
 
-        #region Private Fields
+        #region Constants
 
-        private readonly TimeSpan _defaultDelayRetryDuration = TimeSpan.FromMilliseconds(1000);
-        private readonly TimeSpan _defaultConnectionTimeout = TimeSpan.FromMilliseconds(10000);
-        private readonly TimeSpan _defaultReadTimeout = TimeSpan.FromMinutes(5);
-        private readonly TimeSpan _maximumRetryDuration = TimeSpan.FromMilliseconds(30000);
+        public static readonly TimeSpan DefaultDelayRetryDuration = TimeSpan.FromMilliseconds(1000);
+        public static readonly TimeSpan DefaultConnectionTimeout = TimeSpan.FromMilliseconds(10000);
+        public static readonly TimeSpan DefaultReadTimeout = TimeSpan.FromMinutes(5);
+        public static readonly TimeSpan MaximumRetryDuration = TimeSpan.FromMilliseconds(30000);
 
         #endregion
 
@@ -42,7 +42,10 @@ namespace LaunchDarkly.EventSource
         /// <value>
         /// The <see cref="TimeSpan"/> before the connection times out. The default value is 10,000 milliseconds (10 seconds).
         /// </value>
-        public TimeSpan ConnectionTimeOut { get; }
+        public TimeSpan ConnectionTimeout { get; }
+
+        [Obsolete("Use ConnectionTimeout.")]
+        public TimeSpan ConnectionTimeOut { get { return ConnectionTimeout; } }
 
         /// <summary>
         /// Gets the duration to wait before attempting to reconnect to the EventSource API.
@@ -59,7 +62,10 @@ namespace LaunchDarkly.EventSource
         /// <value>
         /// The <see cref="TimeSpan"/> before reading times out. The default value is 300,000 milliseconds (5 minutes).
         /// </value>
-        public TimeSpan ReadTimeOut { get; }
+        public TimeSpan ReadTimeout { get; }
+
+        [Obsolete("Use ReadTimeout.")]
+        public TimeSpan ReadTimeOut { get { return ReadTimeout; } }
 
         /// <summary>
         /// Gets the last event identifier.
@@ -95,7 +101,7 @@ namespace LaunchDarkly.EventSource
         /// The <see cref="HttpMessageHandler"/>.
         /// </value>
         public HttpMessageHandler MessageHandler { get; }
-        
+
         /// <summary>
         /// Gets the HTTP method that will be used when connecting to the EventSource API.
         /// Defaults to GET if not specified.
@@ -116,11 +122,12 @@ namespace LaunchDarkly.EventSource
         /// <value>
         /// The maximum duration of the retry.
         /// </value>
+        [Obsolete("Use constant MaximumRetryDuration instead.")]
         public TimeSpan MaximumDelayRetryDuration
         {
             get
             {
-                return _maximumRetryDuration;
+                return MaximumRetryDuration;
             }
         }
 
@@ -149,26 +156,32 @@ namespace LaunchDarkly.EventSource
         ///     <p>- or - </p>
         ///     <p><paramref name="readTimeout"/> is less than zero. </p>
         /// </exception>
-        public Configuration(Uri uri, HttpMessageHandler messageHandler = null, TimeSpan? connectionTimeOut = null, TimeSpan? delayRetryDuration = null, TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, ILog logger = null,
+        public Configuration(Uri uri, HttpMessageHandler messageHandler = null, TimeSpan? connectionTimeout = null, TimeSpan? delayRetryDuration = null, TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, ILog logger = null,
             HttpMethod method = null, HttpContentFactory requestBodyFactory = null)
         {
             if (uri == null)
+            {
                 throw new ArgumentNullException(nameof(uri));
+            }
 
-            if (connectionTimeOut.HasValue && connectionTimeOut.Value != Timeout.InfiniteTimeSpan && connectionTimeOut.Value < TimeSpan.Zero)
-                throw new ArgumentOutOfRangeException(nameof(connectionTimeOut), Resources.Configuration_Value_Greater_Than_Zero);
-
-            if (delayRetryDuration.HasValue && delayRetryDuration.Value > MaximumDelayRetryDuration)
-                throw new ArgumentOutOfRangeException(nameof(delayRetryDuration), string.Format(Resources.Configuration_RetryDuration_Exceeded, _maximumRetryDuration.Milliseconds));
-
-            if (readTimeout.HasValue && readTimeout.Value < TimeSpan.Zero)
-                throw new ArgumentOutOfRangeException(nameof(readTimeout), Resources.Configuration_Value_Greater_Than_Zero);
+            if (connectionTimeout.HasValue)
+            {
+                CheckConnectionTimeout(connectionTimeout.Value);
+            }
+            if (delayRetryDuration.HasValue)
+            {
+                CheckDelayRetryDuration(delayRetryDuration.Value);
+            }
+            if (readTimeout.HasValue)
+            {
+                CheckReadTimeout(readTimeout.Value);
+            }
 
             Uri = uri;
             MessageHandler = messageHandler ?? new HttpClientHandler();
-            ConnectionTimeOut = connectionTimeOut ?? _defaultConnectionTimeout;
-            DelayRetryDuration = delayRetryDuration ?? _defaultDelayRetryDuration;
-            ReadTimeOut = readTimeout ?? _defaultReadTimeout;
+            ConnectionTimeout = connectionTimeout ?? DefaultConnectionTimeout;
+            DelayRetryDuration = delayRetryDuration ?? DefaultDelayRetryDuration;
+            ReadTimeout = readTimeout ?? DefaultReadTimeout;
             RequestHeaders = requestHeaders;
             LastEventId = lastEventId;
             Logger = logger;
@@ -178,5 +191,45 @@ namespace LaunchDarkly.EventSource
 
         #endregion
 
+        #region Public Methods
+
+        public static ConfigurationBuilder Builder(Uri uri)
+        {
+            return new ConfigurationBuilder(uri);
+        }
+
+        #endregion
+
+        #region Internal Methods
+
+        internal static void CheckConnectionTimeout(TimeSpan connectionTimeout)
+        {
+            if (connectionTimeout != Timeout.InfiniteTimeSpan && connectionTimeout < TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(connectionTimeout), Resources.Configuration_Value_Greater_Than_Zero);
+            }
+        }
+
+        internal static void CheckDelayRetryDuration(TimeSpan delayRetryDuration)
+        {
+            if (delayRetryDuration > MaximumRetryDuration)
+            {
+                throw new ArgumentOutOfRangeException(nameof(delayRetryDuration), string.Format(Resources.Configuration_RetryDuration_Exceeded, MaximumRetryDuration.Milliseconds));
+            }
+            if (delayRetryDuration < TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(delayRetryDuration), Resources.Configuration_Value_Greater_Than_Zero);
+            }
+        }
+
+        internal static void CheckReadTimeout(TimeSpan readTimeout)
+        {
+            if (readTimeout < TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(readTimeout), Resources.Configuration_Value_Greater_Than_Zero);
+            }
+        }
+
+        #endregion
     }
 }

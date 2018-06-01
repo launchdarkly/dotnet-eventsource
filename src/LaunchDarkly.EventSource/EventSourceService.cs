@@ -120,7 +120,7 @@ namespace LaunchDarkly.EventSource
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                var readTimeoutTask = Task.Delay(_configuration.ReadTimeOut);
+                var readTimeoutTask = Task.Delay(_configuration.ReadTimeout);
 
                 var readLineTask = reader.ReadLineAsync();
 
@@ -137,7 +137,7 @@ namespace LaunchDarkly.EventSource
 
         private HttpClient GetHttpClient()
         {
-            return new HttpClient(_configuration.MessageHandler, false) { Timeout = _configuration.ConnectionTimeOut };
+            return new HttpClient(_configuration.MessageHandler, false) { Timeout = _configuration.ConnectionTimeout };
         }
 
         private HttpRequestMessage CreateHttpRequestMessage(Uri uri)

@@ -22,7 +22,7 @@ namespace LaunchDarkly.EventSource.Tests
         {
             var e = Record.Exception(() => new Configuration(
                 uri: _uri,
-                connectionTimeOut: new TimeSpan(-1)));
+                connectionTimeout: new TimeSpan(-1)));
 
             Assert.NotNull(e);
             Assert.IsType<ArgumentOutOfRangeException>(e);
