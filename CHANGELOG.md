@@ -4,7 +4,8 @@ All notable changes to the LaunchDarkly's EventSource implementation for C# will
 
 ## [3.1.0] - 2018-06-01
 ### Added
-- The HTTP method and request body can now be specified in the `Configuration` constructor. The default is still to use `GET` and not send a request body.
+- The new class `ConfigurationBuilder` provides a validated fluent builder pattern for `Configuration` instances.
+- The HTTP method and request body can now be specified in `ConfigurationBuilder` or in the `Configuration` constructor. The default is still to use `GET` and not send a request body.
 
 ## [3.0.0] - 2018-02-23
 ### Changed

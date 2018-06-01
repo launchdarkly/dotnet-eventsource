@@ -1,6 +1,5 @@
 ﻿using LaunchDarkly.EventSource;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 
 namespace EventSource_ConsoleApp
@@ -11,23 +10,19 @@ namespace EventSource_ConsoleApp
 
         static void Main(string[] args)
         {
-
-            Dictionary<string, string> headers =
-                new Dictionary<string, string> {{ "Authorization", "<Insert Auth Key>" }};
-
             Log("Starting...");
 
             var url = "<Insert API URL Here>";
+            string authKey = "<Insert Auth Key>";
 
-            var connnectionTimeout = TimeSpan.FromMilliseconds(Timeout.Infinite); //Use Timeout.Infinite if you want a connection that does not timeout.
+            var connectionTimeout = TimeSpan.FromMilliseconds(Timeout.Infinite); //Use Timeout.Infinite if you want a connection that does not timeout.
 
-            Configuration config = new Configuration(
-                uri: new Uri(url),
-                connectionTimeOut: connnectionTimeout,
-                delayRetryDuration: TimeSpan.FromMilliseconds(1000),
-                readTimeout: TimeSpan.FromMinutes(4),
-                requestHeaders: headers
-            );
+            Configuration config = Configuration.Builder(new Uri(url))
+                .ConnectionTimeout(connectionTimeout)
+                .DelayRetryDuration(TimeSpan.FromMilliseconds(1000))
+                .ReadTimeout(TimeSpan.FromMinutes(4))
+                .RequestHeader("Authorization", authKey)
+                .Build();
 
             _evt = new EventSource(config);
 
