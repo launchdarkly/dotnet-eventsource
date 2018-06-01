@@ -2,6 +2,17 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [3.1.0] - 2018-06-01
+### Added
+- The HTTP method and request body can now be specified in the `Configuration` constructor. The default is still to use `GET` and not send a request body.
+
+## [3.0.0] - 2018-02-23
+### Changed
+- Logging is now done via `Common.Logging`.
+
+### Added
+- `EventSource` now uses the interface `IEventSource`.
+
 ## [2.2.1] - 2018-02-05
 - Downgrade Microsoft.Extensions.Logging to 1.0.2 to reduce dependencies brought in when building against .NET Framework.
 
