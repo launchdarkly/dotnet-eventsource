@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <VersionPrefix>3.1.0</VersionPrefix>
+    <Version>3.1.0</Version>
     <TargetFrameworks>netstandard1.4;net45</TargetFrameworks>
     <PackageLicenseUrl>https://raw.github.com/LaunchDarkly/dotnet-eventsource/master/LICENSE</PackageLicenseUrl>
     <AssemblyName>LaunchDarkly.EventSource</AssemblyName>
@@ -14,7 +14,6 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>../../LaunchDarkly.EventSource.snk</AssemblyOriginatorKeyFile>
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
-    <Version>3.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
