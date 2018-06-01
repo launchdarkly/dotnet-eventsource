@@ -142,7 +142,7 @@ namespace LaunchDarkly.EventSource
 
         private HttpRequestMessage CreateHttpRequestMessage(Uri uri)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, uri);
+            var request = new HttpRequestMessage(_configuration.Method ?? HttpMethod.Get, uri);
 
             // Add all headers provided in the Configuration Headers. This allows a consumer to provide any request headers to the EventSource API
             if (_configuration.RequestHeaders != null)
@@ -150,6 +150,16 @@ namespace LaunchDarkly.EventSource
                 foreach (var item in _configuration.RequestHeaders)
                 {
                     request.Headers.Add(item.Key, item.Value);
+                }
+            }
+
+            // Add the request body, if any.
+            if (_configuration.RequestBodyFactory != null)
+            {
+                HttpContent requestBody = _configuration.RequestBodyFactory();
+                if (requestBody != null)
+                {
+                    request.Content = requestBody;
                 }
             }
 
