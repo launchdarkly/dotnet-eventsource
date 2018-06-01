@@ -187,6 +187,56 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
+        public async Task Default_HTTP_method_is_get()
+        {
+            var handler = new StubMessageHandler();
+            handler.QueueStringResponse(":");
+
+            var evt = new EventSource(new Configuration(_uri, handler, readTimeout: _defaultReadTimeout));
+            evt.CommentReceived += (_, e) => { evt.Close(); };
+            await evt.StartAsync();
+
+            var request = handler.GetRequests().First();
+            Assert.Equal(HttpMethod.Get, request.Method);
+        }
+
+        [Fact]
+        public async Task HTTP_method_can_be_specified()
+        {
+            var handler = new StubMessageHandler();
+            handler.QueueStringResponse(":");
+
+            var evt = new EventSource(new Configuration(_uri, handler, readTimeout: _defaultReadTimeout,
+                method: HttpMethod.Post));
+            evt.CommentReceived += (_, e) => { evt.Close(); };
+            await evt.StartAsync();
+
+            var request = handler.GetRequests().First();
+            Assert.Equal(HttpMethod.Post, request.Method);
+        }
+
+        [Fact]
+        public async Task HTTP_request_body_can_be_specified()
+        {
+            var handler = new StubMessageHandler();
+            handler.QueueStringResponse(":");
+
+            HttpContent content = new StringContent("{}");
+            Configuration.HttpContentFactory contentFn = () =>
+            {
+                return content;
+            };
+
+            var evt = new EventSource(new Configuration(_uri, handler, readTimeout: _defaultReadTimeout,
+                method: HttpMethod.Post, requestBodyFactory: contentFn));
+            evt.CommentReceived += (_, e) => { evt.Close(); };
+            await evt.StartAsync();
+
+            var request = handler.GetRequests().First();
+            Assert.Equal(content, request.Content);
+        }
+
+        [Fact]
         public async Task When_the_HttpRequest_is_sent_then_the_outgoing_request_contains_accept_header()
         {
             // Arrange

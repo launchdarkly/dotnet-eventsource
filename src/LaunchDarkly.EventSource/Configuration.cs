@@ -11,6 +11,11 @@ namespace LaunchDarkly.EventSource
     /// </summary>
     public sealed class Configuration
     {
+        #region Types
+
+        public delegate HttpContent HttpContentFactory();
+
+        #endregion
 
         #region Private Fields
 
@@ -92,6 +97,19 @@ namespace LaunchDarkly.EventSource
         public HttpMessageHandler MessageHandler { get; }
         
         /// <summary>
+        /// Gets the HTTP method that will be used when connecting to the EventSource API.
+        /// Defaults to GET if not specified.
+        /// </summary>
+        public HttpMethod Method { get; }
+
+        /// <summary>
+        /// Gets the request body that will be sent when connecting to the EventSource API, if the HTTP method
+        /// is one that allows a request body. This is in the form of a factory function because the request
+        /// may need to be sent more than once.
+        /// </summary>
+        public HttpContentFactory RequestBodyFactory { get; }
+
+        /// <summary>
         /// Gets the maximum amount of time to wait before attempting to reconnect to the EventSource API. 
         /// This value is read-only and cannot be set.
         /// </summary>
@@ -121,6 +139,8 @@ namespace LaunchDarkly.EventSource
         /// <param name="requestHeaders">Request headers used when connecting to the remote EventSource API.</param>
         /// <param name="lastEventId">The last event identifier.</param>
         /// <param name="logger">The logger used for logging internal messages.</param>
+        /// <param name="method">The HTTP method used to connect to the remote EventSource API.</param>
+        /// <param name="requestBodyFactory">A function that produces an HTTP request body to send to the remote EventSource API.</param>
         /// <exception cref="ArgumentNullException">Throws ArgumentNullException if the uri parameter is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">
         ///     <p><paramref name="connectionTimeOut"/> is less than zero. </p>
@@ -129,7 +149,8 @@ namespace LaunchDarkly.EventSource
         ///     <p>- or - </p>
         ///     <p><paramref name="readTimeout"/> is less than zero. </p>
         /// </exception>
-        public Configuration(Uri uri, HttpMessageHandler messageHandler = null, TimeSpan? connectionTimeOut = null, TimeSpan? delayRetryDuration = null, TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, ILog logger = null)
+        public Configuration(Uri uri, HttpMessageHandler messageHandler = null, TimeSpan? connectionTimeOut = null, TimeSpan? delayRetryDuration = null, TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, ILog logger = null,
+            HttpMethod method = null, HttpContentFactory requestBodyFactory = null)
         {
             if (uri == null)
                 throw new ArgumentNullException(nameof(uri));
@@ -151,6 +172,8 @@ namespace LaunchDarkly.EventSource
             RequestHeaders = requestHeaders;
             LastEventId = lastEventId;
             Logger = logger;
+            Method = method;
+            RequestBodyFactory = requestBodyFactory;
         }
 
         #endregion
