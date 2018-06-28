@@ -2,6 +2,10 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [3.1.1] - 2018-06-28
+### Removed
+- Removed an unused dependency on Newtonsoft.Json.
+
 ## [3.1.0] - 2018-06-01
 ### Added
 - The new class `ConfigurationBuilder` provides a validated fluent builder pattern for `Configuration` instances.
