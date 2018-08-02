@@ -6,6 +6,9 @@ All notable changes to the LaunchDarkly's EventSource implementation for C# will
 ### Changed
 - The SDK was referencing some system assemblies via `<PackageReference>`, which could cause dependency conflicts. These have been changed to framework `<Reference>`s. A redundant reference to `System.Runtime` was removed.
 
+### Fixed
+- If the stream connection fails, there should be an increasing backoff interval before each reconnect attempt. Previously, it would log a message about waiting some number of milliseconds, but then not actually wait.
+
 ## [3.1.1] - 2018-06-28
 ### Removed
 - Removed an unused dependency on Newtonsoft.Json.
