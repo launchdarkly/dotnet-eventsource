@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
 using LaunchDarkly.EventSource;
+using Common.Logging;
+using Common.Logging.Simple;
 
 namespace EventSource_ConsoleApp_DotNetCore
 {
@@ -10,6 +12,8 @@ namespace EventSource_ConsoleApp_DotNetCore
 
         static void Main(string[] args)
         {
+            LogManager.Adapter = new Common.Logging.Simple.DebugLoggerFactoryAdapter();
+
             Log("Starting...");
 
             var url = "<Insert API URL Here>";
