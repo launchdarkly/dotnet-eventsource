@@ -117,7 +117,7 @@ namespace LaunchDarkly.EventSource
             var cancellationToken = _pendingRequest.Token;
             while (!cancellationToken.IsCancellationRequested)
             {
-                MaybeWaitWithBackOff();
+                await MaybeWaitWithBackOff();
                 try
                 {
                     await ConnectToEventSourceAsync(cancellationToken);
@@ -131,7 +131,7 @@ namespace LaunchDarkly.EventSource
             }
         }
 
-        private async void MaybeWaitWithBackOff()  {
+        private async Task MaybeWaitWithBackOff()  {
             if (_backOff.GetReconnectAttemptCount() > 0 && _retryDelay > TimeSpan.FromMilliseconds(0))
             {
                 TimeSpan sleepTime = _backOff.GetNextBackOff();
