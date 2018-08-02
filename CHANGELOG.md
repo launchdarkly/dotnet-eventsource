@@ -2,6 +2,10 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [3.1.2] - 2018-08-02
+### Changed
+- The SDK was referencing some system assemblies via `<PackageReference>`, which could cause dependency conflicts. These have been changed to framework `<Reference>`s. A redundant reference to `System.Runtime` was removed.
+
 ## [3.1.1] - 2018-06-28
 ### Removed
 - Removed an unused dependency on Newtonsoft.Json.
