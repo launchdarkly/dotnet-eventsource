@@ -9,7 +9,7 @@ namespace LaunchDarkly.EventSource
         private readonly TimeSpan _minimumDelay;
         private readonly TimeSpan _maximumDelay;
         private readonly Random _jitterer = new Random();
-        private static int _reconnectAttempts;
+        private int _reconnectAttempts;
 
         public ExponentialBackoffWithDecorrelation(TimeSpan minimumDelay, TimeSpan maximumDelay)
         {
