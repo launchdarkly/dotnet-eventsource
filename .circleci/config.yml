@@ -1,4 +1,9 @@
 version: 2
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test-1.1
 jobs:
   test-1.1:
     docker:
