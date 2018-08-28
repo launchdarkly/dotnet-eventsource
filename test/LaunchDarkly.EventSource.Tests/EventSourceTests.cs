@@ -354,6 +354,7 @@ namespace LaunchDarkly.EventSource.Tests
             var evt = new EventSource(config);
 
             var receiver = new ErrorReceiver(evt);
+            receiver.CloseEventSourceOnError = true;
 
             //// Act
             await evt.StartAsync();
@@ -375,6 +376,7 @@ namespace LaunchDarkly.EventSource.Tests
             var evt = new EventSource(new Configuration(_uri, handler));
 
             var receiver = new ErrorReceiver(evt);
+            receiver.CloseEventSourceOnError = true;
 
             //Act
             await evt.StartAsync();
@@ -402,6 +404,7 @@ namespace LaunchDarkly.EventSource.Tests
             var evt = new EventSource(new Configuration(_uri, handler));
 
             ErrorReceiver receiver = new ErrorReceiver(evt);
+            receiver.CloseEventSourceOnError = true;
 
             await evt.StartAsync();
 
@@ -469,6 +472,7 @@ namespace LaunchDarkly.EventSource.Tests
             var evt = new StubEventSource(new Configuration(_uri, handler, readTimeout: readTimeout), (int)timeout.TotalMilliseconds);
 
             var receiver = new ErrorReceiver(evt);
+            receiver.CloseEventSourceOnError = true;
 
             await evt.StartAsync();
 
@@ -519,8 +523,7 @@ namespace LaunchDarkly.EventSource.Tests
 
             var evt = new EventSource(new Configuration(_uri, handler));
 
-            ErrorReceiver receiver = new ErrorReceiver(evt);
-            receiver.CloseEventSourceOnError = false;
+            var receiver = new ErrorReceiver(evt);
 
             string messageReceived = null;
             evt.MessageReceived += (_, e) =>
@@ -547,6 +550,7 @@ namespace LaunchDarkly.EventSource.Tests
             var evt = new EventSource(new Configuration(_uri, handler));
 
             var receiver = new ErrorReceiver(evt);
+            receiver.CloseEventSourceOnError = true;
 
             await evt.StartAsync();
 
@@ -556,7 +560,7 @@ namespace LaunchDarkly.EventSource.Tests
 
     class ErrorReceiver
     {
-        public bool CloseEventSourceOnError = true;
+        public bool CloseEventSourceOnError = false;
         public Exception ErrorReceived = null;
         public ReadyState SourceStateReceived;
         private readonly EventSource _source;
