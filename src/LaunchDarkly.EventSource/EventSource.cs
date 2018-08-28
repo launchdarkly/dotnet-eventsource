@@ -25,8 +25,9 @@ namespace LaunchDarkly.EventSource
         private string _eventName = Constants.MessageField;
         private string _lastEventId;
         private TimeSpan _retryDelay;
-        private CancellationTokenSource _pendingRequest;
         private readonly ExponentialBackoffWithDecorrelation _backOff;
+        private CancellationTokenSource _currentRequestToken;
+        private ReadyState _readyState;
 
         #endregion
 
@@ -65,8 +66,20 @@ namespace LaunchDarkly.EventSource
         /// </value>
         public ReadyState ReadyState
         {
-            get;
-            private set;
+            get
+            {
+                lock(this)
+                {
+                    return _readyState;
+                }
+            }
+            private set
+            {
+                lock(this)
+                {
+                    _readyState = value;
+                }
+            }
         }
 
         internal TimeSpan BackOffDelay
@@ -88,13 +101,11 @@ namespace LaunchDarkly.EventSource
         /// configuration</exception>
         public EventSource(Configuration configuration)
         {
-            ReadyState = ReadyState.Raw;
+            _readyState = ReadyState.Raw;
 
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
             _logger = _configuration.Logger ?? LogManager.GetLogger(typeof(EventSource));
-
-            _pendingRequest = new CancellationTokenSource();
 
             _retryDelay = _configuration.DelayRetryDuration;
 
@@ -114,14 +125,22 @@ namespace LaunchDarkly.EventSource
         /// <exception cref="InvalidOperationException">The method was called after the connection <see cref="ReadyState"/> was Open or Connecting.</exception>
         public async Task StartAsync()
         {
-            var cancellationToken = _pendingRequest.Token;
-            while (!cancellationToken.IsCancellationRequested)
+            while (ReadyState != ReadyState.Shutdown)
             {
                 await MaybeWaitWithBackOff();
                 try
                 {
-                    await ConnectToEventSourceAsync(cancellationToken);
-                    _backOff.ResetReconnectAttemptCount();
+                    var newRequestTokenSource = new CancellationTokenSource();
+                    lock (this)
+                    {
+                        if (_readyState == ReadyState.Shutdown)
+                        {
+                            // in case Close() was called in between the previous ReadyState check and the creation of the new token
+                            return;
+                        }
+                        _currentRequestToken = newRequestTokenSource;
+                    }
+                    await ConnectToEventSourceAsync(newRequestTokenSource.Token);
                 }
                 catch (Exception e)
                 {
@@ -152,21 +171,24 @@ namespace LaunchDarkly.EventSource
             if (ReadyState == ReadyState.Raw || ReadyState == ReadyState.Shutdown) return;
 
             Close(ReadyState.Shutdown);
-
-            // Cancel token to cancel requests.
-            CancelToken();
-
+            CancelCurrentRequest();
         }
 
         #endregion
 
         #region Private Methods
 
-        private void CancelToken()
+        private void CancelCurrentRequest()
         {
-            CancellationTokenSource cancellationTokenSource = Interlocked.Exchange(ref _pendingRequest, new CancellationTokenSource());
-            cancellationTokenSource.Cancel();
-            cancellationTokenSource.Dispose();
+            CancellationTokenSource requestTokenSource = null;
+            lock (this)
+            {
+                requestTokenSource = _currentRequestToken;
+            }
+            if (requestTokenSource != null)
+            {
+                requestTokenSource.Cancel();
+            }
         }
 
         internal virtual EventSourceService GetEventSourceService(Configuration configuration)
@@ -189,7 +211,10 @@ namespace LaunchDarkly.EventSource
 
                 var svc = GetEventSourceService(_configuration);
 
-                svc.ConnectionOpened += (o, e) => { SetReadyState(ReadyState.Open, OnOpened); };
+                svc.ConnectionOpened += (o, e) => {
+                    _backOff.ResetReconnectAttemptCount();
+                    SetReadyState(ReadyState.Open, OnOpened);
+                };
                 svc.ConnectionClosed += (o, e) => { SetReadyState(ReadyState.Closed, OnClosed); };
 
                 await svc.GetDataAsync(
@@ -199,7 +224,7 @@ namespace LaunchDarkly.EventSource
             }
             catch (EventSourceServiceCancelledException e)
             {
-                CancelToken();
+                CancelCurrentRequest();
 
                 CloseAndRaiseError(e);
             }
@@ -212,7 +237,6 @@ namespace LaunchDarkly.EventSource
 
                     throw;
                 }
-
             }
         }
 
@@ -252,12 +276,19 @@ namespace LaunchDarkly.EventSource
 
         private void SetReadyState(ReadyState state, Action<StateChangedEventArgs> action = null)
         {
-            if (ReadyState == state) return;
-
-            ReadyState = state;
+            lock (this)
+            {
+                if (_readyState == state || _readyState == ReadyState.Shutdown)
+                {
+                    return;
+                }
+                _readyState = state;
+            }
 
             if (action != null)
-                action(new StateChangedEventArgs(ReadyState));
+            {
+                action(new StateChangedEventArgs(state));
+            }
         }
 
         private void ProcessField(string field, string value)
