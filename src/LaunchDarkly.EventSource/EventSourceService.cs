@@ -63,7 +63,6 @@ namespace LaunchDarkly.EventSource
             cancellationToken.ThrowIfCancellationRequested();
 
             await ConnectToEventSourceApi(processResponse, cancellationToken);
-
         }
 
         #endregion

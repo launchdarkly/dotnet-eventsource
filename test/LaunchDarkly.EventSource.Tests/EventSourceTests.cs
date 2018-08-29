@@ -353,18 +353,16 @@ namespace LaunchDarkly.EventSource.Tests
 
             var evt = new EventSource(config);
 
-            var wasErrorEventRaised = false;
-            evt.Error += (s, e) =>
-            {
-                wasErrorEventRaised = true;
-            };
+            var receiver = new ErrorReceiver(evt);
+            receiver.CloseEventSourceOnError = true;
 
             //// Act
             await evt.StartAsync();
 
             //// Assert
-            Assert.True(wasErrorEventRaised);
-            Assert.True(evt.ReadyState == ReadyState.Closed);
+            Assert.NotNull(receiver.ErrorReceived);
+            Assert.Equal(ReadyState.Closed, receiver.SourceStateReceived);
+            Assert.Equal(ReadyState.Shutdown, evt.ReadyState);
         }
 
         [Fact]
@@ -377,20 +375,19 @@ namespace LaunchDarkly.EventSource.Tests
 
             var evt = new EventSource(new Configuration(_uri, handler));
 
+            var receiver = new ErrorReceiver(evt);
+            receiver.CloseEventSourceOnError = true;
+
             //Act
-            var raisedEvent = await Assert.RaisesAsync<ExceptionEventArgs>(
-                h => evt.Error += h,
-                h => evt.Error -= h,
-                () => evt.StartAsync());
+            await evt.StartAsync();
 
             //// Assert
-            Assert.NotNull(raisedEvent);
-            Assert.Equal(evt, raisedEvent.Sender);
-            Assert.IsType<EventSourceServiceUnsuccessfulResponseException>(raisedEvent.Arguments.Exception);
-            Assert.Equal(204, ((EventSourceServiceUnsuccessfulResponseException)raisedEvent.Arguments.Exception).StatusCode);
-            Assert.True(evt.ReadyState == ReadyState.Closed);
+            Assert.NotNull(receiver.ErrorReceived);
+            var ex = Assert.IsType<EventSourceServiceUnsuccessfulResponseException>(receiver.ErrorReceived);
+            Assert.Equal(204, ex.StatusCode);
+            Assert.Equal(ReadyState.Closed, receiver.SourceStateReceived);
+            Assert.Equal(ReadyState.Shutdown, evt.ReadyState);
         }
-
 
         [Theory]
         [InlineData(HttpStatusCode.InternalServerError)]
@@ -406,18 +403,17 @@ namespace LaunchDarkly.EventSource.Tests
 
             var evt = new EventSource(new Configuration(_uri, handler));
 
-            //Act
-            var raisedEvent = await Assert.RaisesAsync<ExceptionEventArgs>(
-                h => evt.Error += h,
-                h => evt.Error -= h,
-                () => evt.StartAsync());
+            ErrorReceiver receiver = new ErrorReceiver(evt);
+            receiver.CloseEventSourceOnError = true;
+
+            await evt.StartAsync();
 
             //// Assert
-            Assert.NotNull(raisedEvent);
-            Assert.Equal(evt, raisedEvent.Sender);
-            Assert.IsType<EventSourceServiceUnsuccessfulResponseException>(raisedEvent.Arguments.Exception);
-            Assert.Equal((int)statusCode, ((EventSourceServiceUnsuccessfulResponseException)raisedEvent.Arguments.Exception).StatusCode);
-            Assert.True(evt.ReadyState == ReadyState.Closed);
+            Assert.NotNull(receiver.ErrorReceived);
+            var ex = Assert.IsType<EventSourceServiceUnsuccessfulResponseException>(receiver.ErrorReceived);
+            Assert.Equal((int)statusCode, ex.StatusCode);
+            Assert.Equal(ReadyState.Closed, receiver.SourceStateReceived);
+            Assert.Equal(ReadyState.Shutdown, evt.ReadyState);
         }
 
         [Fact]
@@ -426,7 +422,8 @@ namespace LaunchDarkly.EventSource.Tests
             // Arrange
             var handler = new StubMessageHandler();
 
-            for (int i = 0; i < 2; i++)
+            var nAttempts = 2;
+            for (int i = 0; i < nAttempts; i++)
             {
                 var response = new HttpResponseMessageWithError();
 
@@ -436,7 +433,6 @@ namespace LaunchDarkly.EventSource.Tests
                     "text/event-stream");
 
                 handler.QueueResponse(response);
-
             }
 
             handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.NoContent));
@@ -447,6 +443,10 @@ namespace LaunchDarkly.EventSource.Tests
             evt.Error += (_, e) =>
             {
                 backoffs.Add(evt.BackOffDelay);
+                if (backoffs.Count >= nAttempts)
+                {
+                    evt.Close();
+                }
             };
 
             //Act
@@ -454,7 +454,7 @@ namespace LaunchDarkly.EventSource.Tests
 
             //// Assert
             Assert.NotEmpty(backoffs);
-            Assert.True(backoffs.Distinct().Count() == backoffs.Count());
+            Assert.Equal(backoffs.Distinct().Count(), backoffs.Count());
         }
 
 
@@ -471,25 +471,15 @@ namespace LaunchDarkly.EventSource.Tests
 
             var evt = new StubEventSource(new Configuration(_uri, handler, readTimeout: readTimeout), (int)timeout.TotalMilliseconds);
 
-            var exceptionMessage = string.Empty;
+            var receiver = new ErrorReceiver(evt);
+            receiver.CloseEventSourceOnError = true;
 
-            try
-            {
+            await evt.StartAsync();
 
-                evt.Error += (_, e) =>
-                {
-                    exceptionMessage = e.Exception.Message;
-                    evt.Close();
-                };
-
-                await evt.StartAsync();
-
-            }
-            catch (TaskCanceledException) {}
-
-            Assert.Contains(exceptionMessage, Resources.EventSourceService_Read_Timeout);
-            Assert.True(evt.ReadyState == ReadyState.Shutdown);
-
+            Assert.NotNull(receiver.ErrorReceived);
+            Assert.Contains(receiver.ErrorReceived.Message, Resources.EventSourceService_Read_Timeout);
+            Assert.Equal(ReadyState.Closed, receiver.SourceStateReceived);
+            Assert.Equal(ReadyState.Shutdown, evt.ReadyState);
         }
 
         [Fact]
@@ -520,7 +510,35 @@ namespace LaunchDarkly.EventSource.Tests
 
             Assert.Equal("put", eventName);
             Assert.True(wasMessageReceivedEventRaised);
+        }
 
+        [Fact]
+        public async Task When_server_returns_HTTP_error_a_reconnect_attempt_is_made()
+        {
+            var messageData = "hello";
+
+            var handler = new StubMessageHandler();
+            handler.QueueResponse(new HttpResponseMessage(HttpStatusCode.Unauthorized));
+            handler.QueueStringResponse("event: put\ndata: " + messageData + "\n\n");
+
+            var evt = new EventSource(new Configuration(_uri, handler));
+
+            var receiver = new ErrorReceiver(evt);
+
+            string messageReceived = null;
+            evt.MessageReceived += (_, e) =>
+            {
+                messageReceived = e.Message.Data;
+                evt.Close();
+            };
+
+            await evt.StartAsync();
+
+            Assert.Equal(2, handler.GetRequests().Count());
+            Assert.NotNull(receiver.ErrorReceived);
+            var ex = Assert.IsType<EventSourceServiceUnsuccessfulResponseException>(receiver.ErrorReceived);
+            Assert.Equal((int)HttpStatusCode.Unauthorized, ex.StatusCode);
+            Assert.Equal(messageData, messageReceived);
         }
 
         [Fact]
@@ -531,14 +549,36 @@ namespace LaunchDarkly.EventSource.Tests
 
             var evt = new EventSource(new Configuration(_uri, handler));
 
-            evt.Error += (_, e) =>
-            {
-                evt.Close();
-            };
+            var receiver = new ErrorReceiver(evt);
+            receiver.CloseEventSourceOnError = true;
 
             await evt.StartAsync();
 
             Assert.Equal(1, handler.GetRequests().Count());
+        }
+    }
+
+    class ErrorReceiver
+    {
+        public bool CloseEventSourceOnError = false;
+        public Exception ErrorReceived = null;
+        public ReadyState SourceStateReceived;
+        private readonly EventSource _source;
+        
+        public ErrorReceiver(EventSource source)
+        {
+            _source = source;
+            source.Error += HandleError;
+        }
+
+        public void HandleError(object sender, ExceptionEventArgs e)
+        {
+            ErrorReceived = e.Exception;
+            SourceStateReceived = _source.ReadyState;
+            if (CloseEventSourceOnError)
+            {
+                _source.Close();
+            }
         }
     }
 }
