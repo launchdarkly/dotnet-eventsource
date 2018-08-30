@@ -2,6 +2,9 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [3.1.5] - 2018-08-29
+Duplicate of 3.1.4, created due to a problem in the release process.
+
 ## [3.1.4] - 2018-08-29
 ### Fixed
 - Fixed a bug that prevented the event source from reconnecting to the stream if it received an HTTP error status from the server (as opposed to simply losing the connection).
