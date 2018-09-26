@@ -254,6 +254,12 @@ namespace LaunchDarkly.EventSource
 
         private void ProcessResponseContent(string content)
         {
+            if (content == null)
+            {
+                // StreamReader may emit a null if the stream has been closed; there's nothing to
+                // be done at this level in that case
+                return;
+            }
             if (string.IsNullOrEmpty(content.Trim()))
             {
                 DispatchEvent();
