@@ -28,6 +28,10 @@ namespace LaunchDarkly.EventSource
             return TimeSpan.FromMilliseconds(nextDelay);
         }
 
+        public int GetReconnectAttemptCount() {
+            return _reconnectAttempts;
+        }
+
         public void ResetReconnectAttemptCount() {
             _reconnectAttempts = 0;
         }
