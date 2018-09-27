@@ -17,23 +17,23 @@ namespace LaunchDarkly.EventSource
             _maximumDelay = maximumDelay;
         }
 
+        /// <summary>
+        /// Gets the next backoff duration and increments the reconnect attempt count
+        /// </summary>
         public TimeSpan GetNextBackOff()
         {
-            int nextDelay = Convert.ToInt32(Math.Min(_maximumDelay.TotalMilliseconds, _minimumDelay.TotalMilliseconds * Math.Pow(2, _reconnectAttempts++)));
+            int nextDelay = Convert.ToInt32(Math.Min(_maximumDelay.TotalMilliseconds, _minimumDelay.TotalMilliseconds * Math.Pow(2, _reconnectAttempts)));
             nextDelay = nextDelay / 2 + _jitterer.Next(nextDelay) / 2;
+            IncrementReconnectAttemptCount();
             return TimeSpan.FromMilliseconds(nextDelay);
-        }
-
-        public int GetReconnectAttemptCount() {
-            return _reconnectAttempts;
-        }
-
-        public void IncrementReconnectAttemptCount() {
-            _reconnectAttempts++;
         }
 
         public void ResetReconnectAttemptCount() {
             _reconnectAttempts = 0;
+        }
+
+        private void IncrementReconnectAttemptCount() {
+            _reconnectAttempts++;
         }
     }
 }
