@@ -151,7 +151,7 @@ namespace LaunchDarkly.EventSource
         }
 
         private async Task MaybeWaitWithBackOff()  {
-            if (_retryDelay > TimeSpan.FromMilliseconds(0))
+            if (_retryDelay.TotalMilliseconds > 0)
             {
                 TimeSpan sleepTime = _backOff.GetNextBackOff();
                 if (sleepTime.TotalMilliseconds > 0) {
