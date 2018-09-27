@@ -32,7 +32,13 @@ namespace LaunchDarkly.EventSource
             _reconnectAttempts = 0;
         }
 
-        private void IncrementReconnectAttemptCount() {
+        public int IncrementReconnectAttemptCount() {
+            return _reconnectAttempts++;
+        }
+
+
+        [Obsolete("IncrementReconnectAttemptCount is deprecated, use GetNextBackOff instead.")]
+        public void IncrementReconnectAttemptCount() {
             _reconnectAttempts++;
         }
     }
