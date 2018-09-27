@@ -24,18 +24,13 @@ namespace LaunchDarkly.EventSource
         {
             int nextDelay = Convert.ToInt32(Math.Min(_maximumDelay.TotalMilliseconds, _minimumDelay.TotalMilliseconds * Math.Pow(2, _reconnectAttempts)));
             nextDelay = nextDelay / 2 + _jitterer.Next(nextDelay) / 2;
-            IncrementReconnectAttemptCount();
+            _reconnectAttempts++;
             return TimeSpan.FromMilliseconds(nextDelay);
         }
 
         public void ResetReconnectAttemptCount() {
             _reconnectAttempts = 0;
         }
-
-        public int IncrementReconnectAttemptCount() {
-            return _reconnectAttempts++;
-        }
-
 
         [Obsolete("IncrementReconnectAttemptCount is deprecated, use GetNextBackOff instead.")]
         public void IncrementReconnectAttemptCount() {
