@@ -151,15 +151,14 @@ namespace LaunchDarkly.EventSource
         }
 
         private async Task MaybeWaitWithBackOff()  {
-            if (_backOff.GetReconnectAttemptCount() > 0 && _retryDelay > TimeSpan.FromMilliseconds(0))
+            if (_retryDelay.TotalMilliseconds > 0)
             {
                 TimeSpan sleepTime = _backOff.GetNextBackOff();
-                _logger.InfoFormat("Waiting {0} milliseconds before reconnecting...", sleepTime.TotalMilliseconds);
-                BackOffDelay = sleepTime;
-                await Task.Delay(sleepTime);
-            }
-            else {
-                _backOff.IncrementReconnectAttemptCount();
+                if (sleepTime.TotalMilliseconds > 0) {
+                    _logger.InfoFormat("Waiting {0} milliseconds before reconnecting...", sleepTime.TotalMilliseconds);
+                    BackOffDelay = sleepTime;
+                    await Task.Delay(sleepTime);
+                }
             }
         }
 
