@@ -127,7 +127,12 @@ namespace LaunchDarkly.EventSource
 
                 if (completedTask == readTimeoutTask)
                 {
+                    Util.SuppressExceptions(readLineTask); // must do this since we're not going to await the task
                     throw new HttpRequestException(Resources.EventSourceService_Read_Timeout);
+                }
+                else
+                {
+                    Util.SuppressExceptions(readTimeoutTask); // this task should never throw an exception, but you never know
                 }
 
                 processResponse(readLineTask.Result);

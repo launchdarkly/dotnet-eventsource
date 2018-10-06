@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -480,6 +481,47 @@ namespace LaunchDarkly.EventSource.Tests
             Assert.Contains(receiver.ErrorReceived.Message, Resources.EventSourceService_Read_Timeout);
             Assert.Equal(ReadyState.Closed, receiver.SourceStateReceived);
             Assert.Equal(ReadyState.Shutdown, evt.ReadyState);
+        }
+
+        [Fact]
+        public async Task Timeout_does_not_cause_unobserved_exception()
+        {
+            var handler = new StubMessageHandler();
+
+            TimeSpan readTimeout = TimeSpan.FromMilliseconds(10);
+            TimeSpan timeout = TimeSpan.FromMilliseconds(100);
+            var evt = new StubEventSource(new Configuration(_uri, handler, readTimeout: readTimeout), (int)timeout.TotalMilliseconds);
+
+            var caughtUnobservedException = false;
+            EventHandler<UnobservedTaskExceptionEventArgs> exceptionHandler = (object sender, UnobservedTaskExceptionEventArgs e) =>
+            {
+                e.SetObserved();
+                caughtUnobservedException = true;
+            };
+            TaskScheduler.UnobservedTaskException += exceptionHandler;
+
+            try
+            {
+                var receiver = new ErrorReceiver(evt);
+                receiver.CloseEventSourceOnError = true;
+
+                await evt.StartAsync();
+
+                // StartAsync has returned, meaning that the EventSource was closed by the ErrorReceiver, meaning that it
+                // encountered a timeout. Wait a little bit longer to make sure that the stream reader task has got an
+                // exception from the closed stream.
+                Thread.Sleep(TimeSpan.FromMilliseconds(500));
+
+                // Force finalizer to run so that if there was an unobserved exception, it will trigger that event.
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
+                Assert.False(caughtUnobservedException);
+            }
+            finally
+            {
+                TaskScheduler.UnobservedTaskException -= exceptionHandler;
+            }
         }
 
         [Fact]
