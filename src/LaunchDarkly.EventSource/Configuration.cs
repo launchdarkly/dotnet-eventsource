@@ -1,8 +1,8 @@
-﻿using Common.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
+using LaunchDarkly.EventSource.Logging;
 
 namespace LaunchDarkly.EventSource
 {
@@ -86,15 +86,7 @@ namespace LaunchDarkly.EventSource
         /// The last event identifier.
         /// </value>
         public string LastEventId { get; }
-
-        /// <summary>
-        /// Gets the <see cref="Common.Logging.ILog"/> used internally in the <see cref="EventSource"/> class.
-        /// </summary>
-        /// <value>
-        /// The ILog to use for internal logging.
-        /// </value>
-        public ILog Logger { get; }
-
+        
         /// <summary>
         /// Gets or sets the request headers used when connecting to the EventSource API.
         /// </summary>
@@ -149,12 +141,11 @@ namespace LaunchDarkly.EventSource
         /// </summary>
         /// <param name="uri">The URI used to connect to the remote EventSource API.</param>
         /// <param name="messageHandler">The message handler to use when sending API requests. If null, the <see cref="HttpClientHandler"/> is used.</param>
-        /// <param name="connectionTimeOut">The connection timeout. If null, defaults to 10 seconds.</param>
+        /// <param name="connectionTimeout">The connection timeout. If null, defaults to 10 seconds.</param>
         /// <param name="delayRetryDuration">The time to wait before attempting to reconnect to the EventSource API. If null, defaults to 1 second.</param>
         /// <param name="readTimeout">The timeout when reading data from the EventSource API. If null, defaults to 5 minutes.</param>
         /// <param name="requestHeaders">Request headers used when connecting to the remote EventSource API.</param>
         /// <param name="lastEventId">The last event identifier.</param>
-        /// <param name="logger">The logger used for logging internal messages.</param>
         /// <param name="method">The HTTP method used to connect to the remote EventSource API.</param>
         /// <param name="requestBodyFactory">A function that produces an HTTP request body to send to the remote EventSource API.</param>
         /// <exception cref="ArgumentNullException">Throws ArgumentNullException if the uri parameter is null.</exception>
@@ -166,7 +157,7 @@ namespace LaunchDarkly.EventSource
         ///     <p><paramref name="readTimeout"/> is less than zero. </p>
         /// </exception>
         public Configuration(Uri uri, HttpMessageHandler messageHandler = null, TimeSpan? connectionTimeout = null, TimeSpan? delayRetryDuration = null,
-            TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, ILog logger = null,
+            TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null,
             HttpMethod method = null, HttpContentFactory requestBodyFactory = null, TimeSpan? backoffResetThreshold = null)
         {
             if (uri == null)
@@ -195,7 +186,6 @@ namespace LaunchDarkly.EventSource
             ReadTimeout = readTimeout ?? DefaultReadTimeout;
             RequestHeaders = requestHeaders;
             LastEventId = lastEventId;
-            Logger = logger;
             Method = method;
             RequestBodyFactory = requestBodyFactory;
         }

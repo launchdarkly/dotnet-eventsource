@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Threading;
 using LaunchDarkly.EventSource;
-using Common.Logging;
-using Common.Logging.Simple;
+using LaunchDarkly.EventSource.Logging;
 
 namespace EventSource_ConsoleApp_DotNetCore
 {
@@ -10,9 +9,34 @@ namespace EventSource_ConsoleApp_DotNetCore
     {
         private static EventSource _evt;
 
+        private sealed class DebugLogProvider : ILogProvider
+        {
+            public Logger GetLogger(string name)
+            {
+                return (level, func, exception, parameters) =>
+                {
+                    if (func != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[{level}]: {func()}; {exception}");
+                    }
+                    return true;
+                };
+            }
+
+            public IDisposable OpenNestedContext(string message)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IDisposable OpenMappedContext(string key, object value, bool destructure = false)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         static void Main(string[] args)
         {
-            LogManager.Adapter = new Common.Logging.Simple.DebugLoggerFactoryAdapter();
+            LaunchDarkly.EventSource.Logging.LogProvider.SetCurrentLogProvider(new DebugLogProvider());
 
             Log("Starting...");
 

@@ -1,8 +1,8 @@
-﻿using Common.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using LaunchDarkly.EventSource.Logging;
 
 namespace LaunchDarkly.EventSource
 {
@@ -28,7 +28,6 @@ namespace LaunchDarkly.EventSource
         private TimeSpan _backoffResetThreshold = Configuration.DefaultBackoffResetThreshold;
         private TimeSpan _readTimeout = Configuration.DefaultReadTimeout;
         private string _lastEventId;
-        private ILog _logger;
         private IDictionary<string, string> _requestHeaders = new Dictionary<string, string>();
         private HttpMessageHandler _messageHandler;
         private HttpMethod _method = HttpMethod.Get;
@@ -54,9 +53,9 @@ namespace LaunchDarkly.EventSource
         public Configuration Build()
         {
             return new Configuration(_uri, _messageHandler, _connectionTimeout, _delayRetryDuration, _readTimeout,
-                _requestHeaders, _lastEventId, _logger, _method, _requestBodyFactory);
+                _requestHeaders, _lastEventId, _method, _requestBodyFactory);
         }
-        
+
         public ConfigurationBuilder ConnectionTimeout(TimeSpan connectionTimeout)
         {
             Configuration.CheckConnectionTimeout(connectionTimeout);
@@ -90,12 +89,6 @@ namespace LaunchDarkly.EventSource
             return this;
         }
 
-        public ConfigurationBuilder Logger(ILog logger)
-        {
-            _logger = logger;
-            return this;
-        }
-
         public ConfigurationBuilder RequestHeaders(IDictionary<string, string> headers)
         {
             if (headers == null)
@@ -105,7 +98,7 @@ namespace LaunchDarkly.EventSource
             _requestHeaders = headers;
             return this;
         }
-        
+
         public ConfigurationBuilder RequestHeader(string name, string value)
         {
             _requestHeaders[name] = value;

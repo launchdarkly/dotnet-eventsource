@@ -1,5 +1,4 @@
-﻿using Common.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
@@ -135,21 +134,6 @@ namespace LaunchDarkly.EventSource.Tests
         {
             var b = Configuration.Builder(uri).LastEventId("abc");
             Assert.Equal("abc", b.Build().LastEventId);
-        }
-
-        [Fact]
-        public void LoggerDefaultsToNull()
-        {
-            var b = Configuration.Builder(uri);
-            Assert.Null(b.Build().Logger);
-        }
-
-        [Fact]
-        public void BuilderSetsLog()
-        {
-            ILog log = LogManager.GetLogger("test");
-            var b = Configuration.Builder(uri).Logger(log);
-            Assert.Same(log, b.Build().Logger);
         }
 
         [Fact]

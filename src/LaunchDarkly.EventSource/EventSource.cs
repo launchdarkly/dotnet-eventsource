@@ -1,4 +1,3 @@
-﻿using Common.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using LaunchDarkly.EventSource.Logging;
 
 namespace LaunchDarkly.EventSource
 {
@@ -102,17 +102,16 @@ namespace LaunchDarkly.EventSource
         /// configuration</exception>
         public EventSource(Configuration configuration)
         {
+            _logger = LogProvider.For<EventSource>();
+
             _readyState = ReadyState.Raw;
 
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-
-            _logger = _configuration.Logger ?? LogManager.GetLogger(typeof(EventSource));
 
             _retryDelay = _configuration.DelayRetryDuration;
 
             _backOff = new ExponentialBackoffWithDecorrelation(_retryDelay,
                 Configuration.MaximumRetryDuration);
-
         }
 
         #endregion
