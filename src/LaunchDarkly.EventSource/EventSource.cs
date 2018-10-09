@@ -125,9 +125,14 @@ namespace LaunchDarkly.EventSource
         /// <exception cref="InvalidOperationException">The method was called after the connection <see cref="ReadyState"/> was Open or Connecting.</exception>
         public async Task StartAsync()
         {
+            bool firstTime = true;
             while (ReadyState != ReadyState.Shutdown)
             {
-                await MaybeWaitWithBackOff();
+                if (!firstTime)
+                {
+                    await MaybeWaitWithBackOff();
+                }
+                firstTime = false;
                 try
                 {
                     var newRequestTokenSource = new CancellationTokenSource();
