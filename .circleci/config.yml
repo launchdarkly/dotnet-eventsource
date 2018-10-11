@@ -3,11 +3,11 @@ workflows:
   version: 2
   test:
     jobs:
-      - test-1.1
+      - test-2.0
 jobs:
-  test-1.1:
+  test-2.0:
     docker:
-      - image: microsoft/dotnet:1.1-sdk
+      - image: microsoft/dotnet:2.0-sdk-jessie
     steps:
       - run:
           name: install packages
