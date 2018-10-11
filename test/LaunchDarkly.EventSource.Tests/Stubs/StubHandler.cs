@@ -140,7 +140,6 @@ namespace LaunchDarkly.EventSource.Tests
             }
             catch (Exception)
             {
-                System.Console.WriteLine("yo");
                 // just exit
             }
         }
