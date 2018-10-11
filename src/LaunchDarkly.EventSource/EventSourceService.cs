@@ -135,7 +135,13 @@ namespace LaunchDarkly.EventSource
                     Util.SuppressExceptions(readTimeoutTask); // this task should never throw an exception, but you never know
                 }
 
-                processResponse(readLineTask.Result);
+                string line = readLineTask.Result;
+                if (line == null)
+                {
+                    // this means the stream is done, i.e. the connection was closed
+                    return;
+                }
+                processResponse(line);
             }
         }
 
