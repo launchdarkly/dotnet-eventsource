@@ -33,45 +33,99 @@ namespace LaunchDarkly.EventSource.Tests
             _requests.Add(request);
 
             var response = _responses.Dequeue();
-
-            if (response.IoError)
-            {
-                throw new HttpRequestException("Unit Test Exception Message");
-            }
- 
-            if (response.Response != null)
-            {
-                return Task.FromResult(response.Response);
-            }
-
-            var httpResponse = new HttpResponseMessage(response.Status);
-            var streamRead = new AnonymousPipeServerStream(PipeDirection.In);
-            var streamWrite = new AnonymousPipeClientStream(PipeDirection.Out, streamRead.ClientSafePipeHandle);
-            var content = new StreamContent(streamRead);
-            content.Headers.ContentType = new MediaTypeHeaderValue("text/event-stream");
-            httpResponse.Content = content;
-
-            Task.Run(() => WriteStreamingResponse(response, streamWrite, cancellationToken));
-
-            return Task.FromResult(httpResponse);
+            return Task.FromResult(response.MakeResponse(cancellationToken));
         }
 
         public void QueueResponse(StubResponse response) => _responses.Enqueue(response);
         
         public IEnumerable<HttpRequestMessage> GetRequests() =>
             _requests;
+    }
+
+    public abstract class StubResponse
+    {
+        public abstract HttpResponseMessage MakeResponse(CancellationToken cancellationToken);
+
+        protected StubResponse() { }
+
+        public static StubResponse WithResponse(HttpResponseMessage message)
+        {
+            return new StubResponseWithHttpResponse(message);
+        }
+
+        public static StubResponse WithStatus(HttpStatusCode status)
+        {
+            return new StubResponseWithHttpResponse(new HttpResponseMessage(status));
+        }
+
+        public static StubResponse WithIOError()
+        {
+            return new StubResponseWithIOError();
+        }
+
+        public static StubResponse StartStream(params StreamAction[] actions)
+        {
+            return new StubResponseWithStream(actions);
+        }
+    }
+
+    internal class StubResponseWithHttpResponse : StubResponse
+    {
+        private readonly HttpResponseMessage message;
+
+        public StubResponseWithHttpResponse(HttpResponseMessage message)
+        {
+            this.message = message;
+        }
+
+        override public HttpResponseMessage MakeResponse(CancellationToken cancellationToken)
+        {
+            return message;
+        }
+    }
+
+    internal class StubResponseWithIOError : StubResponse
+    {
+        override public HttpResponseMessage MakeResponse(CancellationToken cancellationToken)
+        {
+            throw new HttpRequestException("Unit Test Exception Message");
+        }
+    }
+
+    internal class StubResponseWithStream : StubResponse
+    {
+        private readonly StreamAction[] _actions;
+
+        public StubResponseWithStream(StreamAction[] actions)
+        {
+            _actions = actions;
+        }
+
+        override public HttpResponseMessage MakeResponse(CancellationToken cancellationToken)
+        {
+            var httpResponse = new HttpResponseMessage(HttpStatusCode.OK);
+            var streamRead = new AnonymousPipeServerStream(PipeDirection.In);
+            var streamWrite = new AnonymousPipeClientStream(PipeDirection.Out, streamRead.ClientSafePipeHandle);
+            var content = new StreamContent(streamRead);
+            content.Headers.ContentType = new MediaTypeHeaderValue("text/event-stream");
+            httpResponse.Content = content;
+
+            Task.Run(() => WriteStreamingResponse(streamWrite, cancellationToken));
+
+            return httpResponse;
+        }
         
-        private async Task WriteStreamingResponse(StubResponse response, Stream output, CancellationToken cancellationToken)
+        private async Task WriteStreamingResponse(Stream output, CancellationToken cancellationToken)
         {
             try
             {
-                foreach (var action in response.Actions)
+                foreach (var action in _actions)
                 {
                     if (action.Delay != TimeSpan.Zero)
                     {
                         await Task.Delay(action.Delay, cancellationToken);
                     }
-                    if (action.Content == null)
+                    if (action.ShouldQuit())
                     {
                         return;
                     }
@@ -91,73 +145,36 @@ namespace LaunchDarkly.EventSource.Tests
             }
         }
     }
-
-    public class StubResponse
-    {
-        internal readonly bool IoError;
-        internal readonly HttpStatusCode Status;
-        internal readonly HttpResponseMessage Response;
-        internal readonly List<StubStreamAction> Actions;
-
-        private StubResponse(bool ioError, HttpStatusCode status, HttpResponseMessage response)
-        {
-            IoError = ioError;
-            Status = status;
-            Response = response;
-            Actions = new List<StubStreamAction>();
-        }
-
-        public static StubResponse WithIoError()
-        {
-            return new StubResponse(true, 0, null);
-        }
-
-        public static StubResponse WithStatus(HttpStatusCode status)
-        {
-            return new StubResponse(false, status, null);
-        }
-
-        public static StubResponse Ok()
-        {
-            return WithStatus(HttpStatusCode.OK);
-        }
-
-        public static StubResponse WithResponse(HttpResponseMessage response)
-        {
-            return new StubResponse(false, HttpStatusCode.OK, response);
-        }
-
-        public StubResponse WithAction(StubStreamAction action)
-        {
-            Actions.Add(action);
-            return this;
-        }
-    }
-
-    public class StubStreamAction
+    
+    public class StreamAction
     {
         internal readonly TimeSpan Delay;
         internal readonly string Content;
 
-        private StubStreamAction(TimeSpan delay, string content)
+        private StreamAction(TimeSpan delay, string content)
         {
             Delay = delay;
             Content = content;
         }
 
-        public static StubStreamAction Write(string content)
+        public bool ShouldQuit()
         {
-            return new StubStreamAction(TimeSpan.Zero, content);
+            return Content == null;
         }
 
-        public static StubStreamAction CloseStream()
+        public static StreamAction Write(string content)
         {
-            return new StubStreamAction(TimeSpan.Zero, null);
+            return new StreamAction(TimeSpan.Zero, content);
         }
 
-        public StubStreamAction AfterDelay(TimeSpan delay)
+        public static StreamAction CloseStream()
         {
-            return new StubStreamAction(delay, Content);
+            return new StreamAction(TimeSpan.Zero, null);
+        }
+
+        public StreamAction AfterDelay(TimeSpan delay)
+        {
+            return new StreamAction(delay, Content);
         }
     }
 

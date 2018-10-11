@@ -20,7 +20,7 @@ namespace LaunchDarkly.EventSource.Tests
             var commentSent = ": hello";
 
             var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.Ok().WithAction(StubStreamAction.Write(commentSent + "\n\n")));
+            handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(commentSent + "\n\n")));
 
             var evt = new EventSource(new Configuration(_uri, handler));
 
@@ -43,7 +43,7 @@ namespace LaunchDarkly.EventSource.Tests
             var sseData = "this is a test message";
 
             var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.Ok().WithAction(StubStreamAction.Write(sse)));
+            handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(sse)));
 
             var evt = new EventSource(new Configuration(_uri, handler));
 
@@ -62,7 +62,7 @@ namespace LaunchDarkly.EventSource.Tests
             var sse = "event: put\ndata: this is a test message\n\n";
 
             var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.Ok().WithAction(StubStreamAction.Write(sse)));
+            handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(sse)));
 
             var evt = new EventSource(new Configuration(_uri, handler));
 
@@ -81,7 +81,7 @@ namespace LaunchDarkly.EventSource.Tests
             var sse = "id:200\nevent: put\ndata: this is a test message\n\n";
 
             var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.Ok().WithAction(StubStreamAction.Write(sse)));
+            handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(sse)));
 
             var evt = new EventSource(new Configuration(_uri, handler));
 
@@ -98,7 +98,7 @@ namespace LaunchDarkly.EventSource.Tests
         public async Task Default_HTTP_method_is_get()
         {
             var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.Ok());
+            handler.QueueResponse(StubResponse.StartStream());
 
             var evt = new EventSource(new Configuration(_uri, handler));
             handler.RequestReceived += (s, r) => evt.Close();
@@ -112,7 +112,7 @@ namespace LaunchDarkly.EventSource.Tests
         public async Task HTTP_method_can_be_specified()
         {
             var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.Ok());
+            handler.QueueResponse(StubResponse.StartStream());
 
             var config = new ConfigurationBuilder(_uri).MessageHandler(handler)
                 .Method(HttpMethod.Post).Build();
@@ -129,7 +129,7 @@ namespace LaunchDarkly.EventSource.Tests
         public async Task HTTP_request_body_can_be_specified()
         {
             var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.Ok());
+            handler.QueueResponse(StubResponse.StartStream());
 
             HttpContent content = new StringContent("{}");
             Configuration.HttpContentFactory contentFn = () =>
@@ -152,7 +152,7 @@ namespace LaunchDarkly.EventSource.Tests
         public async Task When_the_HttpRequest_is_sent_then_the_outgoing_request_contains_accept_header()
         {
             var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.Ok());
+            handler.QueueResponse(StubResponse.StartStream());
             
             var evt = new EventSource(new Configuration(_uri, handler));
             handler.RequestReceived += (s, r) => evt.Close();
@@ -170,7 +170,7 @@ namespace LaunchDarkly.EventSource.Tests
             var lastEventId = "10";
 
             var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.Ok());
+            handler.QueueResponse(StubResponse.StartStream());
 
             var config = new ConfigurationBuilder(_uri).MessageHandler(handler)
                 .LastEventId(lastEventId).Build();
@@ -188,7 +188,7 @@ namespace LaunchDarkly.EventSource.Tests
         public async Task When_Configuration_Request_headers_are_set_then_the_outgoing_request_contains_those_same_headers()
         {
             var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.Ok());
+            handler.QueueResponse(StubResponse.StartStream());
 
             var headers = new Dictionary<string, string> { { "User-Agent", "mozilla" }, { "Authorization", "testing" } };
 
@@ -292,9 +292,9 @@ namespace LaunchDarkly.EventSource.Tests
             var nAttempts = 2;
             for (int i = 0; i < nAttempts; i++)
             {
-                handler.QueueResponse(StubResponse.WithIoError());
+                handler.QueueResponse(StubResponse.WithIOError());
             }
-            handler.QueueResponse(StubResponse.Ok());
+            handler.QueueResponse(StubResponse.StartStream());
 
             var evt = new EventSource(new Configuration(_uri, handler));
 
@@ -322,9 +322,9 @@ namespace LaunchDarkly.EventSource.Tests
             TimeSpan timeToWait = readTimeout.Add(TimeSpan.FromSeconds(1));
 
             var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.Ok().WithAction(
-                StubStreamAction.Write(":\n\n").AfterDelay(timeToWait)));
-            handler.QueueResponse(StubResponse.Ok());
+            handler.QueueResponse(StubResponse.StartStream(
+                StreamAction.Write(":\n\n").AfterDelay(timeToWait)));
+            handler.QueueResponse(StubResponse.StartStream());
 
             var config = new ConfigurationBuilder(_uri).MessageHandler(handler).ReadTimeout(readTimeout).Build();
             var evt = new EventSource(config);
@@ -348,9 +348,9 @@ namespace LaunchDarkly.EventSource.Tests
             TimeSpan timeToWait = TimeSpan.FromMilliseconds(100);
 
             var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.Ok().WithAction(
-                StubStreamAction.Write(":\n\n").AfterDelay(timeToWait)));
-            handler.QueueResponse(StubResponse.Ok());
+            handler.QueueResponse(StubResponse.StartStream(
+                StreamAction.Write(":\n\n").AfterDelay(timeToWait)));
+            handler.QueueResponse(StubResponse.StartStream());
 
             var config = new ConfigurationBuilder(_uri).MessageHandler(handler).ReadTimeout(readTimeout).Build();
             var evt = new EventSource(config);
@@ -394,8 +394,8 @@ namespace LaunchDarkly.EventSource.Tests
             TimeSpan timeToWait = readTimeout.Subtract(TimeSpan.FromSeconds(1));
 
             var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.Ok().WithAction(
-                StubStreamAction.Write(sse).AfterDelay(timeToWait)));
+            handler.QueueResponse(StubResponse.StartStream(
+                StreamAction.Write(sse).AfterDelay(timeToWait)));
 
             var config = new ConfigurationBuilder(_uri).MessageHandler(handler).ReadTimeout(readTimeout).Build();
             var evt = new EventSource(config);
@@ -416,8 +416,8 @@ namespace LaunchDarkly.EventSource.Tests
 
             var handler = new StubMessageHandler();
             handler.QueueResponse(StubResponse.WithStatus(HttpStatusCode.Unauthorized));
-            handler.QueueResponse(StubResponse.Ok().WithAction(
-                StubStreamAction.Write("event: put\ndata: " + messageData + "\n\n")));
+            handler.QueueResponse(StubResponse.StartStream(
+                StreamAction.Write("event: put\ndata: " + messageData + "\n\n")));
 
             var evt = new EventSource(new Configuration(_uri, handler));
 
@@ -442,7 +442,7 @@ namespace LaunchDarkly.EventSource.Tests
         {
             var handler = new StubMessageHandler();
             handler.QueueResponse(StubResponse.WithStatus(HttpStatusCode.Unauthorized));
-            handler.QueueResponse(StubResponse.Ok());
+            handler.QueueResponse(StubResponse.StartStream());
 
             var evt = new EventSource(new Configuration(_uri, handler));
 
@@ -462,10 +462,10 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
             for (var i = 0; i < nAttempts; i++)
             {
-                handler.QueueResponse(StubResponse.Ok().WithAction(
-                    StubStreamAction.CloseStream().AfterDelay(closeDelay)));
+                handler.QueueResponse(StubResponse.StartStream(
+                    StreamAction.CloseStream().AfterDelay(closeDelay)));
             }
-            handler.QueueResponse(StubResponse.Ok());
+            handler.QueueResponse(StubResponse.StartStream());
             
             var config = new ConfigurationBuilder(_uri).MessageHandler(handler)
                 .BackoffResetThreshold(threshold).Build();
@@ -503,10 +503,10 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
             for (var i = 0; i < nAttempts; i++)
             {
-                handler.QueueResponse(StubResponse.Ok().WithAction(
-                    StubStreamAction.CloseStream().AfterDelay(closeDelay)));
+                handler.QueueResponse(StubResponse.StartStream(
+                    StreamAction.CloseStream().AfterDelay(closeDelay)));
             }
-            handler.QueueResponse(StubResponse.Ok());
+            handler.QueueResponse(StubResponse.StartStream());
 
             var config = new ConfigurationBuilder(_uri).MessageHandler(handler)
                 .BackoffResetThreshold(threshold).Build();
