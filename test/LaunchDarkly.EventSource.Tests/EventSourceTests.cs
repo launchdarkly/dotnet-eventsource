@@ -1,4 +1,3 @@
-using LaunchDarkly.EventSource.Tests.Stubs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -228,7 +227,7 @@ namespace LaunchDarkly.EventSource.Tests
             var evt = new EventSource(config);
             var receiver = new ErrorReceiver();
             evt.Error += receiver;
-            evt.Error += (_, e) => evt.Close();;
+            evt.Error += (_, e) => evt.Close();
 
             await evt.StartAsync();
             
