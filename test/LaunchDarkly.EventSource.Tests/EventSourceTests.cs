@@ -19,27 +19,23 @@ namespace LaunchDarkly.EventSource.Tests
         [Fact]
         public async Task When_a_comment_SSE_is_received_then_a_comment_event_is_raised()
         {
-            var commentSent = ":";
+            var commentSent = ": hello";
 
             var handler = new StubMessageHandler();
             handler.QueueResponse(StubResponse.Ok().WithAction(StubStreamAction.Write(commentSent + "\n\n")));
 
             var evt = new EventSource(new Configuration(_uri, handler, readTimeout: _defaultReadTimeout));
 
-            string commentReceived = string.Empty;
-            var wasCommentEventRaised = false;
+            string commentReceived = null;
             evt.CommentReceived += (_, e) =>
             {
                 commentReceived = e.Comment;
-                wasCommentEventRaised = true;
-
                 evt.Close();
             };
 
             await evt.StartAsync();
 
             Assert.Equal(commentSent, commentReceived);
-            Assert.True(wasCommentEventRaised);
         }
 
         [Fact]
