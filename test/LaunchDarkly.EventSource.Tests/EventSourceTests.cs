@@ -14,7 +14,6 @@ namespace LaunchDarkly.EventSource.Tests
     public class EventSourceTests
     {
         private readonly Uri _uri = new Uri("http://test.com");
-        private readonly TimeSpan _defaultReadTimeout = TimeSpan.FromSeconds(1);
 
         [Fact]
         public async Task When_a_comment_SSE_is_received_then_a_comment_event_is_raised()
@@ -24,7 +23,7 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
             handler.QueueResponse(StubResponse.Ok().WithAction(StubStreamAction.Write(commentSent + "\n\n")));
 
-            var evt = new EventSource(new Configuration(_uri, handler, readTimeout: _defaultReadTimeout));
+            var evt = new EventSource(new Configuration(_uri, handler));
 
             string commentReceived = null;
             evt.CommentReceived += (_, e) =>
@@ -47,7 +46,7 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
             handler.QueueResponse(StubResponse.Ok().WithAction(StubStreamAction.Write(sse)));
 
-            var evt = new EventSource(new Configuration(_uri, handler, readTimeout: _defaultReadTimeout));
+            var evt = new EventSource(new Configuration(_uri, handler));
 
             var m = new MessageReceiver();
             evt.MessageReceived += m;
@@ -66,7 +65,7 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
             handler.QueueResponse(StubResponse.Ok().WithAction(StubStreamAction.Write(sse)));
 
-            var evt = new EventSource(new Configuration(_uri, handler, readTimeout: _defaultReadTimeout));
+            var evt = new EventSource(new Configuration(_uri, handler));
 
             var m = new MessageReceiver();
             evt.MessageReceived += m;
@@ -85,7 +84,7 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
             handler.QueueResponse(StubResponse.Ok().WithAction(StubStreamAction.Write(sse)));
 
-            var evt = new EventSource(new Configuration(_uri, handler, readTimeout: _defaultReadTimeout));
+            var evt = new EventSource(new Configuration(_uri, handler));
 
             var m = new MessageReceiver();
             evt.MessageReceived += m;
@@ -102,7 +101,7 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
             handler.QueueResponse(StubResponse.Ok());
 
-            var evt = new EventSource(new Configuration(_uri, handler, readTimeout: _defaultReadTimeout));
+            var evt = new EventSource(new Configuration(_uri, handler));
             handler.RequestReceived += (s, r) => evt.Close();
             await evt.StartAsync();
 
@@ -116,8 +115,10 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
             handler.QueueResponse(StubResponse.Ok());
 
-            var evt = new EventSource(new Configuration(_uri, handler, readTimeout: _defaultReadTimeout,
-                method: HttpMethod.Post));
+            var config = new ConfigurationBuilder(_uri).MessageHandler(handler)
+                .Method(HttpMethod.Post).Build();
+            var evt = new EventSource(config);
+
             handler.RequestReceived += (s, r) => evt.Close();
             await evt.StartAsync();
 
@@ -137,8 +138,10 @@ namespace LaunchDarkly.EventSource.Tests
                 return content;
             };
 
-            var evt = new EventSource(new Configuration(_uri, handler, readTimeout: _defaultReadTimeout,
-                method: HttpMethod.Post, requestBodyFactory: contentFn));
+            var config = new ConfigurationBuilder(_uri).MessageHandler(handler)
+                .Method(HttpMethod.Post).RequestBodyFactory(contentFn).Build();
+            var evt = new EventSource(config);
+
             handler.RequestReceived += (s, r) => evt.Close();
             await evt.StartAsync();
 
@@ -152,7 +155,7 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
             handler.QueueResponse(StubResponse.Ok());
             
-            var evt = new EventSource(new Configuration(_uri, handler, readTimeout: _defaultReadTimeout));
+            var evt = new EventSource(new Configuration(_uri, handler));
             handler.RequestReceived += (s, r) => evt.Close();
 
             await evt.StartAsync();
@@ -170,12 +173,8 @@ namespace LaunchDarkly.EventSource.Tests
             var handler = new StubMessageHandler();
             handler.QueueResponse(StubResponse.Ok());
 
-            var config = new Configuration(
-                uri: _uri,
-                messageHandler: handler,
-                readTimeout: _defaultReadTimeout,
-                lastEventId: lastEventId);
-
+            var config = new ConfigurationBuilder(_uri).MessageHandler(handler)
+                .LastEventId(lastEventId).Build();
             var evt = new EventSource(config);
             handler.RequestReceived += (s, r) => evt.Close();
 
@@ -194,7 +193,8 @@ namespace LaunchDarkly.EventSource.Tests
 
             var headers = new Dictionary<string, string> { { "User-Agent", "mozilla" }, { "Authorization", "testing" } };
 
-            var config = new Configuration(_uri, handler, requestHeaders: headers, readTimeout: _defaultReadTimeout);
+            var config = new ConfigurationBuilder(_uri).MessageHandler(handler)
+                .RequestHeaders(headers).Build();
 
             var evt = new EventSource(config);
             handler.RequestReceived += (s, r) => evt.Close();
