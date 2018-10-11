@@ -23,6 +23,7 @@ namespace LaunchDarkly.EventSource
         public static readonly TimeSpan DefaultConnectionTimeout = TimeSpan.FromMilliseconds(10000);
         public static readonly TimeSpan DefaultReadTimeout = TimeSpan.FromMinutes(5);
         public static readonly TimeSpan MaximumRetryDuration = TimeSpan.FromMilliseconds(30000);
+        public static readonly TimeSpan DefaultBackoffResetThreshold = TimeSpan.FromMinutes(1);
 
         #endregion
 
@@ -55,6 +56,14 @@ namespace LaunchDarkly.EventSource
         /// The maximum time allowed is 30,000 milliseconds (30 seconds).
         /// </value>
         public TimeSpan DelayRetryDuration { get; }
+
+        /// <summary>
+        /// Gets the amount of time a connection must stay open before the EventSource resets its backoff delay.
+        /// If a connection fails before the threshold has elapsed, the delay before reconnecting will be greater
+        /// than the last delay; if it fails after the threshold, the delay will start over at the initial minimum
+        /// value. This prevents long delays from occurring on connections that are only rarely restarted.
+        /// </summary>
+        public TimeSpan BackoffResetThreshold { get; }
 
         /// <summary>
         /// Gets the time-out when reading from the EventSource API.
@@ -156,8 +165,9 @@ namespace LaunchDarkly.EventSource
         ///     <p>- or - </p>
         ///     <p><paramref name="readTimeout"/> is less than zero. </p>
         /// </exception>
-        public Configuration(Uri uri, HttpMessageHandler messageHandler = null, TimeSpan? connectionTimeout = null, TimeSpan? delayRetryDuration = null, TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, ILog logger = null,
-            HttpMethod method = null, HttpContentFactory requestBodyFactory = null)
+        public Configuration(Uri uri, HttpMessageHandler messageHandler = null, TimeSpan? connectionTimeout = null, TimeSpan? delayRetryDuration = null,
+            TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, ILog logger = null,
+            HttpMethod method = null, HttpContentFactory requestBodyFactory = null, TimeSpan? backoffResetThreshold = null)
         {
             if (uri == null)
             {
@@ -181,6 +191,7 @@ namespace LaunchDarkly.EventSource
             MessageHandler = messageHandler ?? new HttpClientHandler();
             ConnectionTimeout = connectionTimeout ?? DefaultConnectionTimeout;
             DelayRetryDuration = delayRetryDuration ?? DefaultDelayRetryDuration;
+            BackoffResetThreshold = backoffResetThreshold ?? DefaultBackoffResetThreshold;
             ReadTimeout = readTimeout ?? DefaultReadTimeout;
             RequestHeaders = requestHeaders;
             LastEventId = lastEventId;
