@@ -22,10 +22,16 @@ namespace LaunchDarkly.EventSource
         /// </summary>
         public TimeSpan GetNextBackOff()
         {
-            int nextDelay = Convert.ToInt32(Math.Min(_maximumDelay.TotalMilliseconds, _minimumDelay.TotalMilliseconds * Math.Pow(2, _reconnectAttempts)));
+            int nextDelay = GetMaximumMillisecondsForAttempt(_reconnectAttempts);
             nextDelay = nextDelay / 2 + _jitterer.Next(nextDelay) / 2;
             _reconnectAttempts++;
             return TimeSpan.FromMilliseconds(nextDelay);
+        }
+
+        internal int GetMaximumMillisecondsForAttempt(int attempt)
+        {
+            return Convert.ToInt32(Math.Min(_maximumDelay.TotalMilliseconds,
+                _minimumDelay.TotalMilliseconds * Math.Pow(2, attempt)));
         }
 
         public int GetReconnectAttemptCount() {
