@@ -6,6 +6,8 @@ All notable changes to the LaunchDarkly's EventSource implementation for C# will
 ### Added
 - Previously, the delay before reconnect attempts would increase exponentially only if the previous connection could not be made at all or returned an HTTP error; if it received an HTTP 200 status, the delay would be reset to the minimum even if the connection then immediately failed. Now, the new configuration property `BackoffResetThreshold` (default: 1 minute) specifies the length of time that a connection must stay active in order for the reconnect delay to be reset. ([#37](https://github.com/launchdarkly/dotnet-eventsource/issues/37))
 
+- The new configuration property `BackoffResetThreshold` specifies how long a connection must remain up before the reconnection backoff delay will reset to its minimum value. In other words, if connections continue to be restarted and continue to fail within less time than this, then the delay will continue to increase.
+
 ### Fixed
 - Fixed an [unobserved exception](https://blogs.msdn.microsoft.com/pfxteam/2011/09/28/task-exception-handling-in-net-4-5/) that could occur following a stream timeout, which could cause a crash in .NET 4.0.
 
