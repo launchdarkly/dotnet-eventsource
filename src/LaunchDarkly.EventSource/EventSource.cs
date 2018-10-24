@@ -27,6 +27,7 @@ namespace LaunchDarkly.EventSource
         private TimeSpan _retryDelay;
         private readonly ExponentialBackoffWithDecorrelation _backOff;
         private CancellationTokenSource _currentRequestToken;
+        private DateTime? _lastSuccessfulConnectionTime;
         private ReadyState _readyState;
 
         #endregion
@@ -130,6 +131,14 @@ namespace LaunchDarkly.EventSource
             {
                 if (!firstTime)
                 {
+                    if (_lastSuccessfulConnectionTime.HasValue)
+                    {
+                        if (DateTime.Now.Subtract(_lastSuccessfulConnectionTime.Value) >= _configuration.BackoffResetThreshold)
+                        {
+                            _backOff.ResetReconnectAttemptCount();
+                        }
+                        _lastSuccessfulConnectionTime = null;
+                    }
                     await MaybeWaitWithBackOff();
                 }
                 firstTime = false;
@@ -216,7 +225,7 @@ namespace LaunchDarkly.EventSource
                 var svc = GetEventSourceService(_configuration);
 
                 svc.ConnectionOpened += (o, e) => {
-                    _backOff.ResetReconnectAttemptCount();
+                    _lastSuccessfulConnectionTime = DateTime.Now;
                     SetReadyState(ReadyState.Open, OnOpened);
                 };
                 svc.ConnectionClosed += (o, e) => { SetReadyState(ReadyState.Closed, OnClosed); };

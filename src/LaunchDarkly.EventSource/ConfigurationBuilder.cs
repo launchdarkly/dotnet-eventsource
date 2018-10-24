@@ -25,6 +25,7 @@ namespace LaunchDarkly.EventSource
         private readonly Uri _uri;
         private TimeSpan _connectionTimeout = Configuration.DefaultConnectionTimeout;
         private TimeSpan _delayRetryDuration = Configuration.DefaultDelayRetryDuration;
+        private TimeSpan _backoffResetThreshold = Configuration.DefaultBackoffResetThreshold;
         private TimeSpan _readTimeout = Configuration.DefaultReadTimeout;
         private string _lastEventId;
         private ILog _logger;
@@ -67,6 +68,12 @@ namespace LaunchDarkly.EventSource
         {
             Configuration.CheckDelayRetryDuration(delayRetryDuration);
             _delayRetryDuration = delayRetryDuration;
+            return this;
+        }
+
+        public ConfigurationBuilder BackoffResetThreshold(TimeSpan backoffResetThreshold)
+        {
+            _backoffResetThreshold = backoffResetThreshold;
             return this;
         }
 
