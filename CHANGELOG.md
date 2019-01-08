@@ -2,6 +2,10 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [3.2.1] - 2019-01-07
+### Removed
+- The console applications for manual testing have been removed.
+
 ## [3.2.0] - 2018-10-24
 ### Added
 - Previously, the delay before reconnect attempts would increase exponentially only if the previous connection could not be made at all or returned an HTTP error; if it received an HTTP 200 status, the delay would be reset to the minimum even if the connection then immediately failed. Now, the new configuration property `BackoffResetThreshold` (default: 1 minute) specifies the length of time that a connection must stay active in order for the reconnect delay to be reset. ([#37](https://github.com/launchdarkly/dotnet-eventsource/issues/37))
