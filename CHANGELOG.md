@@ -2,9 +2,12 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
-## [3.2.1] - 2019-01-07
+## [3.2.1] - 2019-01-09
+### Changed
+- The published assemblies are now digitally signed as well as strong-named. Also, they are now built in Release mode and do not contain debug information.
+
 ### Removed
-- The console applications for manual testing have been removed.
+- The console applications for manual testing have been removed (because the unit tests now include full end-to-end tests against a stub HTTP server).
 
 ## [3.2.0] - 2018-10-24
 ### Added

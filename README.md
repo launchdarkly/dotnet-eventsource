@@ -1,8 +1,8 @@
 .NET EventSource implementation
-===========================
+===============================
 
 Project Information
------------
+-------------------
 
 This libary allows .NET developers to consume Server Sent Events from a remote API. The server sent events spec is defined here: [https://html.spec.whatwg.org/multipage/server-sent-events.html](https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events)
 
@@ -31,8 +31,9 @@ NOTE: You'll need your LaunchDarkly SDK Key before running the Console app.
    4. Go to the Debug menu and select Start Debugging (or hit the F5 key).
 
 Signing
------------
-The artifacts generated from this repo are signed by LaunchDarkly. The public key file is in this repo at `LaunchDarkly.EventSource.pk` as well as here:
+-------
+
+The published version of this assembly is digitally signed by LaunchDarkly and strong-named. Building the code locally in the default Debug configuration does not sign the assembly and does not require a key file. The public key file is in this repo at `LaunchDarkly.EventSource.pk` as well as here:
 
 ```
 Public key (hash algorithm: sha1):
@@ -45,8 +46,15 @@ efa557867cec3f488906ec0ef6fe6728a7cfdeef861fcce49ea79357ba825d95d56d67597bc9cc
 Public key token is 18e8c36453e3060f
 ```
 
+Development notes
+-----------------
+
+This project imports the `dotnet-base` repository as a subtree. See the `README.md` file in that directory for more information.
+
+Releases are done using the release script in `dotnet-base`. Since the published package includes a .NET Framework 4.5 build, the release must be done from Windows.
+
 About LaunchDarkly
------------
+------------------
 
 * LaunchDarkly is a continuous delivery platform that provides feature flags as a service and allows developers to iterate quickly and safely. We allow you to easily flag your features and manage them from the LaunchDarkly dashboard.  With LaunchDarkly, you can:
     * Roll out a new feature to a subset of your users (like a group of users who opt-in to a beta tester group), gathering feedback and bug reports from real-world use cases.
