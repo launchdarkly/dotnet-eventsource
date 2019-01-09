@@ -7,10 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LaunchDarkly.EventSource.Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LaunchDarkly.EventSource", "src\LaunchDarkly.EventSource\LaunchDarkly.EventSource.csproj", "{4A78D1AF-516D-4A83-A172-EBA2856DDA2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventSource-ConsoleApp", "console-app\EventSource-ConsoleApp.csproj", "{8DF879D6-5C73-4447-BEE3-5C920E994413}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventSource-ConsoleApp-DotNetCore", "console-app-dotnetcore\EventSource-ConsoleApp-DotNetCore.csproj", "{19765F43-FF94-43D8-8F15-E25B90BF025E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,14 +21,6 @@ Global
 		{4A78D1AF-516D-4A83-A172-EBA2856DDA2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A78D1AF-516D-4A83-A172-EBA2856DDA2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A78D1AF-516D-4A83-A172-EBA2856DDA2B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8DF879D6-5C73-4447-BEE3-5C920E994413}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8DF879D6-5C73-4447-BEE3-5C920E994413}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8DF879D6-5C73-4447-BEE3-5C920E994413}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8DF879D6-5C73-4447-BEE3-5C920E994413}.Release|Any CPU.Build.0 = Release|Any CPU
-		{19765F43-FF94-43D8-8F15-E25B90BF025E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{19765F43-FF94-43D8-8F15-E25B90BF025E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{19765F43-FF94-43D8-8F15-E25B90BF025E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{19765F43-FF94-43D8-8F15-E25B90BF025E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
