@@ -178,3 +178,4 @@ nuget.exe
 project.lock.json
 
 *.snk
+*.p12
