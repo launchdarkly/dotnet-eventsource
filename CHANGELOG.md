@@ -2,6 +2,10 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [3.2.3] - 2019-01-14
+### Fixed:
+- The assemblies in this package now have Authenticode signatures. The release note for 3.2.1 was an error; that release did not include signatures.
+
 ## [3.2.2] - 2019-01-09
 ### Removed
 - The console applications for manual testing have been removed (because the unit tests now include full end-to-end tests against a stub HTTP server).
