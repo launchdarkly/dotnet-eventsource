@@ -144,7 +144,7 @@ namespace LaunchDarkly.EventSource
                 firstTime = false;
                 try
                 {
-                    var newRequestTokenSource = new CancellationTokenSource();
+                    CancellationTokenSource newRequestTokenSource = null;
                     lock (this)
                     {
                         if (_readyState == ReadyState.Shutdown)
@@ -152,6 +152,8 @@ namespace LaunchDarkly.EventSource
                             // in case Close() was called in between the previous ReadyState check and the creation of the new token
                             return;
                         }
+                        newRequestTokenSource = new CancellationTokenSource();
+                        _currentRequestToken?.Dispose();
                         _currentRequestToken = newRequestTokenSource;
                     }
                     await ConnectToEventSourceAsync(newRequestTokenSource.Token);
@@ -197,10 +199,12 @@ namespace LaunchDarkly.EventSource
             lock (this)
             {
                 requestTokenSource = _currentRequestToken;
+                _currentRequestToken = null;
             }
             if (requestTokenSource != null)
             {
                 requestTokenSource.Cancel();
+                requestTokenSource.Dispose();
             }
         }
 
