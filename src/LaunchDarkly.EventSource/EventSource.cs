@@ -1,9 +1,6 @@
 ﻿using Common.Logging;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,7 +10,7 @@ namespace LaunchDarkly.EventSource
     /// Provides an EventSource client for consuming Server Sent Events. Additional details on the Server Sent Events spec
     /// can be found at https://html.spec.whatwg.org/multipage/server-sent-events.html
     /// </summary>
-    public class EventSource : IEventSource
+    public class EventSource : IEventSource, IDisposable
     {
 
         #region Private Fields
@@ -179,7 +176,7 @@ namespace LaunchDarkly.EventSource
         }
 
         /// <summary>
-        /// Closes the connection to the EventSource API.
+        /// Closes the connection to the EventSource API. The EventSource cannot be reopened after this.
         /// </summary>
         public void Close()
         {
@@ -187,6 +184,22 @@ namespace LaunchDarkly.EventSource
 
             Close(ReadyState.Shutdown);
             CancelCurrentRequest();
+        }
+
+        /// <summary>
+        /// Equivalent to calling <see cref="Close"/>.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Close();
+            }
         }
 
         #endregion
