@@ -2,6 +2,13 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [3.3.0] - 2019-03-26
+### Added:
+- The `EventSource` now implements `IDisposable`. Calling `Dispose()` has the same effect as calling `Close()`.
+
+### Fixed:
+- Under some circumstances, a `CancellationTokenSource` might not be disposed of after making an HTTP request, which could cause a timer object to be leaked.
+
 ## [3.2.3] - 2019-01-14
 ### Fixed:
 - The assemblies in this package now have Authenticode signatures. The release note for 3.2.1 was an error; that release did not include signatures.
