@@ -189,15 +189,23 @@ namespace LaunchDarkly.EventSource
                         {
                             // This exception could either be the result of us explicitly cancelling a request, in which case we don't
                             // need to do anything else, or it could be that the request timed out.
-                            if (!oe.CancellationToken.IsCancellationRequested)
+                            if (oe.CancellationToken.IsCancellationRequested)
+                            {
+                                realException = null;
+                            }
+                            else
                             {
                                 realException = new TimeoutException();
                             }
                         }
-                        _logger.ErrorFormat("Encountered an error connecting to EventSource: {0}", realException, realException.Message);
-                        _logger.Debug("", realException);
 
-                        OnError(new ExceptionEventArgs(realException));
+                        if (realException != null)
+                        {
+                            _logger.ErrorFormat("Encountered an error connecting to EventSource: {0}", realException, realException.Message);
+                            _logger.Debug("", realException);
+
+                            OnError(new ExceptionEventArgs(realException));
+                        }
                     }
                 }
             }
