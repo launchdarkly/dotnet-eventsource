@@ -1,6 +1,7 @@
 ﻿using Common.Logging;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,12 +13,12 @@ namespace LaunchDarkly.EventSource
     /// </summary>
     public class EventSource : IEventSource, IDisposable
     {
-
         #region Private Fields
 
         private readonly Configuration _configuration;
         private readonly ILog _logger;
 
+        private HttpClient _httpClient;
         private List<string> _eventBuffer;
         private string _eventName = Constants.MessageField;
         private string _lastEventId;
@@ -123,6 +124,11 @@ namespace LaunchDarkly.EventSource
         /// <exception cref="InvalidOperationException">The method was called after the connection <see cref="ReadyState"/> was Open or Connecting.</exception>
         public async Task StartAsync()
         {
+            if (_httpClient is null)
+            {
+                _httpClient = CreateHttpClient();
+            }
+
             bool firstTime = true;
             while (ReadyState != ReadyState.Shutdown)
             {
@@ -139,26 +145,60 @@ namespace LaunchDarkly.EventSource
                     await MaybeWaitWithBackOff();
                 }
                 firstTime = false;
+
+                CancellationTokenSource newRequestTokenSource = null;
+                CancellationToken cancellationToken;
+                lock (this)
+                {
+                    if (_readyState == ReadyState.Shutdown)
+                    {
+                        // in case Close() was called in between the previous ReadyState check and the creation of the new token
+                        return;
+                    }
+                    newRequestTokenSource = new CancellationTokenSource();
+                    _currentRequestToken?.Dispose();
+                    _currentRequestToken = newRequestTokenSource;
+                }
+
+                if (ReadyState == ReadyState.Connecting || ReadyState == ReadyState.Open)
+                {
+                    throw new InvalidOperationException(string.Format(Resources.EventSource_Already_Started, ReadyState));
+                }
+
+                SetReadyState(ReadyState.Connecting);
+                cancellationToken = newRequestTokenSource.Token;
+
                 try
                 {
-                    CancellationTokenSource newRequestTokenSource = null;
-                    lock (this)
-                    {
-                        if (_readyState == ReadyState.Shutdown)
-                        {
-                            // in case Close() was called in between the previous ReadyState check and the creation of the new token
-                            return;
-                        }
-                        newRequestTokenSource = new CancellationTokenSource();
-                        _currentRequestToken?.Dispose();
-                        _currentRequestToken = newRequestTokenSource;
-                    }
-                    await ConnectToEventSourceAsync(newRequestTokenSource.Token);
+                    await ConnectToEventSourceAsync(cancellationToken);
+
+                    // ConnectToEventSourceAsync normally doesn't return, unless it detects that the request has been cancelled.
+                    Close(ReadyState.Closed);
                 }
                 catch (Exception e)
                 {
-                    _logger.ErrorFormat("Encountered an error connecting to EventSource: {0}", e, e.Message);
-                    _logger.Debug("", e);
+                    CancelCurrentRequest();
+
+                    // If the user called Close(), ReadyState = Shutdown, so errors are irrelevant.
+                    if (ReadyState != ReadyState.Shutdown)
+                    {
+                        Close(ReadyState.Closed);
+
+                        Exception realException = e;
+                        if (e is OperationCanceledException oe)
+                        {
+                            // This exception could either be the result of us explicitly cancelling a request, in which case we don't
+                            // need to do anything else, or it could be that the request timed out.
+                            if (!oe.CancellationToken.IsCancellationRequested)
+                            {
+                                realException = new TimeoutException();
+                            }
+                        }
+                        _logger.ErrorFormat("Encountered an error connecting to EventSource: {0}", realException, realException.Message);
+                        _logger.Debug("", realException);
+
+                        OnError(new ExceptionEventArgs(realException));
+                    }
                 }
             }
         }
@@ -180,10 +220,13 @@ namespace LaunchDarkly.EventSource
         /// </summary>
         public void Close()
         {
-            if (ReadyState == ReadyState.Raw || ReadyState == ReadyState.Shutdown) return;
-
-            Close(ReadyState.Shutdown);
+            if (ReadyState != ReadyState.Raw && ReadyState != ReadyState.Shutdown)
+            {
+                Close(ReadyState.Shutdown);
+            }
             CancelCurrentRequest();
+            _httpClient?.Dispose();
+            _httpClient = null;
         }
 
         /// <summary>
@@ -206,6 +249,11 @@ namespace LaunchDarkly.EventSource
 
         #region Private Methods
 
+        private HttpClient CreateHttpClient()
+        {
+            return new HttpClient(_configuration.MessageHandler, false) { Timeout = _configuration.ConnectionTimeout };
+        }
+
         private void CancelCurrentRequest()
         {
             CancellationTokenSource requestTokenSource = null;
@@ -216,6 +264,7 @@ namespace LaunchDarkly.EventSource
             }
             if (requestTokenSource != null)
             {
+                _logger.Debug("Cancelling current request");
                 requestTokenSource.Cancel();
                 requestTokenSource.Dispose();
             }
@@ -223,65 +272,33 @@ namespace LaunchDarkly.EventSource
 
         internal virtual EventSourceService GetEventSourceService(Configuration configuration)
         {
-            return new EventSourceService(configuration);
+            return new EventSourceService(configuration, _httpClient, _logger);
         }
 
         private async Task ConnectToEventSourceAsync(CancellationToken cancellationToken)
         {
-            if (ReadyState == ReadyState.Connecting || ReadyState == ReadyState.Open)
-            {
-                throw new InvalidOperationException(string.Format(Resources.EventSource_Already_Started, ReadyState));
-            }
+            _eventBuffer = new List<string>();
 
-            SetReadyState(ReadyState.Connecting);
+            var svc = GetEventSourceService(_configuration);
 
-            try
-            {
-                _eventBuffer = new List<string>();
+            svc.ConnectionOpened += (o, e) => {
+                _lastSuccessfulConnectionTime = DateTime.Now;
+                SetReadyState(ReadyState.Open, OnOpened);
+            };
+            svc.ConnectionClosed += (o, e) => { SetReadyState(ReadyState.Closed, OnClosed); };
 
-                var svc = GetEventSourceService(_configuration);
-
-                svc.ConnectionOpened += (o, e) => {
-                    _lastSuccessfulConnectionTime = DateTime.Now;
-                    SetReadyState(ReadyState.Open, OnOpened);
-                };
-                svc.ConnectionClosed += (o, e) => { SetReadyState(ReadyState.Closed, OnClosed); };
-
-                await svc.GetDataAsync(
-                    ProcessResponseContent,
-                    cancellationToken
-                );
-            }
-            catch (EventSourceServiceCancelledException e)
-            {
-                CancelCurrentRequest();
-
-                CloseAndRaiseError(e);
-            }
-            catch (Exception e)
-            {
-                // If the user called Close(), ReadyState = Shutdown. Don't rethrow.
-                if (ReadyState != ReadyState.Shutdown)
-                {
-                    CloseAndRaiseError(e);
-
-                    throw;
-                }
-            }
+            await svc.GetDataAsync(
+                ProcessResponseContent,
+                cancellationToken
+            );
         }
 
         private void Close(ReadyState state)
         {
+            _logger.DebugFormat("Close({0}) - state was {1}", state, ReadyState);
             SetReadyState(state, OnClosed);
         }
-
-        private void CloseAndRaiseError(Exception ex)
-        {
-            Close(ReadyState.Closed);
-
-            OnError(new ExceptionEventArgs(ex));
-        }
-
+        
         private void ProcessResponseContent(string content)
         {
             if (content == null)
@@ -358,6 +375,7 @@ namespace LaunchDarkly.EventSource
             _eventBuffer.RemoveAll(item => item.Equals("\n"));
 
             var message = new MessageEvent(string.Concat(_eventBuffer), _lastEventId, _configuration.Uri);
+            _logger.DebugFormat("Received event \"{0}\"", _eventName);
 
             OnMessageReceived(new MessageReceivedEventArgs(message, _eventName));
 
@@ -367,45 +385,29 @@ namespace LaunchDarkly.EventSource
 
         private void OnOpened(StateChangedEventArgs e)
         {
-            if (Opened != null)
-            {
-                Opened(this, e);
-            }
+            Opened?.Invoke(this, e);
         }
 
         private void OnClosed(StateChangedEventArgs e)
         {
-            if (Closed != null)
-            {
-                Closed(this, e);
-            }
+            Closed?.Invoke(this, e);
         }
 
         private void OnMessageReceived(MessageReceivedEventArgs e)
         {
-            if (MessageReceived != null)
-            {
-                MessageReceived(this, e);
-            }
+            MessageReceived?.Invoke(this, e);
         }
 
         private void OnCommentReceived(CommentReceivedEventArgs e)
         {
-            if (CommentReceived != null)
-            {
-                CommentReceived(this, e);
-            }
+            CommentReceived?.Invoke(this, e);
         }
 
         private void OnError(ExceptionEventArgs e)
         {
-            if (Error != null)
-            {
-                Error(this, e);
-            }
+            Error?.Invoke(this, e);
         }
 
         #endregion
-
     }
 }

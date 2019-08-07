@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Common.Logging;
 
 namespace LaunchDarkly.EventSource
 {
@@ -13,6 +14,8 @@ namespace LaunchDarkly.EventSource
         #region Private Fields
 
         private readonly Configuration _configuration;
+        private readonly HttpClient _httpClient;
+        private readonly ILog _logger;
 
         private const string UserAgentProduct = "DotNetClient";
         internal static readonly string UserAgentVersion = ((AssemblyInformationalVersionAttribute)typeof(EventSource)
@@ -45,9 +48,11 @@ namespace LaunchDarkly.EventSource
         /// <exception cref="ArgumentNullException">client
         /// or
         /// configuration</exception>
-        public EventSourceService(Configuration configuration)
+        public EventSourceService(Configuration configuration, HttpClient httpClient, ILog logger)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         #endregion
@@ -71,37 +76,29 @@ namespace LaunchDarkly.EventSource
 
         private async Task ConnectToEventSourceApi(Action<string> processResponse, CancellationToken cancellationToken)
         {
-            var client = GetHttpClient();
-
-            try
+            _logger.DebugFormat("Making {0} request to EventSource URI {1}",
+                _configuration.Method ?? HttpMethod.Get,
+                _configuration.Uri);
+            
+            using (var response = await _httpClient.SendAsync(CreateHttpRequestMessage(_configuration.Uri),
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken).ConfigureAwait(false))
             {
-                using (var response = await client.SendAsync(CreateHttpRequestMessage(_configuration.Uri),
-                    HttpCompletionOption.ResponseHeadersRead,
-                    cancellationToken).ConfigureAwait(false))
+                _logger.DebugFormat("Response status: {0}", (int)response.StatusCode);
+                HandleInvalidResponses(response);
+
+                OnConnectionOpened();
+
+                using (var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
                 {
-                    HandleInvalidResponses(response);
-
-                    OnConnectionOpened();
-
-                    using (var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+                    using (var reader = GetStreamReader(stream))
                     {
-                        using (var reader = GetStreamReader(stream))
-                        {
-                            await ProcessResponseFromReaderAsync(processResponse, reader, cancellationToken);
-                        }
+                        await ProcessResponseFromReaderAsync(processResponse, reader, cancellationToken);
                     }
-
-                    OnConnectionClosed();
                 }
-            }
-            finally
-            {
-                if (client != null)
-                {
-                    client.Dispose();
-                }
-            }
 
+                OnConnectionClosed();
+            }
         }
 
         protected virtual IStreamReader GetStreamReader(Stream stream)
@@ -112,7 +109,6 @@ namespace LaunchDarkly.EventSource
         protected virtual async Task ProcessResponseFromReaderAsync(Action<string> processResponse, IStreamReader reader,
             CancellationToken cancellationToken)
         {
-
             // In a loop, reading from a stream. while reading from the stream, process the lines in the stream.
             // Reset the timer after processing each line (reading from the stream).
             // If the read time out occurs, throw exception and exit method.
@@ -206,7 +202,6 @@ namespace LaunchDarkly.EventSource
         {
             if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
             {
-
                 throw new EventSourceServiceUnsuccessfulResponseException(Resources.EventSource_204_Response, (int)response.StatusCode);
             }
 
@@ -236,18 +231,12 @@ namespace LaunchDarkly.EventSource
 
         private void OnConnectionOpened()
         {
-            if (ConnectionOpened != null)
-            {
-                ConnectionOpened(this, EventArgs.Empty);
-            }
+            ConnectionOpened?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnConnectionClosed()
         {
-            if (ConnectionClosed != null)
-            {
-                ConnectionClosed(this, EventArgs.Empty);
-            }
+            ConnectionClosed?.Invoke(this, EventArgs.Empty);
         }
 
         #endregion
