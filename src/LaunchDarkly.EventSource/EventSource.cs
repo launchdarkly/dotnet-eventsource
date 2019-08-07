@@ -201,9 +201,6 @@ namespace LaunchDarkly.EventSource
 
                         if (realException != null)
                         {
-                            _logger.ErrorFormat("Encountered an error connecting to EventSource: {0}", realException, realException.Message);
-                            _logger.Debug("", realException);
-
                             OnError(new ExceptionEventArgs(realException));
                         }
                     }
