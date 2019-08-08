@@ -38,39 +38,26 @@ namespace LaunchDarkly.EventSource
         public Uri Uri { get; }
 
         /// <summary>
-        /// Gets the connection timeout value used when connecting to the EventSource API.
+        /// the connection timeout value used when connecting to the EventSource API.
         /// </summary>
-        /// <value>
-        /// The <see cref="TimeSpan"/> before the connection times out. The default value is 10,000 milliseconds (10 seconds).
-        /// </value>
         public TimeSpan ConnectionTimeout { get; }
 
         [Obsolete("Use ConnectionTimeout.")]
         public TimeSpan ConnectionTimeOut { get { return ConnectionTimeout; } }
 
         /// <summary>
-        /// Gets the duration to wait before attempting to reconnect to the EventSource API.
+        /// The duration to wait before attempting to reconnect to the EventSource API.
         /// </summary>
-        /// <value>
-        /// The amount of time to wait before attempting to reconnect to the EventSource API. The default value is 1,000 milliseconds (1 second).
-        /// The maximum time allowed is 30,000 milliseconds (30 seconds).
-        /// </value>
         public TimeSpan DelayRetryDuration { get; }
 
         /// <summary>
-        /// Gets the amount of time a connection must stay open before the EventSource resets its backoff delay.
-        /// If a connection fails before the threshold has elapsed, the delay before reconnecting will be greater
-        /// than the last delay; if it fails after the threshold, the delay will start over at the initial minimum
-        /// value. This prevents long delays from occurring on connections that are only rarely restarted.
+        /// The amount of time a connection must stay open before the EventSource resets its backoff delay.
         /// </summary>
         public TimeSpan BackoffResetThreshold { get; }
 
         /// <summary>
-        /// Gets the time-out when reading from the EventSource API.
+        /// The timeout when reading from the EventSource API.
         /// </summary>
-        /// <value>
-        /// The <see cref="TimeSpan"/> before reading times out. The default value is 300,000 milliseconds (5 minutes).
-        /// </value>
         public TimeSpan ReadTimeout { get; }
 
         [Obsolete("Use ReadTimeout.")]
@@ -79,46 +66,30 @@ namespace LaunchDarkly.EventSource
         /// <summary>
         /// Gets the last event identifier.
         /// </summary>
-        /// <remarks>
-        /// Setting the LastEventId in the constructor will add an HTTP request header named "Last-Event-ID" when connecting to the EventSource API
-        /// </remarks>
-        /// <value>
-        /// The last event identifier.
-        /// </value>
         public string LastEventId { get; }
 
         /// <summary>
-        /// Gets the <see cref="Common.Logging.ILog"/> used internally in the <see cref="EventSource"/> class.
+        /// A custom logger to be used for all EventSource log output.
         /// </summary>
-        /// <value>
-        /// The ILog to use for internal logging.
-        /// </value>
         public ILog Logger { get; }
 
         /// <summary>
-        /// Gets or sets the request headers used when connecting to the EventSource API.
+        /// The request headers to be sent with each EventSource HTTP request.
         /// </summary>
-        /// <value>
-        /// The request headers.
-        /// </value>
         public IDictionary<string, string> RequestHeaders { get; }
 
         /// <summary>
-        /// Gets the HttpMessageHandler used to call the EventSource API.
+        /// The HttpMessageHandler that will be used for the HTTP client, or null for the default handler.
         /// </summary>
-        /// <value>
-        /// The <see cref="HttpMessageHandler"/>.
-        /// </value>
         public HttpMessageHandler MessageHandler { get; }
 
         /// <summary>
-        /// Gets the HTTP method that will be used when connecting to the EventSource API.
-        /// Defaults to GET if not specified.
+        /// The HTTP method that will be used when connecting to the EventSource API.
         /// </summary>
         public HttpMethod Method { get; }
 
         /// <summary>
-        /// Gets the request body that will be sent when connecting to the EventSource API, if the HTTP method
+        /// A factory for HTTP request body content, if the HTTP method is one that allows a request body.
         /// is one that allows a request body. This is in the form of a factory function because the request
         /// may need to be sent more than once.
         /// </summary>
@@ -188,7 +159,7 @@ namespace LaunchDarkly.EventSource
             }
 
             Uri = uri;
-            MessageHandler = messageHandler ?? new HttpClientHandler();
+            MessageHandler = messageHandler;
             ConnectionTimeout = connectionTimeout ?? DefaultConnectionTimeout;
             DelayRetryDuration = delayRetryDuration ?? DefaultDelayRetryDuration;
             BackoffResetThreshold = backoffResetThreshold ?? DefaultBackoffResetThreshold;
@@ -204,6 +175,11 @@ namespace LaunchDarkly.EventSource
 
         #region Public Methods
 
+        /// <summary>
+        /// Provides a new <see cref="ConfigurationBuilder"/> for constructing a configuration.
+        /// </summary>
+        /// <param name="uri">the EventSource URI</param>
+        /// <returns>a new builder instance</returns>
         public static ConfigurationBuilder Builder(Uri uri)
         {
             return new ConfigurationBuilder(uri);

@@ -179,10 +179,9 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
-        public void MessageHandlerDefaultsToHttpClientHandler()
+        public void MessageHandlerDefaultsToNull()
         {
-            var b = Configuration.Builder(uri);
-            Assert.IsType<HttpClientHandler>(b.Build().MessageHandler);
+            Assert.Null(Configuration.Builder(uri).Build().MessageHandler);
         }
 
         [Fact]

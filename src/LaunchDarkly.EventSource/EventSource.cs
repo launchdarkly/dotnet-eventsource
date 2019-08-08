@@ -16,9 +16,9 @@ namespace LaunchDarkly.EventSource
         #region Private Fields
 
         private readonly Configuration _configuration;
+        private readonly HttpClient _httpClient;
         private readonly ILog _logger;
 
-        private HttpClient _httpClient;
         private List<string> _eventBuffer;
         private string _eventName = Constants.MessageField;
         private string _lastEventId;
@@ -111,6 +111,7 @@ namespace LaunchDarkly.EventSource
             _backOff = new ExponentialBackoffWithDecorrelation(_retryDelay,
                 Configuration.MaximumRetryDuration);
 
+            _httpClient = CreateHttpClient();
         }
 
         #endregion
@@ -124,11 +125,6 @@ namespace LaunchDarkly.EventSource
         /// <exception cref="InvalidOperationException">The method was called after the connection <see cref="ReadyState"/> was Open or Connecting.</exception>
         public async Task StartAsync()
         {
-            if (_httpClient is null)
-            {
-                _httpClient = CreateHttpClient();
-            }
-
             bool firstTime = true;
             while (ReadyState != ReadyState.Shutdown)
             {
@@ -230,8 +226,7 @@ namespace LaunchDarkly.EventSource
                 Close(ReadyState.Shutdown);
             }
             CancelCurrentRequest();
-            _httpClient?.Dispose();
-            _httpClient = null;
+            _httpClient.Dispose();
         }
 
         /// <summary>
@@ -256,7 +251,11 @@ namespace LaunchDarkly.EventSource
 
         private HttpClient CreateHttpClient()
         {
-            return new HttpClient(_configuration.MessageHandler, false) { Timeout = _configuration.ConnectionTimeout };
+            var client =_configuration.MessageHandler is null ?
+                new HttpClient() :
+                new HttpClient(_configuration.MessageHandler, false);
+            client.Timeout = _configuration.ConnectionTimeout;
+            return client;
         }
 
         private void CancelCurrentRequest()
