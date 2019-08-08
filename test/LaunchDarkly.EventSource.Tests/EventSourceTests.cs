@@ -15,6 +15,14 @@ namespace LaunchDarkly.EventSource.Tests
         private readonly Uri _uri = new Uri("http://test.com");
 
         [Fact]
+        public void Can_Create_and_start_EventSource_without_specifying_message_handler()
+        {
+            // Testing this just because all of the other tests use a StubMessageHandler
+            var evt = new EventSource(Configuration.Builder(_uri).Build());
+            evt.StartAsync();
+        }
+
+        [Fact]
         public async Task When_a_comment_SSE_is_received_then_a_comment_event_is_raised()
         {
             var commentSent = ": hello";

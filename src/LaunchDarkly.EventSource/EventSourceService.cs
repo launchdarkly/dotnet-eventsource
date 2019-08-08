@@ -140,12 +140,7 @@ namespace LaunchDarkly.EventSource
                 processResponse(line);
             }
         }
-
-        private HttpClient GetHttpClient()
-        {
-            return new HttpClient(_configuration.MessageHandler, false) { Timeout = _configuration.ConnectionTimeout };
-        }
-
+        
         private HttpRequestMessage CreateHttpRequestMessage(Uri uri)
         {
             var request = new HttpRequestMessage(_configuration.Method ?? HttpMethod.Get, uri);
