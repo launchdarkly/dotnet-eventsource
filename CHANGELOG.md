@@ -2,6 +2,11 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [3.3.1] - 2019-08-08
+### Fixed:
+- If you don't explicitly provide an `HttpMessageHandler` in the configuration, EventSource will now use the default `HttpClient` constructor; previously, it would create an instance of the standard .NET `HttpMessageHandler` implementation and tell the `HttpClient` to use that. In .NET Framework and .NET Standard, this makes no difference, but in Xamarin, calling the default `HttpClient` constructor may allow it to use a better HTTP implementation based on native APIs.
+- Expanded and improved documentation comments.
+
 ## [3.3.0] - 2019-03-26
 ### Added:
 - The `EventSource` now implements `IDisposable`. Calling `Dispose()` has the same effect as calling `Close()`.
