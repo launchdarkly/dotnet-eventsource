@@ -63,24 +63,24 @@ namespace LaunchDarkly.EventSource
         /// Initiates the request to the EventSource API and parses Server Sent Events received by the API.
         /// </summary>
         /// <returns>A <see cref="System.Threading.Tasks.Task"/> A task that represents the work queued to execute in the ThreadPool.</returns>
-        public async Task GetDataAsync(Action<string> processResponse, CancellationToken cancellationToken)
+        public async Task GetDataAsync(Action<string> processResponse, string lastEventId, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            await ConnectToEventSourceApi(processResponse, cancellationToken);
+            await ConnectToEventSourceApi(processResponse, lastEventId, cancellationToken);
         }
 
         #endregion
 
         #region Private Methods
 
-        private async Task ConnectToEventSourceApi(Action<string> processResponse, CancellationToken cancellationToken)
+        private async Task ConnectToEventSourceApi(Action<string> processResponse, string lastEventId, CancellationToken cancellationToken)
         {
             _logger.DebugFormat("Making {0} request to EventSource URI {1}",
                 _configuration.Method ?? HttpMethod.Get,
                 _configuration.Uri);
-            
-            using (var response = await _httpClient.SendAsync(CreateHttpRequestMessage(_configuration.Uri),
+
+            using (var response = await _httpClient.SendAsync(CreateHttpRequestMessage(_configuration.Uri, lastEventId),
                 HttpCompletionOption.ResponseHeadersRead,
                 cancellationToken).ConfigureAwait(false))
             {
@@ -140,8 +140,8 @@ namespace LaunchDarkly.EventSource
                 processResponse(line);
             }
         }
-        
-        private HttpRequestMessage CreateHttpRequestMessage(Uri uri)
+
+        private HttpRequestMessage CreateHttpRequestMessage(Uri uri, string lastEventId)
         {
             var request = new HttpRequestMessage(_configuration.Method ?? HttpMethod.Get, uri);
 
@@ -164,7 +164,15 @@ namespace LaunchDarkly.EventSource
                 }
             }
 
-            // If the EventSource Configuration was provided with a LastEventId, include it as a header to the API request.
+            // If the lastEventId was provided, include it as a header to the API request.
+            if (!string.IsNullOrWhiteSpace(lastEventId))
+            {
+                request.Headers.Remove(Constants.LastEventIdHttpHeader);
+                request.Headers.Add(Constants.LastEventIdHttpHeader, lastEventId);
+            }
+
+            // If we haven't set the LastEventId header and if the EventSource Configuration was provided with a LastEventId,
+            // include it as a header to the API request.
             if (!string.IsNullOrWhiteSpace(_configuration.LastEventId) && !request.Headers.Contains(Constants.LastEventIdHttpHeader))
                 request.Headers.Add(Constants.LastEventIdHttpHeader, _configuration.LastEventId);
 

@@ -293,6 +293,7 @@ namespace LaunchDarkly.EventSource
 
             await svc.GetDataAsync(
                 ProcessResponseContent,
+                _lastEventId,
                 cancellationToken
             );
         }

@@ -193,6 +193,80 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
+        public async Task When_reconnecting_the_outgoing_request_contains_Last_Event_Id_header()
+        {
+            var lastEventId = "10";
+            var firstResponse = $"id:{lastEventId}\nevent: put\ndata: this is a test message\n\n";
+            var secondResponse = $"id:20\nevent: put\ndata: this is a test message\n\n";
+
+            var handler = new StubMessageHandler();
+            handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(firstResponse), StreamAction.CloseStream()));
+            handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(secondResponse), StreamAction.CloseStream()));
+
+            var evt = new EventSource(new Configuration(_uri, handler));
+            var first = true;
+            handler.RequestReceived += (s, r) =>
+            {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    evt.Close();
+                }
+            };
+
+            await evt.StartAsync();
+
+            var requests = handler.GetRequests().ToList();
+            Assert.False(requests[0].Headers.Contains(Constants.LastEventIdHttpHeader));
+            Assert.True(requests[1].Headers.Contains(Constants.LastEventIdHttpHeader));
+            Assert.True(requests[1].Headers.GetValues(Constants.LastEventIdHttpHeader).Contains(lastEventId));
+        }
+
+        [Fact]
+        public async Task When_reconnecting_the_outgoing_request_overrides_Last_Event_Id_from_configuration()
+        {
+            var lastEventId = "10";
+            var firstResponse = $"id:{lastEventId}\nevent: put\ndata: this is a test message\n\n";
+            var secondResponse = $"id:20\nevent: put\ndata: this is a test message\n\n";
+
+            var handler = new StubMessageHandler();
+            handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(firstResponse), StreamAction.CloseStream()));
+            handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(secondResponse), StreamAction.CloseStream()));
+
+            var configuration = Configuration
+                .Builder(_uri)
+                .MessageHandler(handler)
+                .LastEventId("0")
+                .RequestHeader(Constants.LastEventIdHttpHeader, "0")
+                .Build();
+            var evt = new EventSource(configuration);
+            var first = true;
+            handler.RequestReceived += (s, r) =>
+            {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    evt.Close();
+                }
+            };
+
+            await evt.StartAsync();
+
+            var requests = handler.GetRequests().ToList();
+            Assert.True(requests[0].Headers.Contains(Constants.LastEventIdHttpHeader));
+            Assert.True(requests[1].Headers.Contains(Constants.LastEventIdHttpHeader));
+            var lastEventIdHeader = requests[1].Headers.GetValues(Constants.LastEventIdHttpHeader).ToArray();
+            Assert.Equal(1, lastEventIdHeader.Length);
+            Assert.Equal(lastEventId, lastEventIdHeader[0]);
+        }
+
+        [Fact]
         public async Task When_Configuration_Request_headers_are_set_then_the_outgoing_request_contains_those_same_headers()
         {
             var handler = new StubMessageHandler();
