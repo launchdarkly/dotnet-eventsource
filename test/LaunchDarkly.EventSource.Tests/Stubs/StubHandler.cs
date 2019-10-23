@@ -127,6 +127,7 @@ namespace LaunchDarkly.EventSource.Tests
                     }
                     if (action.ShouldQuit())
                     {
+                        output.Close();
                         return;
                     }
                     byte[] data = Encoding.UTF8.GetBytes(action.Content);
