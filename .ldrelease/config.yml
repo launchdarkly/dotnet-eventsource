@@ -1,0 +1,14 @@
+
+publications:
+  - url: https://nuget.org/packages/LaunchDarkly.EventSource
+    description: NuGet
+
+circleci:
+  windows: {}
+
+template:
+  name: dotnet-windows
+
+documentation:
+  githubPages: true
+  title: LaunchDarkly .NET EventSource Client
