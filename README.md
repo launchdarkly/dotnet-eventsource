@@ -18,17 +18,8 @@ Quick setup
 **Build Solution**
 1. In Visual Studio, Build the LaunchDarkly.EventSource.sln solution
 
-**Running the example Console App**
-
-Included in the solution is a Console App that shows example usage for using the LaunchDarkly EventSource library against LaunchDarkly's streaming API.
-
-NOTE: You'll need your LaunchDarkly SDK Key before running the Console app.
-
-1. Compile and Run the EventSource-ConsoleApp project.
-   1. Select the EventSource-ConsoleApp project in the Solution Explorer.
-   2. Open the Program.cs file.
-   3. Replace "Insert Auth Key" with your LaunchDarkly API key.
-   4. Go to the Debug menu and select Start Debugging (or hit the F5 key).
+**Usage**
+Included are tests which show example usage for using the LaunchDarkly EventSource library (specifically, LaunchDarkly.EventSource.Tests.EventSourceTests).
 
 Signing
 -------
