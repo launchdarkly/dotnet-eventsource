@@ -6,9 +6,6 @@ workflows:
     jobs:
       - test-netcore-2-1
 
-orbs:
-  win: circleci/windows@1.0.0
-
 jobs:
   test-netcore-2-1:
     docker:
