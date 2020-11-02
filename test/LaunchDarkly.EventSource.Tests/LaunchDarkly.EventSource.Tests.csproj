@@ -12,6 +12,12 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>../../LaunchDarkly.EventSource.snk</AssemblyOriginatorKeyFile>
