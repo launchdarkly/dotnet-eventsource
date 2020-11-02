@@ -5,7 +5,6 @@ workflows:
   test:
     jobs:
       - test-netcore-2-1
-      - test-windows-netframework-4-5-2
 
 orbs:
   win: circleci/windows@1.0.0
@@ -22,19 +21,3 @@ jobs:
       - run: dotnet restore
       - run: dotnet build src/LaunchDarkly.EventSource -f netstandard2.0
       - run: dotnet test test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj -f netcoreapp2.1
-
-  test-windows-netframework-4-5-2:
-    executor:
-      name: win/vs2019
-      shell: powershell.exe
-    steps:
-      - checkout
-      - run:
-          name: install project dependencies
-          command: dotnet restore
-      - run:
-          name: build for .NET Framework 4.5.2
-          command: dotnet build src/LaunchDarkly.EventSource -f net452
-      - run:
-          name: run tests in .NET Framework 4.6
-          command: dotnet test test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj -f net46
