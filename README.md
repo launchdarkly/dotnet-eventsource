@@ -6,7 +6,7 @@ Project Information
 
 This libary allows .NET developers to consume Server Sent Events from a remote API. The server sent events spec is defined here: [https://html.spec.whatwg.org/multipage/server-sent-events.html](https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events)
 
-This library supports .NET 4.5+ and .NET Standard 1.4+.
+This library supports .NET 4.5.2+ and .NET Standard 2.0+.
 
 Quick setup
 -----------
