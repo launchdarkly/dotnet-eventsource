@@ -14,5 +14,5 @@ jobs:
           command: apt-get -q update && apt-get install -qy awscli
       - checkout
       - run: dotnet restore
-      - run: dotnet build src/LaunchDarkly.EventSource -f netstandard1.4
+      - run: dotnet build src/LaunchDarkly.EventSource -f netstandard2.0
       - run: dotnet test test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj -f netcoreapp2.0
