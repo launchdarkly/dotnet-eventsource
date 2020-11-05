@@ -4,7 +4,8 @@ publications:
     description: NuGet
 
 circleci:
-  windows: {}
+  windows:
+    context: org-global
 
 template:
   name: dotnet-windows
