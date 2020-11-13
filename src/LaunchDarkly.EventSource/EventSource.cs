@@ -1,9 +1,9 @@
-﻿using Common.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using LaunchDarkly.Logging;
 
 namespace LaunchDarkly.EventSource
 {
@@ -17,7 +17,7 @@ namespace LaunchDarkly.EventSource
 
         private readonly Configuration _configuration;
         private readonly HttpClient _httpClient;
-        private readonly ILog _logger;
+        private readonly Logger _logger;
 
         private List<string> _eventBuffer;
         private string _eventName = Constants.MessageField;
@@ -104,7 +104,7 @@ namespace LaunchDarkly.EventSource
 
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
-            _logger = _configuration.Logger ?? LogManager.GetLogger(typeof(EventSource));
+            _logger = _configuration.Logger;
 
             _retryDelay = _configuration.DelayRetryDuration;
 
@@ -209,7 +209,7 @@ namespace LaunchDarkly.EventSource
             {
                 TimeSpan sleepTime = _backOff.GetNextBackOff();
                 if (sleepTime.TotalMilliseconds > 0) {
-                    _logger.InfoFormat("Waiting {0} milliseconds before reconnecting...", sleepTime.TotalMilliseconds);
+                    _logger.Info("Waiting {0} milliseconds before reconnecting...", sleepTime.TotalMilliseconds);
                     BackOffDelay = sleepTime;
                     await Task.Delay(sleepTime);
                 }
@@ -300,7 +300,7 @@ namespace LaunchDarkly.EventSource
 
         private void Close(ReadyState state)
         {
-            _logger.DebugFormat("Close({0}) - state was {1}", state, ReadyState);
+            _logger.Debug("Close({0}) - state was {1}", state, ReadyState);
             SetReadyState(state, OnClosed);
         }
         
@@ -380,7 +380,7 @@ namespace LaunchDarkly.EventSource
             _eventBuffer.RemoveAll(item => item.Equals("\n"));
 
             var message = new MessageEvent(string.Concat(_eventBuffer), _lastEventId, _configuration.Uri);
-            _logger.DebugFormat("Received event \"{0}\"", _eventName);
+            _logger.Debug("Received event \"{0}\"", _eventName);
 
             OnMessageReceived(new MessageReceivedEventArgs(message, _eventName));
 

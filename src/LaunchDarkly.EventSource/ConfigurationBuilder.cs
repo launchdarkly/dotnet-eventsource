@@ -1,8 +1,8 @@
-﻿using Common.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using LaunchDarkly.Logging;
 
 namespace LaunchDarkly.EventSource
 {
@@ -28,7 +28,8 @@ namespace LaunchDarkly.EventSource
         private TimeSpan _backoffResetThreshold = Configuration.DefaultBackoffResetThreshold;
         private TimeSpan _readTimeout = Configuration.DefaultReadTimeout;
         private string _lastEventId;
-        private ILog _logger;
+        private ILogAdapter _logAdapter;
+        private Logger _logger;
         private IDictionary<string, string> _requestHeaders = new Dictionary<string, string>();
         private HttpMessageHandler _messageHandler;
         private HttpMethod _method = HttpMethod.Get;
@@ -57,8 +58,10 @@ namespace LaunchDarkly.EventSource
         /// <returns>the configuration</returns>
         public Configuration Build()
         {
+            var logger = _logger ??
+                (_logAdapter is null ? null : _logAdapter.Logger(Configuration.DefaultLoggerName));
             return new Configuration(_uri, _messageHandler, _connectionTimeout, _delayRetryDuration, _readTimeout,
-                _requestHeaders, _lastEventId, _logger, _method, _requestBodyFactory);
+                _requestHeaders, _lastEventId, logger, _method, _requestBodyFactory);
         }
 
         /// <summary>
@@ -147,15 +150,73 @@ namespace LaunchDarkly.EventSource
         }
 
         /// <summary>
-        /// Sets a custom logger to be used for all EventSource log output.
+        /// Sets the logging implementation to be used for all EventSource log output.
         /// </summary>
         /// <remarks>
-        /// By default, EventSource will call <see cref="LogManager.GetLogger(Type)"/> to creates its
-        /// own logger.
+        /// <para>
+        /// This uses the <c>ILogAdapter</c> abstraction from the <c>LaunchDarkly.Logging</c> library,
+        /// which provides several basic implementations such as <c>Logs.ToConsole</c> and an integration
+        /// with the .NET Core logging framework. For more about this and about adapters to other logging
+        /// frameworks, see <a href="https://github.com/launchdarkly/dotnet-logging"><c>LaunchDarkly.Logging</c></a>.
+        /// </para>
+        /// <para>
+        /// <c>LaunchDarkly.Logging</c> defines logging levels of Debug, Info, Warn, and Error. If you do not
+        /// want detailed Debug-level logging, use the <c>Level()</c> modifier to set a minimum level of Info
+        /// or above, as shown in the code example (unless you are using an adapter to another logging
+        /// framework that has its own way of doing log filtering).
+        /// </para>
+        /// <para>
+        /// Log messages will use <see cref="Configuration.DefaultLoggerName"/> as the logger name. If you
+        /// want to specify a different logger name, use <see cref="Logger(Logging.Logger)"/>.
+        /// </para>
+        /// <para>
+        /// If you don't specify <see cref="LogAdapter(ILogAdapter)"/> or <see cref="Logger(Logging.Logger)"/>,
+        /// EventSource will not do any logging.
+        /// </para>
         /// </remarks>
-        /// <param name="logger">a logger instance</param>
+        /// <example>
+        ///     using LaunchDarkly.Logging;
+        ///     
+        ///     // Send log output to the console (standard error), suppressing Debug messages
+        ///     var config = new ConfigurationBuilder(uri).
+        ///         LogAdapter(Logs.ToConsole.Level(LogLevel.Info)).
+        ///         Build();
+        /// </example>
+        /// <param name="logAdapter">a <c>LaunchDarkly.Logging.ILogAdapter</c></param>
         /// <returns>the builder</returns>
-        public ConfigurationBuilder Logger(ILog logger)
+        public ConfigurationBuilder LogAdapter(ILogAdapter logAdapter)
+        {
+            _logAdapter = logAdapter;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a custom logger to be used for all EventSource log output.
+        /// </summary>
+        /// <para>
+        /// This uses the <c>Logger</c> type from the <c>LaunchDarkly.Logging</c> library,
+        /// which provides several basic implementations such as <c>Logs.ToConsole</c> and an integration
+        /// with the .NET Core logging framework. For more about this and about adapters to other logging
+        /// frameworks, see <a href="https://github.com/launchdarkly/dotnet-logging"><c>LaunchDarkly.Logging</c></a>.
+        /// </para>
+        /// <para>
+        /// If you don't specify <see cref="LogAdapter(ILogAdapter)"/> or <see cref="Logger(Logging.Logger)"/>,
+        /// EventSource will not do any logging.
+        /// </para>
+        /// </remarks>
+        /// <example>
+        ///     using LaunchDarkly.Logging;
+        ///     
+        ///     // Define a logger that sends output to the console (standard output), suppressing
+        ///     // Debug messages, and using a logger name of "EventStream"
+        ///     var logger = Logs.ToConsole.Level(LogLevel.Info).Logger("EventStream");
+        ///     var config = new ConfigurationBuilder(uri).
+        ///         Logger(logger).
+        ///         Build();
+        /// </example>
+        /// <param name="logger">a <c>LaunchDarkly.Logging.Logger</c> instance</param>
+        /// <returns>the builder</returns>
+        public ConfigurationBuilder Logger(Logger logger)
         {
             _logger = logger;
             return this;
