@@ -23,7 +23,7 @@ namespace LaunchDarkly.EventSource
         #region Private Fields
 
         private readonly Uri _uri;
-        private TimeSpan _connectionTimeout = Configuration.DefaultConnectionTimeout;
+        private TimeSpan? _connectionTimeout = Configuration.DefaultConnectionTimeout;
         private TimeSpan _delayRetryDuration = Configuration.DefaultDelayRetryDuration;
         private TimeSpan _backoffResetThreshold = Configuration.DefaultBackoffResetThreshold;
         private TimeSpan _readTimeout = Configuration.DefaultReadTimeout;
@@ -31,6 +31,7 @@ namespace LaunchDarkly.EventSource
         private ILog _logger;
         private IDictionary<string, string> _requestHeaders = new Dictionary<string, string>();
         private HttpMessageHandler _messageHandler;
+        private HttpClient _httpClient;
         private HttpMethod _method = HttpMethod.Get;
         private Configuration.HttpContentFactory _requestBodyFactory;
 
@@ -58,7 +59,7 @@ namespace LaunchDarkly.EventSource
         public Configuration Build()
         {
             return new Configuration(_uri, _messageHandler, _connectionTimeout, _delayRetryDuration, _readTimeout,
-                _requestHeaders, _lastEventId, _logger, _method, _requestBodyFactory);
+                _requestHeaders, _lastEventId, _logger, _method, _requestBodyFactory, httpClient:_httpClient);
         }
 
         /// <summary>
@@ -196,6 +197,21 @@ namespace LaunchDarkly.EventSource
         }
 
         /// <summary>
+        /// Sets the HttpClient that will be used for the API Calls, or null for a new HttpClient.
+        /// </summary>
+        /// <remarks>
+        /// Setting this, you have to take care of disposing the httpClient and the connection timeout (httpClient.Timeout) yourself.
+        /// </remarks>
+        /// <param name="client">the httpClient</param>
+        /// <returns>the builder</returns>
+        public ConfigurationBuilder HttpClient(HttpClient client)
+        {
+            this._httpClient = client;
+            this._connectionTimeout = null;
+            return this;
+        }
+
+        /// <summary>
         /// Sets the HTTP method that will be used when connecting to the EventSource API.
         /// </summary>
         /// <remarks>
@@ -234,5 +250,6 @@ namespace LaunchDarkly.EventSource
         }
 
         #endregion
+
     }
 }

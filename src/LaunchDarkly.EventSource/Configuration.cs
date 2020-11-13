@@ -84,6 +84,11 @@ namespace LaunchDarkly.EventSource
         public HttpMessageHandler MessageHandler { get; }
 
         /// <summary>
+        /// The HttpClient that will be used as the HTTP client, or null for a new HttpClient.
+        /// </summary>
+        public HttpClient HttpClient { get; }
+
+        /// <summary>
         /// The HTTP method that will be used when connecting to the EventSource API.
         /// </summary>
         public HttpMethod Method { get; }
@@ -120,7 +125,8 @@ namespace LaunchDarkly.EventSource
         /// </summary>
         /// <param name="uri">The URI used to connect to the remote EventSource API.</param>
         /// <param name="messageHandler">The message handler to use when sending API requests. If null, the <see cref="HttpClientHandler"/> is used.</param>
-        /// <param name="connectionTimeOut">The connection timeout. If null, defaults to 10 seconds.</param>
+        /// <param name="httpClient">The http client to be used when sending API requests. You can specify either <paramref name="messageHandler"/> or httpClient.</param>
+        /// <param name="connectionTimeout">The connection timeout. If null, defaults to 10 seconds. Can not be used with <paramref name="httpClient"/></param>
         /// <param name="delayRetryDuration">The time to wait before attempting to reconnect to the EventSource API. If null, defaults to 1 second.</param>
         /// <param name="readTimeout">The timeout when reading data from the EventSource API. If null, defaults to 5 minutes.</param>
         /// <param name="requestHeaders">Request headers used when connecting to the remote EventSource API.</param>
@@ -129,8 +135,9 @@ namespace LaunchDarkly.EventSource
         /// <param name="method">The HTTP method used to connect to the remote EventSource API.</param>
         /// <param name="requestBodyFactory">A function that produces an HTTP request body to send to the remote EventSource API.</param>
         /// <exception cref="ArgumentNullException">Throws ArgumentNullException if the uri parameter is null.</exception>
+        /// <exception cref="ArgumentException">Throws ArgumentException if both httpClient and messageHandler is not null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">
-        ///     <p><paramref name="connectionTimeOut"/> is less than zero. </p>
+        ///     <p><paramref name="connectionTimeout"/> is less than zero. </p>
         ///     <p>- or - </p>
         ///     <p><paramref name="delayRetryDuration"/> is greater than 30 seconds. </p>
         ///     <p>- or - </p>
@@ -138,7 +145,7 @@ namespace LaunchDarkly.EventSource
         /// </exception>
         public Configuration(Uri uri, HttpMessageHandler messageHandler = null, TimeSpan? connectionTimeout = null, TimeSpan? delayRetryDuration = null,
             TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, ILog logger = null,
-            HttpMethod method = null, HttpContentFactory requestBodyFactory = null, TimeSpan? backoffResetThreshold = null)
+            HttpMethod method = null, HttpContentFactory requestBodyFactory = null, TimeSpan? backoffResetThreshold = null, HttpClient httpClient = null)
         {
             if (uri == null)
             {
@@ -158,8 +165,18 @@ namespace LaunchDarkly.EventSource
                 CheckReadTimeout(readTimeout.Value);
             }
 
+            if (httpClient != null && messageHandler != null)
+            {
+                throw new ArgumentException(Resources.Configuration_HttpClient_With_MessageHandler, nameof(messageHandler));
+            }
+            if (httpClient != null && connectionTimeout != null)
+            {
+                throw new ArgumentException(Resources.Configuration_HttpClient_With_ConnectionTimeout, nameof(messageHandler));
+            }
+
             Uri = uri;
             MessageHandler = messageHandler;
+            HttpClient = httpClient;
             ConnectionTimeout = connectionTimeout ?? DefaultConnectionTimeout;
             DelayRetryDuration = delayRetryDuration ?? DefaultDelayRetryDuration;
             BackoffResetThreshold = backoffResetThreshold ?? DefaultBackoffResetThreshold;
