@@ -193,6 +193,20 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
+        public void HttpClientDefaultsToNull()
+        {
+            Assert.Null(Configuration.Builder(uri).Build().HttpClient);
+        }
+
+        [Fact]
+        public void BuilderSetsHttpClient()
+        {
+            var h = new HttpClient();
+            var b = Configuration.Builder(uri).HttpClient(h);
+            Assert.Same(h, b.Build().HttpClient);
+        }
+        
+        [Fact]
         public void MethodDefaultsToGet()
         {
             var b = Configuration.Builder(uri);
