@@ -7,8 +7,9 @@ using System.Threading;
 namespace LaunchDarkly.EventSource
 {
     /// <summary>
-    /// A class used 
+    /// An immutable class containing configuration properties for <see cref="EventSource"/>.
     /// </summary>
+    /// <seealso cref="ConfigurationBuilder"/>
     public sealed class Configuration
     {
         #region Types
