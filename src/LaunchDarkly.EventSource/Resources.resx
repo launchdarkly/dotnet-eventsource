@@ -123,6 +123,12 @@
   <data name="Configuration_Value_Greater_Than_Zero" xml:space="preserve">
     <value>Value must be greater than zero.</value>
   </data>
+  <data name="Configuration_HttpClient_With_MessageHandler" xml:space="preserve">
+    <value>HttpClient can not be used with MessageHandler.</value>
+  </data>
+  <data name="Configuration_HttpClient_With_ConnectionTimeout" xml:space="preserve">
+    <value>HttpClient can not be used with ConnectionTimeout. Use Timeout property of httpClient instead.</value>
+  </data>
   <data name="EventSourceService_Read_Timeout" xml:space="preserve">
     <value>A timeout occurred while reading the request from the remote EventSource API</value>
   </data>

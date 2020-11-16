@@ -84,6 +84,41 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
+        public async Task When_an_event_message_SSE_is_received_with_http_client_then_a_message_event_is_raised()
+        {
+            var sse = "event: httpclient\ndata: this is a test message with httpclient\n\n";
+
+            var handler = new StubMessageHandler();
+            handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(sse)));
+
+            var client = new HttpClient(handler);
+            var evt = new EventSource(new Configuration(_uri, httpClient: client));
+
+            var m = new MessageReceiver();
+            evt.MessageReceived += m;
+            evt.MessageReceived += ((_, e) => evt.Close());
+
+            await evt.StartAsync();
+
+            Assert.Equal("httpclient", m.RequireSingleEvent().EventName);
+            client.Dispose();
+        }
+
+        [Fact]
+        public async Task When_event_source_closes_do_not_dispose_configured_http_client()
+        {
+            var handler = new StubMessageHandler();
+            handler.QueueResponse(StubResponse.WithResponse(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("Hello")}));
+
+            var client = new HttpClient(handler);
+            var evt = new EventSource(new Configuration(_uri, httpClient: client));
+            evt.Close();
+
+            await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, _uri));
+            client.Dispose();
+        }
+
+        [Fact]
         public async Task When_an_message_SSE_contains_id_is_received_then_last_event_id_is_set()
         {
             var sse = "id:200\nevent: put\ndata: this is a test message\n\n";
