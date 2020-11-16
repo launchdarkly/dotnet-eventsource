@@ -117,17 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Configuration_HttpClient_With_MessageHandler" xml:space="preserve">
+    <value>ConfigurationBuilder.HttpClient cannot be used with ConfigurationBuilder.MessageHandler.</value>
+  </data>
+  <data name="Configuration_HttpClient_With_ConnectionTimeout" xml:space="preserve">
+    <value>ConfigurationBuilder.HttpClient cannot be used with ConfigurationBuilder.ConnectionTimeout. Use Timeout property of HttpClient instead.</value>
+  </data>
   <data name="Configuration_RetryDuration_Exceeded" xml:space="preserve">
     <value>The maximum retry duration is {0}.</value>
   </data>
   <data name="Configuration_Value_Greater_Than_Zero" xml:space="preserve">
     <value>Value must be greater than zero.</value>
-  </data>
-  <data name="Configuration_HttpClient_With_MessageHandler" xml:space="preserve">
-    <value>HttpClient can not be used with MessageHandler.</value>
-  </data>
-  <data name="Configuration_HttpClient_With_ConnectionTimeout" xml:space="preserve">
-    <value>HttpClient can not be used with ConnectionTimeout. Use Timeout property of httpClient instead.</value>
   </data>
   <data name="EventSourceService_Read_Timeout" xml:space="preserve">
     <value>A timeout occurred while reading the request from the remote EventSource API</value>

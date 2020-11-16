@@ -164,14 +164,13 @@ namespace LaunchDarkly.EventSource
             {
                 CheckReadTimeout(readTimeout.Value);
             }
-
             if (httpClient != null && messageHandler != null)
             {
                 throw new ArgumentException(Resources.Configuration_HttpClient_With_MessageHandler, nameof(messageHandler));
             }
             if (httpClient != null && connectionTimeout != null)
             {
-                throw new ArgumentException(Resources.Configuration_HttpClient_With_ConnectionTimeout, nameof(messageHandler));
+                throw new ArgumentException(Resources.Configuration_HttpClient_With_ConnectionTimeout, nameof(connectionTimeout));
             }
 
             Uri = uri;
