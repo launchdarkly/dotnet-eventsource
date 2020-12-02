@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Net.Http;
+
 using Xunit;
 
 
@@ -15,6 +17,30 @@ namespace LaunchDarkly.EventSource.Tests
 
             Assert.NotNull(e);
             Assert.IsType<ArgumentNullException>(e);
+        }
+
+        [Fact]
+        public void Configuration_constructor_throws_exception_when_http_client_and_messageHandler_is_provided()
+        {
+            var stubMessageHandler = new StubMessageHandler();
+            var e = Record.Exception(() =>
+                new Configuration(uri: _uri, 
+                    httpClient: new HttpClient(stubMessageHandler), 
+                    messageHandler: stubMessageHandler));
+
+            Assert.IsType<ArgumentException>(e);
+        }
+
+        [Fact]
+        public void Configuration_constructor_throws_exception_when_http_client_and_connectionTimeout_is_provided()
+        {
+            var stubMessageHandler = new StubMessageHandler();
+            var e = Record.Exception(() =>
+                new Configuration(uri: _uri, 
+                    httpClient: new HttpClient(stubMessageHandler), 
+                    connectionTimeout: TimeSpan.Zero));
+
+            Assert.IsType<ArgumentException>(e);
         }
 
         [Fact]

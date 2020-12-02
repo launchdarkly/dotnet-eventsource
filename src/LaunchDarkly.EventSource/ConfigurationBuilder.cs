@@ -23,7 +23,7 @@ namespace LaunchDarkly.EventSource
         #region Private Fields
 
         private readonly Uri _uri;
-        private TimeSpan _connectionTimeout = Configuration.DefaultConnectionTimeout;
+        private TimeSpan? _connectionTimeout = null;
         private TimeSpan _delayRetryDuration = Configuration.DefaultDelayRetryDuration;
         private TimeSpan _backoffResetThreshold = Configuration.DefaultBackoffResetThreshold;
         private TimeSpan _readTimeout = Configuration.DefaultReadTimeout;
@@ -31,6 +31,7 @@ namespace LaunchDarkly.EventSource
         private ILog _logger;
         private IDictionary<string, string> _requestHeaders = new Dictionary<string, string>();
         private HttpMessageHandler _messageHandler;
+        private HttpClient _httpClient;
         private HttpMethod _method = HttpMethod.Get;
         private Configuration.HttpContentFactory _requestBodyFactory;
 
@@ -58,14 +59,19 @@ namespace LaunchDarkly.EventSource
         public Configuration Build()
         {
             return new Configuration(_uri, _messageHandler, _connectionTimeout, _delayRetryDuration, _readTimeout,
-                _requestHeaders, _lastEventId, _logger, _method, _requestBodyFactory);
+                _requestHeaders, _lastEventId, _logger, _method, _requestBodyFactory, httpClient:_httpClient);
         }
 
         /// <summary>
         /// Sets the connection timeout value used when connecting to the EventSource API.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// The default value is <see cref="Configuration.DefaultConnectionTimeout"/>.
+        /// </para>
+        /// <para>
+        /// Do not use this property if you are using <see cref="HttpClient"/> to specify a custom HTTP client. Doing so will cause <see cref="Build"/> to throw an exception.
+        /// </para>
         /// </remarks>
         /// <param name="connectionTimeout">the timeout</param>
         /// <returns>the builder</returns>
@@ -187,11 +193,33 @@ namespace LaunchDarkly.EventSource
         /// <summary>
         /// Sets the HttpMessageHandler that will be used for the HTTP client, or null for the default handler.
         /// </summary>
+        /// <remarks>
+        /// Do not use this property if you are using <see cref="HttpClient"/> to specify a custom HTTP client. Doing so will cause <see cref="Build"/> to throw an exception.
+        /// </remarks>
         /// <param name="handler">the message handler implementation</param>
         /// <returns>the builder</returns>
         public ConfigurationBuilder MessageHandler(HttpMessageHandler handler)
         {
             this._messageHandler = handler;
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies that EventSource should use a specific HttpClient instance for HTTP requests.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Normally, EventSource creates its own HttpClient and disposes of it when you dispose of the EventSource. If you provide your own HttpClient using this method, you are responsible for managing the HttpClient's lifecycle-- EventSource will not dispose of it.
+        /// </para>
+        /// <para>
+        /// EventSource will not modify this client's properties, so you should not the ConfigurationBuilder methods <see cref="MessageHandler"/> and <see cref="ConnectionTimeout"/> if you use this option. Doing so will cause <see cref="Build"/> to throw an exception.
+        /// </para>
+        /// </remarks>
+        /// <param name="client">an HttpClient instance, or null to use the default behavior</param>
+        /// <returns>the builder</returns>
+        public ConfigurationBuilder HttpClient(HttpClient client)
+        {
+            this._httpClient = client;
             return this;
         }
 
@@ -234,5 +262,6 @@ namespace LaunchDarkly.EventSource
         }
 
         #endregion
+
     }
 }
