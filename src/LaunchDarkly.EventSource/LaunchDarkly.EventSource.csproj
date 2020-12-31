@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>3.3.3</Version>
+    <Version>4.0.0-alpha.1</Version>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
     <PackageLicenseUrl>https://raw.github.com/LaunchDarkly/dotnet-eventsource/master/LICENSE</PackageLicenseUrl>
     <AssemblyName>LaunchDarkly.EventSource</AssemblyName>
@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LaunchDarkly.Logging" Version="1.0.0-alpha.1" />
+    <PackageReference Include="LaunchDarkly.Logging" Version="1.0.0-alpha.3" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">

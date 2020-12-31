@@ -111,7 +111,7 @@ namespace LaunchDarkly.EventSource
             _backOff = new ExponentialBackoffWithDecorrelation(_retryDelay,
                 Configuration.MaximumRetryDuration);
 
-            _httpClient = CreateHttpClient();
+            _httpClient = _configuration.HttpClient ?? CreateHttpClient();
         }
 
         #endregion
@@ -226,7 +226,12 @@ namespace LaunchDarkly.EventSource
                 Close(ReadyState.Shutdown);
             }
             CancelCurrentRequest();
-            _httpClient.Dispose();
+
+            // do not dispose httpClient if it is user provided
+            if (_configuration.HttpClient == null)
+            {
+                _httpClient.Dispose();
+            }
         }
 
         /// <summary>

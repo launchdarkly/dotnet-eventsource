@@ -60,7 +60,25 @@ namespace LaunchDarkly.EventSource {
                 resourceCulture = value;
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to HttpClient can not be used with ConnectionTimeout. Use Timeout property of httpClient instead..
+        /// </summary>
+        internal static string Configuration_HttpClient_With_ConnectionTimeout {
+            get {
+                return ResourceManager.GetString("Configuration_HttpClient_With_ConnectionTimeout", resourceCulture);
+            }
+        }
         
+        /// <summary>
+        ///   Looks up a localized string similar to HttpClient can not be used with MessageHandler..
+        /// </summary>
+        internal static string Configuration_HttpClient_With_MessageHandler {
+            get {
+                return ResourceManager.GetString("Configuration_HttpClient_With_MessageHandler", resourceCulture);
+            }
+        }
+                
         /// <summary>
         ///   Looks up a localized string similar to The maximum retry duration is {0}..
         /// </summary>

@@ -2,6 +2,10 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [3.4.0] - 2020-12-03
+### Added:
+- You can now tell EventSource to use an `HttpClient` instance that you provide by calling `ConfigurationBuilder.HttpClient`. (Thanks, [thorstenfleischmann](https://github.com/launchdarkly/dotnet-eventsource/pull/61)!)
+
 ## [3.3.3] - 2020-11-05
 ### Added:
 - The package now has a specific target for .NET Standard 2.0, in addition to the previous targets of .NET Standard 1.4 and .NET Framework 4.5. There is no functional difference between the 2.0 and 1.4 builds, but it may be desirable for .NET Core/.NET Standard code to be able to avoid linking to any .NET Standard 1.x assemblies.
