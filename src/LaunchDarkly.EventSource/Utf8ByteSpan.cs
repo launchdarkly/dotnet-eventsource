@@ -77,9 +77,6 @@ namespace LaunchDarkly.EventSource
             {
                 return false;
             }
-#if NETSTANDARD2_1 || NETCOREAPP2_1 || NET5_0
-            return AsSpan.SequenceEqual(other.AsSpan);
-#else
             int offset = Offset, otherOffset = other.Offset;
             byte[] data = Data, otherData = other.Data;
             for (int i = 0; i < len; i++)
@@ -90,12 +87,7 @@ namespace LaunchDarkly.EventSource
                 }
             }
             return true;
-#endif
         }
-
-#if NETSTANDARD2_1 || NETCOREAPP2_1 || NET5_0
-        private Span<byte> AsSpan => new Span<byte>(Data, Offset, Length);
-#endif
 
         /// <summary>
         /// Tests whether the bytes in this span are the same as the UTF-8 encoding

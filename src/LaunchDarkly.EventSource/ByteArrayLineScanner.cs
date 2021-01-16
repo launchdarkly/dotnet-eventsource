@@ -3,6 +3,22 @@ using System.IO;
 
 namespace LaunchDarkly.EventSource
 {
+    /// <summary>
+    /// Internal implementation of a buffered text line parser for UTF-8 data.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This is used as follows. 1. The caller puts some data into the byte buffer. 2. The caller
+    /// calls ScanToEndOfLine; if it returns true, the <c>lineOut</c> parameter is set to point
+    /// to the content of the line (not including the line ending character(s)). If it returns
+    /// false, put more data into the buffer and try again.
+    /// </para>
+    /// <para>
+    /// Since in UTF-8 all multi-byte characters use values greater than 127 for all of their
+    /// bytes, this logic doesn't need to do any UTF-8 decoding or even know how many bytes are
+    /// in a character; it just looks for the line-ending sequences CR, LF, or CR+LF.
+    /// </para>
+    /// </remarks>
     internal struct ByteArrayLineScanner
     {
         private readonly byte[] _buffer;
