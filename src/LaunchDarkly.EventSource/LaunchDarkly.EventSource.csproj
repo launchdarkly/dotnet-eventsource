@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Version>4.0.0-alpha.2</Version>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-    <PackageLicenseUrl>https://raw.github.com/LaunchDarkly/dotnet-eventsource/master/LICENSE</PackageLicenseUrl>
+    <LicenseExpression>Apache-2.0</LicenseExpression>
     <AssemblyName>LaunchDarkly.EventSource</AssemblyName>
     <DebugType>portable</DebugType>
     <OutputType>Library</OutputType>
@@ -11,6 +11,8 @@
     <Company>LaunchDarkly</Company>
     <Copyright>Copyright 2017 Catamorphic, Co.</Copyright>
     <Description>LaunchDarkly .NET Event Source library for Server Sent Events</Description>
+    <PackageProjectUrl>https://github.com/launchdarkly/dotnet-eventsource</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/launchdarkly/dotnet-eventsource</RepositoryUrl>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 
