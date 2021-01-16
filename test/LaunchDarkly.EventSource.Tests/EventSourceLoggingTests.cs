@@ -16,7 +16,7 @@ namespace LaunchDarkly.EventSource.Tests
             var logCapture = Logs.Capture();
 
             var config = new ConfigurationBuilder(_uri)
-                .MessageHandler(HandlerWithBasicEvent())
+                .HttpMessageHandler(HandlerWithBasicEvent())
                 .LogAdapter(logCapture)
                 .Build();
 
@@ -40,7 +40,7 @@ namespace LaunchDarkly.EventSource.Tests
             var logger = logCapture.Logger("special");
 
             var config = new ConfigurationBuilder(_uri)
-                .MessageHandler(HandlerWithBasicEvent())
+                .HttpMessageHandler(HandlerWithBasicEvent())
                 .Logger(logger)
                 .Build();
 
@@ -64,7 +64,7 @@ namespace LaunchDarkly.EventSource.Tests
             var logCapture = Logs.Capture();
 
             var config = new ConfigurationBuilder(_uri)
-                .MessageHandler(HandlerWithBasicEvent())
+                .HttpMessageHandler(HandlerWithBasicEvent())
                 .LogAdapter(logCapture)
                 .Build();
 
@@ -88,7 +88,7 @@ namespace LaunchDarkly.EventSource.Tests
             var logCapture = Logs.Capture();
 
             var config = new ConfigurationBuilder(_uri)
-                .MessageHandler(HandlerWithBasicEvent())
+                .HttpMessageHandler(HandlerWithBasicEvent())
                 .LogAdapter(logCapture)
                 .Build();
 

@@ -69,14 +69,14 @@ namespace LaunchDarkly.EventSource
         {
             get
             {
-                lock(this)
+                lock (this)
                 {
                     return _readyState;
                 }
             }
             private set
             {
-                lock(this)
+                lock (this)
                 {
                     _readyState = value;
                 }
@@ -96,10 +96,7 @@ namespace LaunchDarkly.EventSource
         /// <summary>
         /// Initializes a new instance of the <see cref="EventSource" /> class.
         /// </summary>
-        /// <param name="configuration">The configuration.</param>
-        /// <exception cref="ArgumentNullException">client
-        /// or
-        /// configuration</exception>
+        /// <param name="configuration">the configuration</param>
         public EventSource(Configuration configuration)
         {
             _readyState = ReadyState.Raw;
@@ -116,15 +113,25 @@ namespace LaunchDarkly.EventSource
             _httpClient = _configuration.HttpClient ?? CreateHttpClient();
         }
 
+        /// <summary>
+        /// Shortcut for initializing an <see cref="EventSource"/> with only a stream URI
+        /// and no custom properties.
+        /// </summary>
+        /// <param name="uri">the stream URI</param>
+        /// <exception cref="ArgumentNullException">if the URI is null</exception>
+        public EventSource(Uri uri) : this(Configuration.Builder(uri).Build()) {}
+
         #endregion
 
         #region Public Methods
 
         /// <summary>
-        /// Initiates the request to the EventSource API and parses Server Sent Events received by the API.
+        /// Initiates a connection to the SSE server and begins parsing events.
         /// </summary>
-        /// <returns>A <see cref="System.Threading.Tasks.Task"/> A task that represents the work queued to execute in the ThreadPool.</returns>
-        /// <exception cref="InvalidOperationException">The method was called after the connection <see cref="ReadyState"/> was Open or Connecting.</exception>
+        /// <returns>a <see cref="System.Threading.Tasks.Task"/> that will be completed only when the
+        /// <c>EventSource</c> is closed</returns>
+        /// <exception cref="InvalidOperationException">if the method was called again after the
+        /// stream connection was already active</exception>
         public async Task StartAsync()
         {
             bool firstTime = true;
@@ -219,7 +226,7 @@ namespace LaunchDarkly.EventSource
         }
 
         /// <summary>
-        /// Closes the connection to the EventSource API. The EventSource cannot be reopened after this.
+        /// Closes the connection to the SSE server. The <c>EventSource</c> cannot be reopened after this.
         /// </summary>
         public void Close()
         {
@@ -237,7 +244,7 @@ namespace LaunchDarkly.EventSource
         }
 
         /// <summary>
-        /// Equivalent to calling <see cref="Close"/>.
+        /// Equivalent to calling <see cref="Close()"/>.
         /// </summary>
         public void Dispose()
         {
@@ -258,9 +265,9 @@ namespace LaunchDarkly.EventSource
 
         private HttpClient CreateHttpClient()
         {
-            var client =_configuration.MessageHandler is null ?
+            var client =_configuration.HttpMessageHandler is null ?
                 new HttpClient() :
-                new HttpClient(_configuration.MessageHandler, false);
+                new HttpClient(_configuration.HttpMessageHandler, false);
             client.Timeout = _configuration.ConnectionTimeout;
             return client;
         }

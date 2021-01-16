@@ -13,15 +13,20 @@ namespace LaunchDarkly.EventSource
 
         #region Public Constructors 
 
-        public EventSourceServiceCancelledException(string message) : base(message)
-        {
-            
-        }
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="message">the exception message</param>
+        public EventSourceServiceCancelledException(string message) : base(message) { }
 
-        public EventSourceServiceCancelledException(string message, Exception innerException) : base(message, innerException)
-        {
-            
-        }
+        /// <summary>
+        /// Creates a new instance with an inner exception.
+        /// </summary>
+        /// <param name="message">the exception message</param>
+        /// <param name="innerException">the inner exception</param>
+        public EventSourceServiceCancelledException(string message, Exception innerException) :
+            base(message, innerException)
+        { }
 
         #endregion
 

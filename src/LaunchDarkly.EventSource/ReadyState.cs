@@ -22,7 +22,7 @@
         /// </summary>
         Closed,
         /// <summary>
-        /// The connection has been shutdown explicitly by the consumer using the <see cref="EventSource.Close"/> method.
+        /// The connection has been shutdown explicitly by the consumer using the <see cref="EventSource.Close()"/> method.
         /// </summary>
         Shutdown
     }

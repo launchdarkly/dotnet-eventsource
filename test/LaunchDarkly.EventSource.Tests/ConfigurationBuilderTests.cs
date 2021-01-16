@@ -49,12 +49,11 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
-        public void ConnectionTimeoutCannotBeNegative()
+        public void AnyNegativeConnectionTimeoutIsInfinite()
         {
             var ts = TimeSpan.FromSeconds(-9);
-            var b = Configuration.Builder(uri);
-            var e = Record.Exception(() => b.ConnectionTimeout(ts));
-            Assert.IsType<ArgumentOutOfRangeException>(e);
+            var b = Configuration.Builder(uri).ConnectionTimeout(ts);
+            Assert.Equal(Timeout.InfiniteTimeSpan, b.Build().ConnectionTimeout);
         }
 
         [Fact]
@@ -73,21 +72,11 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
-        public void DelayRetryDurationCannotBeInfinite()
+        public void NegativeDelayRetryDurationBecomesZero()
         {
             var ts = Timeout.InfiniteTimeSpan;
-            var b = Configuration.Builder(uri);
-            var e = Record.Exception(() => b.DelayRetryDuration(ts));
-            Assert.IsType<ArgumentOutOfRangeException>(e);
-        }
-
-        [Fact]
-        public void DelayRetryDurationCannotBeNegative()
-        {
-            var ts = TimeSpan.FromSeconds(-9);
-            var b = Configuration.Builder(uri);
-            var e = Record.Exception(() => b.DelayRetryDuration(ts));
-            Assert.IsType<ArgumentOutOfRangeException>(e);
+            var b = Configuration.Builder(uri).DelayRetryDuration(TimeSpan.FromSeconds(-9));
+            Assert.Equal(TimeSpan.Zero, b.Build().DelayRetryDuration);
         }
 
         [Fact]
@@ -106,21 +95,19 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
-        public void ReadTimeoutCannotBeInfinite()
+        public void ReadTimeoutCanBeInfinite()
         {
             var ts = Timeout.InfiniteTimeSpan;
-            var b = Configuration.Builder(uri);
-            var e = Record.Exception(() => b.ReadTimeout(ts));
-            Assert.IsType<ArgumentOutOfRangeException>(e);
+            var b = Configuration.Builder(uri).ReadTimeout(ts);
+            Assert.Equal(ts, b.Build().ReadTimeout);
         }
 
         [Fact]
-        public void ReadTimeoutCannotBeNegative()
+        public void AnyNegativeReadTimeoutBecomesInfinite()
         {
             var ts = TimeSpan.FromSeconds(-9);
-            var b = Configuration.Builder(uri);
-            var e = Record.Exception(() => b.ReadTimeout(ts));
-            Assert.IsType<ArgumentOutOfRangeException>(e);
+            var b = Configuration.Builder(uri).ReadTimeout(ts);
+            Assert.Equal(Timeout.InfiniteTimeSpan, b.Build().ReadTimeout);
         }
 
         [Fact]
@@ -194,15 +181,15 @@ namespace LaunchDarkly.EventSource.Tests
         [Fact]
         public void MessageHandlerDefaultsToNull()
         {
-            Assert.Null(Configuration.Builder(uri).Build().MessageHandler);
+            Assert.Null(Configuration.Builder(uri).Build().HttpMessageHandler);
         }
 
         [Fact]
         public void BuilderSetsMessageHandler()
         {
             var h = new HttpClientHandler();
-            var b = Configuration.Builder(uri).MessageHandler(h);
-            Assert.Same(h, b.Build().MessageHandler);
+            var b = Configuration.Builder(uri).HttpMessageHandler(h);
+            Assert.Same(h, b.Build().HttpMessageHandler);
         }
 
         [Fact]
@@ -243,7 +230,7 @@ namespace LaunchDarkly.EventSource.Tests
         [Fact]
         public void BuilderSetsRequestBodyFactory()
         {
-            Configuration.HttpContentFactory f = () => new StringContent("x");
+            Func<HttpContent> f = () => new StringContent("x");
             var b = Configuration.Builder(uri).RequestBodyFactory(f);
             Assert.Same(f, b.Build().RequestBodyFactory);
         }
