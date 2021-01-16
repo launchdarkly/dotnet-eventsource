@@ -3,6 +3,12 @@ publications:
   - url: https://nuget.org/packages/LaunchDarkly.EventSource
     description: NuGet
 
+releasableBranches:
+  - name: master
+    description: 4.x - for .NET SDK 6.0+ and Xamarin SDK 2.0+
+  - name: 3.x
+    description: for earlier .NET and Xamarin SDKs
+
 circleci:
   windows:
     context: org-global
