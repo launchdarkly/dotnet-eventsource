@@ -6,7 +6,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using LaunchDarkly.Logging;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace LaunchDarkly.EventSource.Tests
 {
@@ -14,12 +16,23 @@ namespace LaunchDarkly.EventSource.Tests
     {
         private readonly Uri _uri = new Uri("http://test.com");
 
+        private readonly ITestOutputHelper _testOutput;
+        private readonly ILogAdapter _testLogging;
+
+        public EventSourceTests(ITestOutputHelper testOutput)
+        {
+            _testOutput = testOutput;
+            _testLogging = Logs.ToMethod(testOutput.WriteLine);
+        }
+
         [Fact]
         public void Can_Create_and_start_EventSource_without_specifying_message_handler()
         {
             // Testing this just because all of the other tests use a StubMessageHandler
-            var evt = new EventSource(Configuration.Builder(_uri).Build());
-            evt.StartAsync();
+            using (var evt = new EventSource(Configuration.Builder(_uri).Build()))
+            {
+                _ = evt.StartAsync();
+            }
         }
 
         [Fact]
@@ -575,7 +588,7 @@ namespace LaunchDarkly.EventSource.Tests
         {
             TimeSpan threshold = TimeSpan.FromSeconds(1);
             TimeSpan closeDelay = TimeSpan.FromMilliseconds(100);
-            const int nAttempts = 3;
+            const int nAttempts = 5;
 
             var handler = new StubMessageHandler();
             for (var i = 0; i < nAttempts; i++)
@@ -586,7 +599,10 @@ namespace LaunchDarkly.EventSource.Tests
             handler.QueueResponse(StubResponse.StartStream());
             
             var config = new ConfigurationBuilder(_uri).MessageHandler(handler)
-                .BackoffResetThreshold(threshold).Build();
+                .DelayRetryDuration(TimeSpan.FromMilliseconds(200))
+                .BackoffResetThreshold(threshold)
+                .LogAdapter(_testLogging)
+                .Build();
             var evt = new EventSource(config);
 
             var requestTimes = new List<DateTime>();
@@ -606,8 +622,9 @@ namespace LaunchDarkly.EventSource.Tests
             for (var i = 0; i < nAttempts; i++)
             {
                 var interval = requestTimes[i + 1] - requestTimes[i] - closeDelay;
-                var min = (i == 0) ? TimeSpan.Zero : GetMaxBackoffDelayForAttempt(config, i);
-                var max = GetMaxBackoffDelayForAttempt(config, i + 1);
+                _testOutput.WriteLine("Restart #{0} had delay of {1}", i, interval);
+                var min = (i == 0) ? TimeSpan.Zero : GetMaxBackoffDelayForAttempt(config, i - 1);
+                var max = GetMaxBackoffDelayForAttempt(config, i);
                 AssertTimeSpanInRange(interval, min, max);
             }
         }
@@ -617,10 +634,10 @@ namespace LaunchDarkly.EventSource.Tests
         {
             TimeSpan threshold = TimeSpan.FromMilliseconds(10);
             TimeSpan closeDelay = TimeSpan.FromMilliseconds(100);
-            const int nAttempts = 3;
+            const int nAttempts = 5;
 
             var handler = new StubMessageHandler();
-            for (var i = 0; i < nAttempts; i++)
+            for (var i = 0; i < nAttempts + 1; i++)
             {
                 handler.QueueResponse(StubResponse.StartStream(
                     StreamAction.CloseStream().AfterDelay(closeDelay)));
@@ -628,14 +645,17 @@ namespace LaunchDarkly.EventSource.Tests
             handler.QueueResponse(StubResponse.StartStream());
 
             var config = new ConfigurationBuilder(_uri).MessageHandler(handler)
-                .BackoffResetThreshold(threshold).Build();
+                .DelayRetryDuration(TimeSpan.FromMilliseconds(200))
+                .BackoffResetThreshold(threshold)
+                .LogAdapter(_testLogging)
+                .Build();
             var evt = new EventSource(config);
 
             var requestTimes = new List<DateTime>();
             handler.RequestReceived += (_, r) =>
             {
                 requestTimes.Add(DateTime.Now);
-                if (requestTimes.Count == 3)
+                if (requestTimes.Count > nAttempts)
                 {
                     evt.Close();
                 }
@@ -643,10 +663,11 @@ namespace LaunchDarkly.EventSource.Tests
 
             await evt.StartAsync();
 
-            var max = GetMaxBackoffDelayForAttempt(config, 1);
+            var max = GetMaxBackoffDelayForAttempt(config, 0);
             for (var i = 0; i < nAttempts; i++)
             {
                 var interval = requestTimes[i + 1] - requestTimes[i] - closeDelay;
+                _testOutput.WriteLine("Restart #{0} had delay of {1}", i, interval);
                 AssertTimeSpanInRange(interval, TimeSpan.Zero, max);
             }
         }
