@@ -1,9 +1,9 @@
-﻿using Common.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using Xunit;
+using LaunchDarkly.Logging;
 
 namespace LaunchDarkly.EventSource.Tests
 {
@@ -138,18 +138,31 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
-        public void LoggerDefaultsToNull()
+        public void LoggerIsNeverNull()
         {
             var b = Configuration.Builder(uri);
-            Assert.Null(b.Build().Logger);
+            Assert.NotNull(b.Build().Logger);
         }
 
         [Fact]
-        public void BuilderSetsLog()
+        public void BuilderSetsLogAdapter()
         {
-            ILog log = LogManager.GetLogger("test");
-            var b = Configuration.Builder(uri).Logger(log);
-            Assert.Same(log, b.Build().Logger);
+            var logMessages = Logs.Capture();
+            var b = Configuration.Builder(uri).LogAdapter(logMessages);
+            var logger = b.Build().Logger;
+            logger.Info("hello");
+            Assert.Equal(new List<LogCapture.Message>
+            {
+                new LogCapture.Message("EventSource", LogLevel.Info, "hello")
+            }, logMessages.GetMessages());
+        }
+
+        [Fact]
+        public void BuilderSetsLogger()
+        {
+            var logger = Logs.ToConsole.Logger("test");
+            var b = Configuration.Builder(uri).Logger(logger);
+            Assert.Same(logger, b.Build().Logger);
         }
 
         [Fact]

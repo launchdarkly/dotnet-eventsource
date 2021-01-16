@@ -5,7 +5,7 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Common.Logging;
+using LaunchDarkly.Logging;
 
 namespace LaunchDarkly.EventSource
 {
@@ -15,7 +15,7 @@ namespace LaunchDarkly.EventSource
 
         private readonly Configuration _configuration;
         private readonly HttpClient _httpClient;
-        private readonly ILog _logger;
+        private readonly Logger _logger;
 
         private const string UserAgentProduct = "DotNetClient";
         internal static readonly string UserAgentVersion = ((AssemblyInformationalVersionAttribute)typeof(EventSource)
@@ -48,7 +48,7 @@ namespace LaunchDarkly.EventSource
         /// <exception cref="ArgumentNullException">client
         /// or
         /// configuration</exception>
-        public EventSourceService(Configuration configuration, HttpClient httpClient, ILog logger)
+        public EventSourceService(Configuration configuration, HttpClient httpClient, Logger logger)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
@@ -76,7 +76,7 @@ namespace LaunchDarkly.EventSource
 
         private async Task ConnectToEventSourceApi(Action<string> processResponse, string lastEventId, CancellationToken cancellationToken)
         {
-            _logger.DebugFormat("Making {0} request to EventSource URI {1}",
+            _logger.Debug("Making {0} request to EventSource URI {1}",
                 _configuration.Method ?? HttpMethod.Get,
                 _configuration.Uri);
 
@@ -84,7 +84,7 @@ namespace LaunchDarkly.EventSource
                 HttpCompletionOption.ResponseHeadersRead,
                 cancellationToken).ConfigureAwait(false))
             {
-                _logger.DebugFormat("Response status: {0}", (int)response.StatusCode);
+                _logger.Debug("Response status: {0}", (int)response.StatusCode);
                 HandleInvalidResponses(response);
 
                 OnConnectionOpened();

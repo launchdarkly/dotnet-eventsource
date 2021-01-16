@@ -1,13 +1,15 @@
-version: 2
+version: 2.1
+
 workflows:
   version: 2
   test:
     jobs:
-      - test-2.0
+      - test-netcore-2-1
+
 jobs:
-  test-2.0:
+  test-netcore-2-1:
     docker:
-      - image: microsoft/dotnet:2.0-sdk-jessie
+      - image: mcr.microsoft.com/dotnet/core/sdk:2.1-focal
     steps:
       - run:
           name: install packages
@@ -15,4 +17,4 @@ jobs:
       - checkout
       - run: dotnet restore
       - run: dotnet build src/LaunchDarkly.EventSource -f netstandard2.0
-      - run: dotnet test test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj -f netcoreapp2.0
+      - run: dotnet test test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj -f netcoreapp2.1

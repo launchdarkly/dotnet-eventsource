@@ -1,8 +1,8 @@
-﻿using Common.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
+using LaunchDarkly.Logging;
 
 namespace LaunchDarkly.EventSource
 {
@@ -25,6 +25,13 @@ namespace LaunchDarkly.EventSource
         public static readonly TimeSpan DefaultReadTimeout = TimeSpan.FromMinutes(5);
         public static readonly TimeSpan MaximumRetryDuration = TimeSpan.FromMilliseconds(30000);
         public static readonly TimeSpan DefaultBackoffResetThreshold = TimeSpan.FromMinutes(1);
+
+        /// <summary>
+        /// The logger name that will be used if you specified a logging implementation but did not
+        /// provide a specific logger instance.
+        /// </summary>
+        /// <seealso cref="ConfigurationBuilder.LogAdapter(ILogAdapter)"/>
+        public const string DefaultLoggerName = "EventSource";
 
         #endregion
 
@@ -70,9 +77,12 @@ namespace LaunchDarkly.EventSource
         public string LastEventId { get; }
 
         /// <summary>
-        /// A custom logger to be used for all EventSource log output.
+        /// The logger to be used for all EventSource log output.
         /// </summary>
-        public ILog Logger { get; }
+        /// <remarks>
+        /// This is never null; if logging is not configured, it will be <c>LaunchDarkly.Logging.Logs.None</c>.
+        /// </remarks>
+        public Logger Logger { get; }
 
         /// <summary>
         /// The request headers to be sent with each EventSource HTTP request.
@@ -145,7 +155,7 @@ namespace LaunchDarkly.EventSource
         ///     <p><paramref name="readTimeout"/> is less than zero. </p>
         /// </exception>
         public Configuration(Uri uri, HttpMessageHandler messageHandler = null, TimeSpan? connectionTimeout = null, TimeSpan? delayRetryDuration = null,
-            TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, ILog logger = null,
+            TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, Logger logger = null,
             HttpMethod method = null, HttpContentFactory requestBodyFactory = null, TimeSpan? backoffResetThreshold = null, HttpClient httpClient = null)
         {
             if (uri == null)
@@ -183,7 +193,7 @@ namespace LaunchDarkly.EventSource
             ReadTimeout = readTimeout ?? DefaultReadTimeout;
             RequestHeaders = requestHeaders;
             LastEventId = lastEventId;
-            Logger = logger;
+            Logger = logger ?? Logs.None.Logger("");
             Method = method;
             RequestBodyFactory = requestBodyFactory;
         }

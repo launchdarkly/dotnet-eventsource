@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>3.4.0</Version>
-    <TargetFrameworks>netstandard1.4;netstandard2.0;net45</TargetFrameworks>
+    <Version>4.0.0-alpha.1</Version>
+    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
     <PackageLicenseUrl>https://raw.github.com/LaunchDarkly/dotnet-eventsource/master/LICENSE</PackageLicenseUrl>
     <AssemblyName>LaunchDarkly.EventSource</AssemblyName>
     <DebugType>portable</DebugType>
@@ -15,10 +15,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Common.Logging" Version="3.4.1" />
+    <PackageReference Include="LaunchDarkly.Logging" Version="1.0.0-alpha.3" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Net.Http" />
@@ -43,5 +43,4 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-
 </Project>

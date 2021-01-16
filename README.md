@@ -6,7 +6,7 @@ Project Information
 
 This libary allows .NET developers to consume Server Sent Events from a remote API. The server sent events spec is defined here: [https://html.spec.whatwg.org/multipage/server-sent-events.html](https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events)
 
-This library supports .NET 4.5+ and .NET Standard 1.4+.
+This library supports .NET 4.5.2+ and .NET Standard 2.0+.
 
 Quick setup
 -----------
@@ -42,7 +42,7 @@ Development notes
 
 This project imports the `dotnet-base` repository as a subtree. See the `README.md` file in that directory for more information.
 
-Releases are done using the release script in `dotnet-base`. Since the published package includes a .NET Framework 4.5 build, the release must be done from Windows.
+Releases are done using the release script in `dotnet-base`. Since the published package includes a .NET Framework build, the release must be done from Windows.
 
 About LaunchDarkly
 ------------------
