@@ -570,6 +570,7 @@ namespace LaunchDarkly.EventSource.Tests
             Assert.Equal(1, handler.GetRequests().Count());
         }
 
+        [Fact]
         public async Task Connection_closed_before_threshold_gets_increasing_backoff_delay()
         {
             TimeSpan threshold = TimeSpan.FromSeconds(1);
@@ -611,6 +612,7 @@ namespace LaunchDarkly.EventSource.Tests
             }
         }
 
+        [Fact]
         public async Task Connection_closed_after_threshold_does_not_get_increasing_backoff_delay()
         {
             TimeSpan threshold = TimeSpan.FromMilliseconds(10);

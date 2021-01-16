@@ -15,9 +15,9 @@ namespace LaunchDarkly.EventSource
     {
         private StreamReader _streamReader;
 
-        public EventSourceStreamReader(Stream stream)
+        public EventSourceStreamReader(Stream stream, Encoding encoding)
         {
-            _streamReader = new StreamReader(stream);
+            _streamReader = new StreamReader(stream, encoding);
         }
 
         public virtual async Task<string> ReadLineAsync()

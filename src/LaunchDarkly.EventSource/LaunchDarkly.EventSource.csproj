@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Version>4.0.0-alpha.1</Version>
-    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp2.1;net452</TargetFrameworks>
     <PackageLicenseUrl>https://raw.github.com/LaunchDarkly/dotnet-eventsource/master/LICENSE</PackageLicenseUrl>
     <AssemblyName>LaunchDarkly.EventSource</AssemblyName>
     <DebugType>portable</DebugType>
