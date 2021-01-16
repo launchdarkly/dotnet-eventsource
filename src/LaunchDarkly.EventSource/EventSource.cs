@@ -128,7 +128,7 @@ namespace LaunchDarkly.EventSource
         /// <summary>
         /// Initiates a connection to the SSE server and begins parsing events.
         /// </summary>
-        /// <returns>a <see cref="System.Threading.Tasks.Task"/> that will be completed only when the
+        /// <returns>a <see cref="Task"/> that will be completed only when the
         /// <c>EventSource</c> is closed</returns>
         /// <exception cref="InvalidOperationException">if the method was called again after the
         /// stream connection was already active</exception>
@@ -414,7 +414,10 @@ namespace LaunchDarkly.EventSource
 
         private void DispatchEvent()
         {
+            var name = _eventName ?? Constants.MessageField;
+            _eventName = null;
             MessageEvent message;
+
             if (_eventDataStringBuffer != null)
             {
                 if (_eventDataStringBuffer.Count == 0)
@@ -424,7 +427,7 @@ namespace LaunchDarkly.EventSource
                 // remove last item which is always a trailing newline
                 _eventDataStringBuffer.RemoveAt(_eventDataStringBuffer.Count - 1);
                 var dataString = string.Concat(_eventDataStringBuffer);
-                message = new MessageEvent(dataString, _lastEventId, _configuration.Uri);
+                message = new MessageEvent(name, dataString, _lastEventId, _configuration.Uri);
 
                 _eventDataStringBuffer.Clear();
             }
@@ -436,43 +439,31 @@ namespace LaunchDarkly.EventSource
                 }
                 var dataSpan = new Utf8ByteSpan(_eventDataUtf8ByteBuffer.GetBuffer(), 0,
                     (int)_eventDataUtf8ByteBuffer.Length - 1); // remove trailing newline
-                message = new MessageEvent(dataSpan, _lastEventId, _configuration.Uri);
+                message = new MessageEvent(name, dataSpan, _lastEventId, _configuration.Uri);
 
                 // We've now taken ownership of the original buffer; null out the previous
                 // reference to it so a new one will be created next time
                 _eventDataUtf8ByteBuffer = null;
             }
 
-            var name = _eventName ?? Constants.MessageField;
-            _eventName = null;
             _logger.Debug("Received event \"{0}\"", name);
-            OnMessageReceived(new MessageReceivedEventArgs(message, name));
+            OnMessageReceived(new MessageReceivedEventArgs(message));
         }
 
-        private void OnOpened(StateChangedEventArgs e)
-        {
+        private void OnOpened(StateChangedEventArgs e) =>
             Opened?.Invoke(this, e);
-        }
 
-        private void OnClosed(StateChangedEventArgs e)
-        {
+        private void OnClosed(StateChangedEventArgs e) =>
             Closed?.Invoke(this, e);
-        }
 
-        private void OnMessageReceived(MessageReceivedEventArgs e)
-        {
+        private void OnMessageReceived(MessageReceivedEventArgs e) =>
             MessageReceived?.Invoke(this, e);
-        }
 
-        private void OnCommentReceived(CommentReceivedEventArgs e)
-        {
+        private void OnCommentReceived(CommentReceivedEventArgs e) =>
             CommentReceived?.Invoke(this, e);
-        }
 
-        private void OnError(ExceptionEventArgs e)
-        {
+        private void OnError(ExceptionEventArgs e) =>
             Error?.Invoke(this, e);
-        }
 
         #endregion
     }

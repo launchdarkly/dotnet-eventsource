@@ -44,9 +44,9 @@ namespace LaunchDarkly.EventSource.Tests
             {
                 EventSink.OpenedAction(ReadyState.Open),
                 EventSink.CommentReceivedAction(": hello"),
-                EventSink.MessageReceivedAction("message", new MessageEvent("value1", null, _uri)),
-                EventSink.MessageReceivedAction("event2", new MessageEvent("ça\nqué", null, _uri)),
-                EventSink.MessageReceivedAction("message", new MessageEvent(
+                EventSink.MessageReceivedAction(new MessageEvent("message", "value1", null, _uri)),
+                EventSink.MessageReceivedAction(new MessageEvent("event2", "ça\nqué", null, _uri)),
+                EventSink.MessageReceivedAction(new MessageEvent("message",
                     MakeLongString(0, 500) + MakeLongString(500, 1000), null, _uri))
             }
         };

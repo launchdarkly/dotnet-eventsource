@@ -16,7 +16,6 @@ namespace LaunchDarkly.EventSource.Tests
         {
             public string Kind { get; set; }
             public string Comment { get; set; }
-            public string EventName { get; set; }
             public MessageEvent Message { get; set; }
             public ReadyState ReadyState { get; set; }
             public Exception Exception { get; set; }
@@ -25,7 +24,6 @@ namespace LaunchDarkly.EventSource.Tests
                 o is Action a &&
                 Kind == a.Kind &&
                 Comment == a.Comment &&
-                EventName == a.EventName &&
                 object.Equals(Message, a.Message) &&
                 ReadyState == a.ReadyState &&
                 object.Equals(Exception, a.Exception);
@@ -40,7 +38,7 @@ namespace LaunchDarkly.EventSource.Tests
                     case "CommentReceived":
                         return Kind + "(" + Comment + ")";
                     case "MessageReceived":
-                        return Kind + "(" + EventName + "," + Message.Data + ")";
+                        return Kind + "(" + Message.Name + "," + Message.Data + ")";
                     case "Error":
                         return Kind + "(" + Exception + ")";
                     default:
@@ -67,8 +65,8 @@ namespace LaunchDarkly.EventSource.Tests
         public static Action CommentReceivedAction(string comment) =>
             new Action { Kind = "CommentReceived", Comment = comment };
 
-        public static Action MessageReceivedAction(string eventName, MessageEvent message) =>
-            new Action { Kind = "MessageReceived", EventName = eventName, Message = message };
+        public static Action MessageReceivedAction(MessageEvent message) =>
+            new Action { Kind = "MessageReceived", Message = message };
 
         public static Action ErrorAction(Exception e) =>
             new Action { Kind = "Error", Exception = e };
@@ -83,7 +81,7 @@ namespace LaunchDarkly.EventSource.Tests
             Add(CommentReceivedAction(args.Comment));
 
         public void OnMessageReceived(object sender, MessageReceivedEventArgs args) =>
-            Add(MessageReceivedAction(args.EventName, args.Message));
+            Add(MessageReceivedAction(args.Message));
 
         public void OnError(object sender, ExceptionEventArgs args) =>
             Add(ErrorAction(args.Exception));
