@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>4.0.0-alpha.2</Version>
+    <Version>4.0.0-alpha.3</Version>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
     <LicenseExpression>Apache-2.0</LicenseExpression>
     <AssemblyName>LaunchDarkly.EventSource</AssemblyName>
@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LaunchDarkly.Logging" Version="1.0.0-alpha.3" />
+    <PackageReference Include="LaunchDarkly.Logging" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
