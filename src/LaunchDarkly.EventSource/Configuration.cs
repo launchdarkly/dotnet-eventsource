@@ -58,8 +58,8 @@ namespace LaunchDarkly.EventSource
         /// <summary>
         /// The duration to wait before attempting to reconnect to the EventSource API.
         /// </summary>
-        public TimeSpan DelayRetryDuration { get; }
         /// <seealso cref="ConfigurationBuilder.DelayRetryDuration(TimeSpan)"/>
+        public TimeSpan DelayRetryDuration { get; }
 
         /// <summary>
         /// The amount of time a connection must stay open before the EventSource resets its backoff delay.
