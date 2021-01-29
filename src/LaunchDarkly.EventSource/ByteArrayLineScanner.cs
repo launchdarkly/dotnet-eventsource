@@ -168,7 +168,7 @@ namespace LaunchDarkly.EventSource
                     // If we've scanned all the data in the buffer, reset _startPos and _count to indicate
                     // that the entire buffer is available for the next read. It's safe for us to do this
                     // before the caller has looked at lineOut, because we're not actually modifying any
-                    // bytes in the buffer. It's the caller's not responsibility not to modify the buffer
+                    // bytes in the buffer. It's the caller's responsibility not to modify the buffer
                     // until it has already done whatever needs to be done with the lineOut data.
                     _startPos = _count = 0;
                 }
