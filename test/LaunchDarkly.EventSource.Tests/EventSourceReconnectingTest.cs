@@ -22,7 +22,7 @@ namespace LaunchDarkly.EventSource.Tests
             handler.QueueResponse(StubResponse.WithStatus(error2));
             handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(message)));
 
-            using (var es = MakeEventSource(handler, builder => builder.DelayRetryDuration(TimeSpan.FromMilliseconds(20))))
+            using (var es = MakeEventSource(handler, builder => builder.InitialRetryDelay(TimeSpan.FromMilliseconds(20))))
             {
                 var eventSink = new EventSink(es, _testLogging);
                 _ = Task.Run(es.StartAsync);
@@ -56,7 +56,7 @@ namespace LaunchDarkly.EventSource.Tests
             handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(message1), StreamAction.CloseStream()));
             handler.QueueResponse(StubResponse.StartStream());
 
-            using (var es = MakeEventSource(handler, builder => builder.DelayRetryDuration(TimeSpan.FromMilliseconds(20))
+            using (var es = MakeEventSource(handler, builder => builder.InitialRetryDelay(TimeSpan.FromMilliseconds(20))
                 .LastEventId(initialEventId)))
             {
                 var eventSink = new EventSink(es, _testLogging);
@@ -84,7 +84,7 @@ namespace LaunchDarkly.EventSource.Tests
 
             var backoffs = new List<TimeSpan>();
 
-            using (var es = MakeEventSource(handler, builder => builder.DelayRetryDuration(TimeSpan.FromMilliseconds(100))))
+            using (var es = MakeEventSource(handler, builder => builder.InitialRetryDelay(TimeSpan.FromMilliseconds(100))))
             {
                 _ = new EventSink(es, _testLogging);
                 es.Error += (_, ex) =>
