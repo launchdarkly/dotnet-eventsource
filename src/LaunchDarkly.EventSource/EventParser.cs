@@ -30,7 +30,7 @@ namespace LaunchDarkly.EventSource
 
         /// <summary>
         /// Attempts to parse a single non-empty line of SSE content that was read as a string. Empty lines
-        /// shoudl not be not passed to this method.
+        /// should not be not passed to this method.
         /// </summary>
         /// <param name="line">a line that was read from the stream, not including any trailing CR/LF</param>
         /// <returns>a <see cref="Result"/> containing the parsed field or comment; <c>ValueString</c> will
@@ -60,7 +60,7 @@ namespace LaunchDarkly.EventSource
 
         /// <summary>
         /// Attempts to parse a single non-empty line of SSE content that was read as UTF-8 bytes. Empty lines
-        /// shoudl not be not passed to this method.
+        /// should not be not passed to this method.
         /// </summary>
         /// <param name="line">a line that was read from the stream, not including any trailing CR/LF</param>
         /// <returns>a <see cref="Result"/> containing the parsed field or comment; <c>ValueBytes</c>
