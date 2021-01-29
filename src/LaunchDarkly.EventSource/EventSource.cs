@@ -105,10 +105,10 @@ namespace LaunchDarkly.EventSource
 
             _logger = _configuration.Logger;
 
-            _retryDelay = _configuration.DelayRetryDuration;
+            _retryDelay = _configuration.InitialRetryDelay;
 
             _backOff = new ExponentialBackoffWithDecorrelation(_retryDelay,
-                Configuration.MaximumRetryDuration);
+                Configuration.MaximumRetryDelay);
 
             _httpClient = _configuration.HttpClient ?? CreateHttpClient();
         }

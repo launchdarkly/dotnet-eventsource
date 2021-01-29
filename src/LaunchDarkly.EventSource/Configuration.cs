@@ -16,16 +16,16 @@ namespace LaunchDarkly.EventSource
         #region Constants
 
         /// <summary>
-        /// The default value for <see cref="ConfigurationBuilder.DelayRetryDuration(TimeSpan)"/>:
+        /// The default value for <see cref="ConfigurationBuilder.InitialRetryDelay(TimeSpan)"/>:
         /// one second.
         /// </summary>
-        public static readonly TimeSpan DefaultDelayRetryDuration = TimeSpan.FromSeconds(1);
+        public static readonly TimeSpan DefaultInitialRetryDelay = TimeSpan.FromSeconds(1);
 
         /// <summary>
-        /// The maximum value for <see cref="ConfigurationBuilder.DelayRetryDuration(TimeSpan)"/>:
+        /// The maximum value for <see cref="ConfigurationBuilder.InitialRetryDelay(TimeSpan)"/>:
         /// 30 seconds.
         /// </summary>
-        public static readonly TimeSpan MaximumRetryDuration = TimeSpan.FromSeconds(30);
+        public static readonly TimeSpan MaximumRetryDelay = TimeSpan.FromSeconds(30);
 
         /// <summary>
         /// The default value for <see cref="ConfigurationBuilder.ConnectionTimeout(TimeSpan)"/>:
@@ -76,12 +76,6 @@ namespace LaunchDarkly.EventSource
         public Encoding DefaultEncoding { get; }
 
         /// <summary>
-        /// The duration to wait before attempting to reconnect to the EventSource API.
-        /// </summary>
-        /// <seealso cref="ConfigurationBuilder.DelayRetryDuration(TimeSpan)"/>
-        public TimeSpan DelayRetryDuration { get; }
-
-        /// <summary>
         /// The HttpClient that will be used as the HTTP client, or null for a new HttpClient.
         /// </summary>
         /// <seealso cref="ConfigurationBuilder.HttpClient(HttpClient)"/>
@@ -92,6 +86,12 @@ namespace LaunchDarkly.EventSource
         /// </summary>
         /// <seealso cref="ConfigurationBuilder.HttpMessageHandler(HttpMessageHandler)"/>
         public HttpMessageHandler HttpMessageHandler { get; }
+
+        /// <summary>
+        /// The initial amount of time to wait before attempting to reconnect to the EventSource API.
+        /// </summary>
+        /// <seealso cref="ConfigurationBuilder.InitialRetryDelay(TimeSpan)"/>
+        public TimeSpan InitialRetryDelay { get; }
 
         /// <summary>
         /// Gets the last event identifier.
@@ -160,9 +160,9 @@ namespace LaunchDarkly.EventSource
             BackoffResetThreshold = builder._backoffResetThreshold;
             ConnectionTimeout = builder._connectionTimeout ?? DefaultConnectionTimeout;
             DefaultEncoding = builder._defaultEncoding ?? Encoding.UTF8;
-            DelayRetryDuration = builder._delayRetryDuration;
             HttpClient = builder._httpClient;
             HttpMessageHandler = (builder._httpClient != null) ? null : builder._httpMessageHandler;
+            InitialRetryDelay = builder._initialRetryDelay;
             LastEventId = builder._lastEventId;
             Logger = logger ?? Logs.None.Logger("");
             Method = builder._method;
