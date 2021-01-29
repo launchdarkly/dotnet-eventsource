@@ -6,7 +6,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using LaunchDarkly.Logging;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace LaunchDarkly.EventSource.Tests
 {
@@ -14,12 +16,23 @@ namespace LaunchDarkly.EventSource.Tests
     {
         private readonly Uri _uri = new Uri("http://test.com");
 
+        private readonly ITestOutputHelper _testOutput;
+        private readonly ILogAdapter _testLogging;
+
+        public EventSourceTests(ITestOutputHelper testOutput)
+        {
+            _testOutput = testOutput;
+            _testLogging = Logs.ToMethod(testOutput.WriteLine);
+        }
+
         [Fact]
         public void Can_Create_and_start_EventSource_without_specifying_message_handler()
         {
             // Testing this just because all of the other tests use a StubMessageHandler
-            var evt = new EventSource(Configuration.Builder(_uri).Build());
-            evt.StartAsync();
+            using (var evt = new EventSource(Configuration.Builder(_uri).Build()))
+            {
+                _ = evt.StartAsync();
+            }
         }
 
         [Fact]
@@ -568,98 +581,6 @@ namespace LaunchDarkly.EventSource.Tests
             await evt.StartAsync();
 
             Assert.Equal(1, handler.GetRequests().Count());
-        }
-
-        public async Task Connection_closed_before_threshold_gets_increasing_backoff_delay()
-        {
-            TimeSpan threshold = TimeSpan.FromSeconds(1);
-            TimeSpan closeDelay = TimeSpan.FromMilliseconds(100);
-            const int nAttempts = 3;
-
-            var handler = new StubMessageHandler();
-            for (var i = 0; i < nAttempts; i++)
-            {
-                handler.QueueResponse(StubResponse.StartStream(
-                    StreamAction.CloseStream().AfterDelay(closeDelay)));
-            }
-            handler.QueueResponse(StubResponse.StartStream());
-            
-            var config = new ConfigurationBuilder(_uri).MessageHandler(handler)
-                .BackoffResetThreshold(threshold).Build();
-            var evt = new EventSource(config);
-
-            var requestTimes = new List<DateTime>();
-            handler.RequestReceived += (_, r) =>
-            {
-                requestTimes.Add(DateTime.Now);
-                if (requestTimes.Count > nAttempts)
-                {
-                    evt.Close();
-                }
-            };
-            
-            await evt.StartAsync();
-
-            Assert.Equal(nAttempts + 1, handler.GetRequests().Count());
-
-            for (var i = 0; i < nAttempts; i++)
-            {
-                var interval = requestTimes[i + 1] - requestTimes[i] - closeDelay;
-                var min = (i == 0) ? TimeSpan.Zero : GetMaxBackoffDelayForAttempt(config, i);
-                var max = GetMaxBackoffDelayForAttempt(config, i + 1);
-                AssertTimeSpanInRange(interval, min, max);
-            }
-        }
-
-        public async Task Connection_closed_after_threshold_does_not_get_increasing_backoff_delay()
-        {
-            TimeSpan threshold = TimeSpan.FromMilliseconds(10);
-            TimeSpan closeDelay = TimeSpan.FromMilliseconds(100);
-            const int nAttempts = 3;
-
-            var handler = new StubMessageHandler();
-            for (var i = 0; i < nAttempts; i++)
-            {
-                handler.QueueResponse(StubResponse.StartStream(
-                    StreamAction.CloseStream().AfterDelay(closeDelay)));
-            }
-            handler.QueueResponse(StubResponse.StartStream());
-
-            var config = new ConfigurationBuilder(_uri).MessageHandler(handler)
-                .BackoffResetThreshold(threshold).Build();
-            var evt = new EventSource(config);
-
-            var requestTimes = new List<DateTime>();
-            handler.RequestReceived += (_, r) =>
-            {
-                requestTimes.Add(DateTime.Now);
-                if (requestTimes.Count == 3)
-                {
-                    evt.Close();
-                }
-            };
-
-            await evt.StartAsync();
-
-            var max = GetMaxBackoffDelayForAttempt(config, 1);
-            for (var i = 0; i < nAttempts; i++)
-            {
-                var interval = requestTimes[i + 1] - requestTimes[i] - closeDelay;
-                AssertTimeSpanInRange(interval, TimeSpan.Zero, max);
-            }
-        }
-
-        TimeSpan GetMaxBackoffDelayForAttempt(Configuration config, int attempt)
-        {
-            var backoff = new ExponentialBackoffWithDecorrelation(config.DelayRetryDuration,
-                Configuration.MaximumRetryDuration);
-            return TimeSpan.FromMilliseconds(backoff.GetMaximumMillisecondsForAttempt(attempt));
-        }
-
-        void AssertTimeSpanInRange(TimeSpan t, TimeSpan min, TimeSpan max)
-        {
-            Assert.True(t >= min, "TimeSpan of " + t + " should have been >= " + min);
-            Assert.True(t <= max, "TimeSpan of " + t + " should have been <= " + max);
         }
     }
 

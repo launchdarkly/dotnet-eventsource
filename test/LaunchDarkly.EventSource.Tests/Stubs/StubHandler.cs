@@ -67,6 +67,11 @@ namespace LaunchDarkly.EventSource.Tests
         {
             return new StubResponseWithStream(actions);
         }
+
+        public static StubResponse StartStream(Encoding encoding, params StreamAction[] actions)
+        {
+            return new StubResponseWithStream(actions, encoding);
+        }
     }
 
     internal class StubResponseWithHttpResponse : StubResponse
@@ -95,10 +100,14 @@ namespace LaunchDarkly.EventSource.Tests
     internal class StubResponseWithStream : StubResponse
     {
         private readonly StreamAction[] _actions;
+        private readonly Encoding _encoding;
+        private readonly bool _specifiedEncoding;
 
-        public StubResponseWithStream(StreamAction[] actions)
+        public StubResponseWithStream(StreamAction[] actions, Encoding encoding = null)
         {
             _actions = actions;
+            _encoding = encoding ?? Encoding.UTF8;
+            _specifiedEncoding = encoding != null;
         }
 
         override public HttpResponseMessage MakeResponse(CancellationToken cancellationToken)
@@ -108,6 +117,10 @@ namespace LaunchDarkly.EventSource.Tests
             var streamWrite = new AnonymousPipeClientStream(PipeDirection.Out, streamRead.ClientSafePipeHandle);
             var content = new StreamContent(streamRead);
             content.Headers.ContentType = new MediaTypeHeaderValue("text/event-stream");
+            if (_specifiedEncoding)
+            {
+                content.Headers.ContentType.CharSet = _encoding.HeaderName;
+            }
             httpResponse.Content = content;
 
             Task.Run(() => WriteStreamingResponse(streamWrite, cancellationToken));
@@ -130,7 +143,7 @@ namespace LaunchDarkly.EventSource.Tests
                         output.Close();
                         return;
                     }
-                    byte[] data = Encoding.UTF8.GetBytes(action.Content);
+                    var data = _encoding.GetBytes(action.Content);
                     await output.WriteAsync(data, 0, data.Length, cancellationToken);
                 }
                 // if we've run out of actions, leave the stream open until it's cancelled
@@ -157,25 +170,16 @@ namespace LaunchDarkly.EventSource.Tests
             Content = content;
         }
 
-        public bool ShouldQuit()
-        {
-            return Content == null;
-        }
+        public bool ShouldQuit() => Content is null;
 
-        public static StreamAction Write(string content)
-        {
-            return new StreamAction(TimeSpan.Zero, content);
-        }
+        public static StreamAction Write(string content) =>
+            new StreamAction(TimeSpan.Zero, content);
 
-        public static StreamAction CloseStream()
-        {
-            return new StreamAction(TimeSpan.Zero, null);
-        }
+        public static StreamAction CloseStream() =>
+            new StreamAction(TimeSpan.Zero, null);
 
-        public StreamAction AfterDelay(TimeSpan delay)
-        {
-            return new StreamAction(delay, Content);
-        }
+        public StreamAction AfterDelay(TimeSpan delay) =>
+            new StreamAction(delay, Content);
     }
 
     public class HttpResponseMessageWithError : HttpResponseMessage

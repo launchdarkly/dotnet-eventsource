@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ using LaunchDarkly.Logging;
 namespace LaunchDarkly.EventSource
 {
     /// <summary>
-    /// Provides an EventSource client for consuming Server Sent Events. Additional details on the Server Sent Events spec
+    /// Provides an EventSource client for consuming Server-Sent Events. Additional details on the Server-Sent Events spec
     /// can be found at https://html.spec.whatwg.org/multipage/server-sent-events.html
     /// </summary>
     public class EventSource : IEventSource, IDisposable
@@ -19,8 +20,9 @@ namespace LaunchDarkly.EventSource
         private readonly HttpClient _httpClient;
         private readonly Logger _logger;
 
-        private List<string> _eventBuffer;
-        private string _eventName = Constants.MessageField;
+        private List<string> _eventDataStringBuffer;
+        private MemoryStream _eventDataUtf8ByteBuffer;
+        private string _eventName;
         private string _lastEventId;
         private TimeSpan _retryDelay;
         private readonly ExponentialBackoffWithDecorrelation _backOff;
@@ -286,7 +288,8 @@ namespace LaunchDarkly.EventSource
 
         private async Task ConnectToEventSourceAsync(CancellationToken cancellationToken)
         {
-            _eventBuffer = new List<string>();
+            _eventDataStringBuffer = null;
+            _eventDataUtf8ByteBuffer = null;
 
             var svc = GetEventSourceService(_configuration);
 
@@ -297,7 +300,8 @@ namespace LaunchDarkly.EventSource
             svc.ConnectionClosed += (o, e) => { SetReadyState(ReadyState.Closed, OnClosed); };
 
             await svc.GetDataAsync(
-                ProcessResponseContent,
+                ProcessResponseLineString,
+                ProcessResponseLineUtf8,
                 _lastEventId,
                 cancellationToken
             );
@@ -309,7 +313,7 @@ namespace LaunchDarkly.EventSource
             SetReadyState(state, OnClosed);
         }
         
-        private void ProcessResponseContent(string content)
+        private void ProcessResponseLineString(string content)
         {
             if (content == null)
             {
@@ -317,25 +321,28 @@ namespace LaunchDarkly.EventSource
                 // be done at this level in that case
                 return;
             }
-            if (string.IsNullOrEmpty(content.Trim()))
+            if (content.Length == 0)
             {
                 DispatchEvent();
             }
-            else if (EventParser.IsComment(content))
+            else
             {
-                OnCommentReceived(new CommentReceivedEventArgs(content));
+                HandleParsedLine(EventParser.ParseLineString(content));
             }
-            else if (EventParser.ContainsField(content))
-            {
-                var field = EventParser.GetFieldFromLine(content);
+        }
 
-                ProcessField(field.Key, field.Value);
+        private void ProcessResponseLineUtf8(Utf8ByteSpan content)
+        {
+            if (content.Length == 0)
+            {
+                DispatchEvent();
             }
             else
             {
-                ProcessField(content.Trim(), string.Empty);
+                HandleParsedLine(EventParser.ParseLineUtf8Bytes(content));
             }
         }
+
 
         private void SetReadyState(ReadyState state, Action<StateChangedEventArgs> action = null)
         {
@@ -354,43 +361,85 @@ namespace LaunchDarkly.EventSource
             }
         }
 
-        private void ProcessField(string field, string value)
+        private void HandleParsedLine(EventParser.Result result)
         {
-            if (EventParser.IsDataFieldName(field))
+            if (result.IsComment)
             {
-                _eventBuffer.Add(value);
-                _eventBuffer.Add("\n");
+                OnCommentReceived(new CommentReceivedEventArgs(result.GetValueAsString()));
             }
-            else if (EventParser.IsIdFieldName(field))
+            else if (result.IsDataField)
             {
-                _lastEventId = value;
+                if (result.ValueString != null)
+                {
+                    if (_eventDataStringBuffer is null)
+                    {
+                        _eventDataStringBuffer = new List<string>(2);
+                    }
+                    _eventDataStringBuffer.Add(result.ValueString);
+                    _eventDataStringBuffer.Add("\n");
+                }
+                else
+                {
+                    if (_eventDataUtf8ByteBuffer is null)
+                    {
+                        _eventDataUtf8ByteBuffer = new MemoryStream(result.ValueBytes.Length + 1);
+                    }
+                    _eventDataUtf8ByteBuffer.Write(result.ValueBytes.Data, result.ValueBytes.Offset, result.ValueBytes.Length);
+                    _eventDataUtf8ByteBuffer.WriteByte((byte)'\n');
+                }
             }
-            else if (EventParser.IsEventFieldName(field))
+            else if (result.IsEventField)
             {
-                _eventName = value;
+                _eventName = result.GetValueAsString();
             }
-            else if (EventParser.IsRetryFieldName(field) && EventParser.IsStringNumeric(value))
+            else if (result.IsIdField)
             {
-                long retry;
-
-                if (long.TryParse(value, out retry))
+                _lastEventId = result.GetValueAsString();
+            }
+            else if (result.IsRetryField)
+            {
+                if (long.TryParse(result.GetValueAsString(), out var retry))
+                {
                     _retryDelay = TimeSpan.FromMilliseconds(retry);
+                }
             }
         }
 
         private void DispatchEvent()
         {
-            if (_eventBuffer.Count == 0) return;
+            MessageEvent message;
+            if (_eventDataStringBuffer != null)
+            {
+                if (_eventDataStringBuffer.Count == 0)
+                {
+                    return;
+                }
+                // remove last item which is always a trailing newline
+                _eventDataStringBuffer.RemoveAt(_eventDataStringBuffer.Count - 1);
+                var dataString = string.Concat(_eventDataStringBuffer);
+                message = new MessageEvent(dataString, _lastEventId, _configuration.Uri);
 
-            _eventBuffer.RemoveAll(item => item.Equals("\n"));
+                _eventDataStringBuffer.Clear();
+            }
+            else
+            {
+                if (_eventDataUtf8ByteBuffer is null || _eventDataUtf8ByteBuffer.Length == 0)
+                {
+                    return;
+                }
+                var dataSpan = new Utf8ByteSpan(_eventDataUtf8ByteBuffer.GetBuffer(), 0,
+                    (int)_eventDataUtf8ByteBuffer.Length - 1); // remove trailing newline
+                message = new MessageEvent(dataSpan, _lastEventId, _configuration.Uri);
 
-            var message = new MessageEvent(string.Concat(_eventBuffer), _lastEventId, _configuration.Uri);
-            _logger.Debug("Received event \"{0}\"", _eventName);
+                // We've now taken ownership of the original buffer; null out the previous
+                // reference to it so a new one will be created next time
+                _eventDataUtf8ByteBuffer = null;
+            }
 
-            OnMessageReceived(new MessageReceivedEventArgs(message, _eventName));
-
-            _eventBuffer.Clear();
-            _eventName = Constants.MessageField;
+            var name = _eventName ?? Constants.MessageField;
+            _eventName = null;
+            _logger.Debug("Received event \"{0}\"", name);
+            OnMessageReceived(new MessageReceivedEventArgs(message, name));
         }
 
         private void OnOpened(StateChangedEventArgs e)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using LaunchDarkly.Logging;
 
@@ -48,6 +49,7 @@ namespace LaunchDarkly.EventSource
         /// <summary>
         /// the connection timeout value used when connecting to the EventSource API.
         /// </summary>
+        /// <seealso cref="ConfigurationBuilder.ConnectionTimeout(TimeSpan)"/>
         public TimeSpan ConnectionTimeout { get; }
 
         [Obsolete("Use ConnectionTimeout.")]
@@ -56,16 +58,26 @@ namespace LaunchDarkly.EventSource
         /// <summary>
         /// The duration to wait before attempting to reconnect to the EventSource API.
         /// </summary>
+        /// <seealso cref="ConfigurationBuilder.DelayRetryDuration(TimeSpan)"/>
         public TimeSpan DelayRetryDuration { get; }
 
         /// <summary>
         /// The amount of time a connection must stay open before the EventSource resets its backoff delay.
         /// </summary>
+        /// <seealso cref="ConfigurationBuilder.BackoffResetThreshold(TimeSpan)"/>
         public TimeSpan BackoffResetThreshold { get; }
+
+        /// <summary>
+        /// The character encoding to use when reading the stream if the server did not specify
+        /// an encoding in a <c>Content-Type</c> header.
+        /// </summary>
+        /// <seealso cref="ConfigurationBuilder.DefaultEncoding(Encoding)"/>
+        public Encoding DefaultEncoding { get; }
 
         /// <summary>
         /// The timeout when reading from the EventSource API.
         /// </summary>
+        /// <seealso cref="ConfigurationBuilder.ReadTimeout(TimeSpan)"/>
         public TimeSpan ReadTimeout { get; }
 
         [Obsolete("Use ReadTimeout.")]
@@ -74,6 +86,7 @@ namespace LaunchDarkly.EventSource
         /// <summary>
         /// Gets the last event identifier.
         /// </summary>
+        /// <seealso cref="ConfigurationBuilder.LastEventId(string)"/>
         public string LastEventId { get; }
 
         /// <summary>
@@ -82,33 +95,46 @@ namespace LaunchDarkly.EventSource
         /// <remarks>
         /// This is never null; if logging is not configured, it will be <c>LaunchDarkly.Logging.Logs.None</c>.
         /// </remarks>
+        /// <seealso cref="ConfigurationBuilder.Logger(Logger)"/>
         public Logger Logger { get; }
 
         /// <summary>
         /// The request headers to be sent with each EventSource HTTP request.
         /// </summary>
+        /// <seealso cref="ConfigurationBuilder.RequestHeader(string, string)"/>
+        /// <seealso cref="ConfigurationBuilder.RequestHeaders(IDictionary{string, string})"/>
         public IDictionary<string, string> RequestHeaders { get; }
 
         /// <summary>
         /// The HttpMessageHandler that will be used for the HTTP client, or null for the default handler.
         /// </summary>
+        /// <seealso cref="ConfigurationBuilder.MessageHandler(HttpMessageHandler)"/>
         public HttpMessageHandler MessageHandler { get; }
 
         /// <summary>
         /// The HttpClient that will be used as the HTTP client, or null for a new HttpClient.
         /// </summary>
+        /// <seealso cref="ConfigurationBuilder.HttpClient(HttpClient)"/>
         public HttpClient HttpClient { get; }
 
         /// <summary>
         /// The HTTP method that will be used when connecting to the EventSource API.
         /// </summary>
+        /// <seealso cref="ConfigurationBuilder.Method(HttpMethod)"/>
         public HttpMethod Method { get; }
+
+        /// <summary>
+        /// Whether to use UTF-8 byte arrays internally if possible when reading the stream.
+        /// </summary>
+        /// <seealso cref="ConfigurationBuilder.PreferDataAsUtf8Bytes(bool)"/>
+        public bool PreferDataAsUtf8Bytes { get; }
 
         /// <summary>
         /// A factory for HTTP request body content, if the HTTP method is one that allows a request body.
         /// is one that allows a request body. This is in the form of a factory function because the request
         /// may need to be sent more than once.
         /// </summary>
+        /// <seealso cref="ConfigurationBuilder.RequestBodyFactory(HttpContentFactory)"/>
         public HttpContentFactory RequestBodyFactory { get; }
 
         /// <summary>
@@ -154,9 +180,22 @@ namespace LaunchDarkly.EventSource
         ///     <p>- or - </p>
         ///     <p><paramref name="readTimeout"/> is less than zero. </p>
         /// </exception>
-        public Configuration(Uri uri, HttpMessageHandler messageHandler = null, TimeSpan? connectionTimeout = null, TimeSpan? delayRetryDuration = null,
-            TimeSpan? readTimeout = null, IDictionary<string, string> requestHeaders = null, string lastEventId = null, Logger logger = null,
-            HttpMethod method = null, HttpContentFactory requestBodyFactory = null, TimeSpan? backoffResetThreshold = null, HttpClient httpClient = null)
+        public Configuration(
+            Uri uri,
+            HttpMessageHandler messageHandler = null,
+            TimeSpan? connectionTimeout = null,
+            TimeSpan? delayRetryDuration = null,
+            TimeSpan? readTimeout = null,
+            IDictionary<string, string> requestHeaders = null,
+            string lastEventId = null,
+            Logger logger = null,
+            HttpMethod method = null,
+            HttpContentFactory requestBodyFactory = null,
+            TimeSpan? backoffResetThreshold = null,
+            HttpClient httpClient = null,
+            Encoding defaultEncoding = null,
+            bool preferDataAsUtf8Bytes = false
+            )
         {
             if (uri == null)
             {
@@ -196,6 +235,8 @@ namespace LaunchDarkly.EventSource
             Logger = logger ?? Logs.None.Logger("");
             Method = method;
             RequestBodyFactory = requestBodyFactory;
+            DefaultEncoding = defaultEncoding ?? Encoding.UTF8;
+            PreferDataAsUtf8Bytes = preferDataAsUtf8Bytes;
         }
 
         #endregion

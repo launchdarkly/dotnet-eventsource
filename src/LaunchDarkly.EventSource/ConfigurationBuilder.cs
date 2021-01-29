@@ -8,22 +8,27 @@ namespace LaunchDarkly.EventSource
 {
     /// <summary>
     /// A standard Builder pattern for constructing a <see cref="Configuration"/> instance.
-    /// 
+    /// </summary>
+    /// <remarks>
+    /// <para>
     /// Initialize a builder by calling <c>new ConfigurationBuilder(uri)</c> or
     /// <c>Configuration.Builder(uri)</c>. The URI is always required; all other properties
     /// are set to defaults. Use the builder's setter methods to modify any desired properties;
     /// setter methods can be chained. Then call <c>Build()</c> to construct the final immutable
     /// <c>Configuration</c>.
-    /// 
+    /// </para>
+    /// <para>
     /// All setter methods will throw <c>ArgumentException</c> if called with an invalid value,
     /// so it is never possible for <c>Build()</c> to fail.
-    /// </summary>
+    /// </para>
+    /// </remarks>
     public class ConfigurationBuilder
     {
         #region Private Fields
 
         private readonly Uri _uri;
         private TimeSpan? _connectionTimeout = null;
+        private Encoding _defaultEncoding = Encoding.UTF8;
         private TimeSpan _delayRetryDuration = Configuration.DefaultDelayRetryDuration;
         private TimeSpan _backoffResetThreshold = Configuration.DefaultBackoffResetThreshold;
         private TimeSpan _readTimeout = Configuration.DefaultReadTimeout;
@@ -34,6 +39,7 @@ namespace LaunchDarkly.EventSource
         private HttpMessageHandler _messageHandler;
         private HttpClient _httpClient;
         private HttpMethod _method = HttpMethod.Get;
+        private bool _preferDataAsUtf8Bytes = false;
         private Configuration.HttpContentFactory _requestBodyFactory;
 
         #endregion
@@ -62,7 +68,8 @@ namespace LaunchDarkly.EventSource
             var logger = _logger ??
                 (_logAdapter is null ? null : _logAdapter.Logger(Configuration.DefaultLoggerName));
             return new Configuration(_uri, _messageHandler, _connectionTimeout, _delayRetryDuration, _readTimeout,
-                _requestHeaders, _lastEventId, _logger, _method, _requestBodyFactory, httpClient: _httpClient);
+                _requestHeaders, _lastEventId, logger, _method, _requestBodyFactory,
+                _backoffResetThreshold, _httpClient, _defaultEncoding, _preferDataAsUtf8Bytes);
         }
 
         /// <summary>
@@ -77,6 +84,21 @@ namespace LaunchDarkly.EventSource
         {
             Configuration.CheckConnectionTimeout(connectionTimeout);
             _connectionTimeout = connectionTimeout;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the character encoding to use when reading the stream if the server did not specify
+        /// an encoding in a <c>Content-Type</c> header.
+        /// </summary>
+        /// <param name="defaultEncoding">A <c>System.Text.Encoding</c>; if null, the default
+        /// is <see cref="Encoding.UTF8"/></param>
+        /// <returns>the builder</returns>
+        /// <seealso cref="MessageEvent"/>
+        /// <seealso cref="PreferDataAsUtf8Bytes"/>
+        public ConfigurationBuilder DefaultEncoding(Encoding defaultEncoding)
+        {
+            _defaultEncoding = defaultEncoding ?? Encoding.UTF8;
             return this;
         }
 
@@ -220,6 +242,36 @@ namespace LaunchDarkly.EventSource
         public ConfigurationBuilder Logger(Logger logger)
         {
             _logger = logger;
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies whether to use UTF-8 byte arrays internally if possible when
+        /// reading the stream.
+        /// </summary>
+        /// <remarks>
+        /// As described in <see cref="MessageEvent"/>, in some applications it may be
+        /// preferable to store and process event data as UTF-8 byte arrays rather than
+        /// strings. By default, <c>EventSource</c> will use the <c>string</c> type when
+        /// processing the event stream; if you then use <see cref="MessageEvent.DataUtf8Bytes"/>
+        /// to get the data, it will be converted to a byte array as needed. It will also
+        /// always use the <c>string</c> type internally if the stream's encoding is not
+        /// UTF-8. However, if the stream's encoding is UTF-8 <c>and</c> you have set
+        /// <c>PreferDataAsUtf8Bytes</c> to <see langword="true"/>, the event data will
+        /// be stored internally as a UTF-8 byte array so that if you read
+        /// <see cref="MessageEvent.DataUtf8Bytes"/>, you will get the same array with no
+        /// extra copying or conversion. Therefore, for greatest efficiency you should set
+        /// this to <see langword="true"/> if you intend to process the data as UTF-8 and
+        /// if you expect that the server will provide it in that encoding. If the server
+        /// turns out not to use that encoding, everything will still work the same except
+        /// that there will be more overhead from string conversion.
+        /// </remarks>
+        /// <param name="preferDataAsUtf8Bytes">true if you intend to request the event
+        /// data as UTF-8 bytes</param>
+        /// <returns>the builder</returns>
+        public ConfigurationBuilder PreferDataAsUtf8Bytes(bool preferDataAsUtf8Bytes)
+        {
+            _preferDataAsUtf8Bytes = preferDataAsUtf8Bytes;
             return this;
         }
 

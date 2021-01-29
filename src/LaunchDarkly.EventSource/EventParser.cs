@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace LaunchDarkly.EventSource
@@ -9,119 +10,87 @@ namespace LaunchDarkly.EventSource
     /// </summary>
     internal static class EventParser
     {
-
         /// <summary>
-        /// Determines if the specified value is a Comment in a Server Sent Event message.
+        /// The result returned by <see cref="ParseLineString(string)"/> or <see cref="ParseLineUtf8Bytes(Utf8ByteSpan)"/>.
         /// </summary>
-        /// <param name="value">A string value.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified value is a comment; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool IsComment(string value)
+        internal struct Result
         {
-            if (string.IsNullOrWhiteSpace(value)) return false;
+            internal string FieldName { get; set; } // null means it's a comment
+            internal string ValueString { get; set; }
+            internal Utf8ByteSpan ValueBytes { get; set; }
 
-            return value.StartsWith(":", StringComparison.OrdinalIgnoreCase);
+            internal string GetValueAsString() => ValueString is null ? ValueBytes.GetString() : ValueString;
+
+            internal bool IsComment => FieldName is null;
+            internal bool IsDataField => FieldName == "data";
+            internal bool IsEventField => FieldName == "event";
+            internal bool IsIdField => FieldName == "id";
+            internal bool IsRetryField => FieldName == "retry";
         }
 
         /// <summary>
-        /// Determines if the specified value is a data field in a Server Sent Event message.
+        /// Attempts to parse a single non-empty line of SSE content that was read as a string. Empty lines
+        /// should not be not passed to this method.
         /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified value is a data field; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool IsDataFieldName(string value)
+        /// <param name="line">a line that was read from the stream, not including any trailing CR/LF</param>
+        /// <returns>a <see cref="Result"/> containing the parsed field or comment; <c>ValueString</c> will
+        /// be set rather than <c>ValueBytes</c></returns>
+        internal static Result ParseLineString(string line)
         {
-            return Constants.DataField.Equals(value, StringComparison.OrdinalIgnoreCase);
+            var colonPos = line.IndexOf(':');
+            if (colonPos == 0) // comment
+            {
+                return new Result { ValueString = line };
+            }
+            if (colonPos < 0) // field name without a value - assume empty value
+            {
+                return new Result { FieldName = line, ValueString = "" };
+            }
+            int valuePos = colonPos + 1;
+            if (valuePos < line.Length && line[valuePos] == ' ')
+            {
+                valuePos++; // trim a single leading space from the value, if present
+            }
+            return new Result
+            {
+                FieldName = line.Substring(0, colonPos),
+                ValueString = line.Substring(valuePos)
+            };
         }
 
         /// <summary>
-        /// Determines if the specified value is an ID field in a Server Sent Event message.
+        /// Attempts to parse a single non-empty line of SSE content that was read as UTF-8 bytes. Empty lines
+        /// should not be not passed to this method.
         /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified value is an ID field; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool IsIdFieldName(string value)
+        /// <param name="line">a line that was read from the stream, not including any trailing CR/LF</param>
+        /// <returns>a <see cref="Result"/> containing the parsed field or comment; <c>ValueBytes</c>
+        /// will be set rather than <c>ValueString</c></returns>
+        public static Result ParseLineUtf8Bytes(Utf8ByteSpan line)
         {
-            return Constants.IdField.Equals(value, StringComparison.OrdinalIgnoreCase);
+            if (line.Length > 0 && line.Data[line.Offset] == ':') // comment
+            {
+                return new Result { ValueBytes = line };
+            }
+            int colonPos = 0;
+            for (; colonPos < line.Length && line.Data[line.Offset + colonPos] != ':'; colonPos++) { }
+            string fieldName = Encoding.UTF8.GetString(line.Data, line.Offset, colonPos);
+            if (colonPos == line.Length) // field name without a value - assume empty value
+            {
+                return new Result {
+                    FieldName = fieldName,
+                    ValueBytes = new Utf8ByteSpan()
+                };
+            }
+            int valuePos = colonPos + 1;
+            if (valuePos < line.Length && line.Data[line.Offset + valuePos] == ' ')
+            {
+                valuePos++; // trim a single leading space from the value, if present
+            }
+            return new Result
+            {
+                FieldName = fieldName,
+                ValueBytes = new Utf8ByteSpan(line.Data, line.Offset + valuePos, line.Length - valuePos)
+            };
         }
-
-        /// <summary>
-        /// Determines if the specified value is an event field in a Server Sent Event message.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified value is an event field; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool IsEventFieldName(string value)
-        {
-            return Constants.EventField.Equals(value, StringComparison.OrdinalIgnoreCase);
-        }
-
-        /// <summary>
-        /// Determines if the specified value is a retry field in a Server Sent Event message.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified value is a retry field; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool IsRetryFieldName(string value)
-        {
-            return Constants.RetryField.Equals(value, StringComparison.OrdinalIgnoreCase);
-        }
-
-        /// <summary>
-        /// Determines if the specified value contains a field in a Server Sent Event message.
-        /// </summary>
-        /// <remarks>
-        /// This method looks for the index of a first occuring colon character in the specified value. Returns true if the index is greater than zero (a zero index value would indicate a comment rather than a field).
-        /// </remarks>
-        /// <param name="value">The value.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified value contains a field; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool ContainsField(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value)) return false;
-
-            return value.IndexOf(":", StringComparison.Ordinal) > 0;
-        }
-
-        /// <summary>
-        /// Gets the field and value from a server sent event message.
-        /// </summary>
-        /// <remarks>
-        /// For processing server sent event messages, see the documentation titled <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html#processField">Process the Field</a>
-        /// </remarks>
-        /// <param name="value">The server sent event message.</param>
-        /// <returns></returns>
-        public static KeyValuePair<string, string> GetFieldFromLine(string value)
-        {
-            if (!ContainsField(value)) return new KeyValuePair<string, string>();
-
-            var colonIndex = value.IndexOf(":", StringComparison.Ordinal);
-
-            var fieldName = value.Substring(0, colonIndex);
-            var fieldValue = value.Substring(colonIndex + 1).TrimStart(' ');
-
-            return new KeyValuePair<string, string>(fieldName, fieldValue);
-        }
-
-        /// <summary>
-        /// Determines if the specified string is numeric (contains only numeric characters).
-        /// </summary>
-        /// <param name="value">The string value to inspect.</param>
-        /// <returns>
-        ///   <c>true</c> if the string value is numeric; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool IsStringNumeric(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value)) return false;
-
-            return Regex.IsMatch(value, @"^[\d]+$");
-        }
-        
     }
 }
