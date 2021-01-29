@@ -80,10 +80,26 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
-        public void InitialRetryDelayHasMaximum()
+        public void MaxRetryDelayHasDefault()
         {
-            var b = Configuration.Builder(uri).InitialRetryDelay(Configuration.MaximumRetryDelay + TimeSpan.FromSeconds(1));
-            Assert.Equal(Configuration.MaximumRetryDelay, b.Build().InitialRetryDelay);
+            var b = Configuration.Builder(uri);
+            Assert.Equal(Configuration.DefaultMaxRetryDelay, b.Build().MaxRetryDelay);
+        }
+
+        [Fact]
+        public void BuilderSetsMaxRetryDelay()
+        {
+            var ts = TimeSpan.FromSeconds(9);
+            var b = Configuration.Builder(uri).MaxRetryDelay(ts);
+            Assert.Equal(ts, b.Build().MaxRetryDelay);
+        }
+
+        [Fact]
+        public void NegativeMaxRetryDelayBecomesZero()
+        {
+            var ts = Timeout.InfiniteTimeSpan;
+            var b = Configuration.Builder(uri).MaxRetryDelay(TimeSpan.FromSeconds(-9));
+            Assert.Equal(TimeSpan.Zero, b.Build().MaxRetryDelay);
         }
 
         [Fact]
@@ -145,7 +161,6 @@ namespace LaunchDarkly.EventSource.Tests
             var b = Configuration.Builder(uri).LogAdapter(logMessages);
             var logger = b.Build().Logger;
             logger.Info("hello");
-
             Assert.Equal(new List<LogCapture.Message>
             {
                 new LogCapture.Message("EventSource", LogLevel.Info, "hello")
