@@ -56,7 +56,6 @@ namespace LaunchDarkly.EventSource.Tests
             }
         }
 
-
         [Fact]
         public void ConnectingLogMessage()
         {
