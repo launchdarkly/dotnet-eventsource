@@ -169,9 +169,9 @@ namespace LaunchDarkly.EventSource
             HttpMessageHandler = (builder._httpClient != null) ? null : builder._httpMessageHandler;
             LastEventId = builder._lastEventId;
             Logger = logger ?? Logs.None.Logger("");
+            Method = builder._method;
             ReadTimeout = builder._readTimeout;
             RequestHeaders = new Dictionary<string, string>(builder._requestHeaders);
-            Method = builder._method;
             PreferDataAsUtf8Bytes = builder._preferDataAsUtf8Bytes;
             RequestBodyFactory = builder._requestBodyFactory;
         }
