@@ -30,7 +30,6 @@ namespace LaunchDarkly.EventSource
         /// <summary>
         /// The default value for <see cref="ConfigurationBuilder.ConnectionTimeout(TimeSpan)"/>:
         /// 10 seconds.
-        /// one second.
         /// </summary>
         public static readonly TimeSpan DefaultConnectionTimeout = TimeSpan.FromSeconds(10);
 
