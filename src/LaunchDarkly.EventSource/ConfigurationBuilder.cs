@@ -30,7 +30,7 @@ namespace LaunchDarkly.EventSource
         internal readonly Uri _uri;
         internal TimeSpan? _connectionTimeout = null;
         internal Encoding _defaultEncoding = Encoding.UTF8;
-        internal TimeSpan _delayRetryDuration = Configuration.DefaultDelayRetryDuration;
+        internal TimeSpan _initialRetryDelay = Configuration.DefaultInitialRetryDelay;
         internal TimeSpan _backoffResetThreshold = Configuration.DefaultBackoffResetThreshold;
         internal TimeSpan _readTimeout = Configuration.DefaultReadTimeout;
         internal string _lastEventId;
@@ -105,17 +105,21 @@ namespace LaunchDarkly.EventSource
         /// a backoff algorithm.
         /// </para>
         /// <para>
-        /// The default value is <see cref="Configuration.DefaultDelayRetryDuration"/>. The maximum
-        /// allowed value is <see cref="Configuration.MaximumRetryDuration"/>; values greater than
+        /// The default value is <see cref="Configuration.DefaultInitialRetryDelay"/>. The maximum
+        /// allowed value is <see cref="Configuration.MaximumRetryDelay"/>; values greater than
         /// the maximum will be changed to the maximum. Negative values are changed to zero.
         /// </para>
+        /// <para>
+        /// The actual duration of each delay will vary slightly because there is a random jitter
+        /// factor to avoid clients all reconnecting at once.
+        /// </para>
         /// </remarks>
-        /// <param name="delayRetryDuration">the initial retry delay</param>
+        /// <param name="initialRetryDelay">the initial retry delay</param>
         /// <returns>the builder</returns>
-        public ConfigurationBuilder DelayRetryDuration(TimeSpan delayRetryDuration)
+        public ConfigurationBuilder InitialRetryDelay(TimeSpan initialRetryDelay)
         {
-            _delayRetryDuration = FiniteTimeSpan(
-                delayRetryDuration > Configuration.MaximumRetryDuration ? Configuration.MaximumRetryDuration : delayRetryDuration);
+            _initialRetryDelay = FiniteTimeSpan(
+                initialRetryDelay > Configuration.MaximumRetryDelay ? Configuration.MaximumRetryDelay : initialRetryDelay);
             return this;
         }
 

@@ -57,26 +57,26 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
-        public void DelayRetryDurationHasDefault()
+        public void InitialRetryDelayHasDefault()
         {
             var b = Configuration.Builder(uri);
-            Assert.Equal(Configuration.DefaultDelayRetryDuration, b.Build().DelayRetryDuration);
+            Assert.Equal(Configuration.DefaultInitialRetryDelay, b.Build().InitialRetryDelay);
         }
 
         [Fact]
-        public void BuilderSetsDelayRetryDuration()
+        public void BuilderSetsInitialRetryDelay()
         {
             var ts = TimeSpan.FromSeconds(9);
-            var b = Configuration.Builder(uri).DelayRetryDuration(ts);
-            Assert.Equal(ts, b.Build().DelayRetryDuration);
+            var b = Configuration.Builder(uri).InitialRetryDelay(ts);
+            Assert.Equal(ts, b.Build().InitialRetryDelay);
         }
 
         [Fact]
-        public void NegativeDelayRetryDurationBecomesZero()
+        public void NegativeInitialRetryDelayBecomesZero()
         {
             var ts = Timeout.InfiniteTimeSpan;
-            var b = Configuration.Builder(uri).DelayRetryDuration(TimeSpan.FromSeconds(-9));
-            Assert.Equal(TimeSpan.Zero, b.Build().DelayRetryDuration);
+            var b = Configuration.Builder(uri).InitialRetryDelay(TimeSpan.FromSeconds(-9));
+            Assert.Equal(TimeSpan.Zero, b.Build().InitialRetryDelay);
         }
 
         [Fact]
