@@ -107,8 +107,7 @@ namespace LaunchDarkly.EventSource
 
             _retryDelay = _configuration.InitialRetryDelay;
 
-            _backOff = new ExponentialBackoffWithDecorrelation(_retryDelay,
-                Configuration.MaximumRetryDelay);
+            _backOff = new ExponentialBackoffWithDecorrelation(_retryDelay, _configuration.MaxRetryDelay);
 
             _httpClient = _configuration.HttpClient ?? CreateHttpClient();
         }

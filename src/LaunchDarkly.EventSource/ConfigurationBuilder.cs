@@ -39,6 +39,7 @@ namespace LaunchDarkly.EventSource
         internal IDictionary<string, string> _requestHeaders = new Dictionary<string, string>();
         internal HttpMessageHandler _httpMessageHandler;
         internal HttpClient _httpClient;
+        internal TimeSpan _maxRetryDelay = Configuration.DefaultMaxRetryDelay;
         internal HttpMethod _method = HttpMethod.Get;
         internal bool _preferDataAsUtf8Bytes = false;
         internal Func<HttpContent> _requestBodyFactory;
@@ -105,9 +106,8 @@ namespace LaunchDarkly.EventSource
         /// a backoff algorithm.
         /// </para>
         /// <para>
-        /// The default value is <see cref="Configuration.DefaultInitialRetryDelay"/>. The maximum
-        /// allowed value is <see cref="Configuration.MaximumRetryDelay"/>; values greater than
-        /// the maximum will be changed to the maximum. Negative values are changed to zero.
+        /// The default value is <see cref="Configuration.DefaultInitialRetryDelay"/>. Negative values
+        /// are changed to zero.
         /// </para>
         /// <para>
         /// The actual duration of each delay will vary slightly because there is a random jitter
@@ -116,10 +116,34 @@ namespace LaunchDarkly.EventSource
         /// </remarks>
         /// <param name="initialRetryDelay">the initial retry delay</param>
         /// <returns>the builder</returns>
+        /// <seealso cref="MaxRetryDelay(TimeSpan)"/>
         public ConfigurationBuilder InitialRetryDelay(TimeSpan initialRetryDelay)
         {
-            _initialRetryDelay = FiniteTimeSpan(
-                initialRetryDelay > Configuration.MaximumRetryDelay ? Configuration.MaximumRetryDelay : initialRetryDelay);
+            _initialRetryDelay = FiniteTimeSpan(initialRetryDelay);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the maximum amount of time to wait before attempting to reconnect.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// <c>EventSource</c> uses an exponential backoff algorithm (with random jitter) so that
+        /// the delay between reconnections starts at <see cref="InitialRetryDelay(TimeSpan)"/> but
+        /// increases with each subsequent attempt. <c>MaxRetryDelay</c> sets a limit on how long
+        /// the delay can be.
+        /// </para>
+        /// <para>
+        /// The default value is <see cref="Configuration.DefaultMaxRetryDelay"/>. Negative values
+        /// are changed to zero.
+        /// </para>
+        /// </remarks>
+        /// <param name="maxRetryDelay">the maximum retry delay</param>
+        /// <returns>the builder</returns>
+        /// <seealso cref="InitialRetryDelay(TimeSpan)"/>
+        public ConfigurationBuilder MaxRetryDelay(TimeSpan maxRetryDelay)
+        {
+            _maxRetryDelay = FiniteTimeSpan(maxRetryDelay);
             return this;
         }
 

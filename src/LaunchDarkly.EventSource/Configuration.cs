@@ -22,10 +22,10 @@ namespace LaunchDarkly.EventSource
         public static readonly TimeSpan DefaultInitialRetryDelay = TimeSpan.FromSeconds(1);
 
         /// <summary>
-        /// The maximum value for <see cref="ConfigurationBuilder.InitialRetryDelay(TimeSpan)"/>:
+        /// The default value for <see cref="ConfigurationBuilder.MaxRetryDelay(TimeSpan)"/>:
         /// 30 seconds.
         /// </summary>
-        public static readonly TimeSpan MaximumRetryDelay = TimeSpan.FromSeconds(30);
+        public static readonly TimeSpan DefaultMaxRetryDelay = TimeSpan.FromSeconds(30);
 
         /// <summary>
         /// The default value for <see cref="ConfigurationBuilder.ConnectionTimeout(TimeSpan)"/>:
@@ -109,6 +109,12 @@ namespace LaunchDarkly.EventSource
         public Logger Logger { get; }
 
         /// <summary>
+        /// Sets the maximum amount of time to wait before attempting to reconnect.
+        /// </summary>
+        /// <seealso cref="ConfigurationBuilder.MaxRetryDelay(TimeSpan)"/>
+        public TimeSpan MaxRetryDelay { get; }
+
+        /// <summary>
         /// The HTTP method that will be used when connecting to the EventSource API.
         /// </summary>
         /// <seealso cref="ConfigurationBuilder.Method(HttpMethod)"/>
@@ -165,6 +171,7 @@ namespace LaunchDarkly.EventSource
             InitialRetryDelay = builder._initialRetryDelay;
             LastEventId = builder._lastEventId;
             Logger = logger ?? Logs.None.Logger("");
+            MaxRetryDelay = builder._maxRetryDelay;
             Method = builder._method;
             ReadTimeout = builder._readTimeout;
             RequestHeaders = new Dictionary<string, string>(builder._requestHeaders);

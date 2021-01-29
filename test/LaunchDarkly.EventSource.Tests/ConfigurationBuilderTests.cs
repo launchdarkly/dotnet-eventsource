@@ -80,6 +80,29 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
+        public void MaxRetryDelayHasDefault()
+        {
+            var b = Configuration.Builder(uri);
+            Assert.Equal(Configuration.DefaultMaxRetryDelay, b.Build().MaxRetryDelay);
+        }
+
+        [Fact]
+        public void BuilderSetsMaxRetryDelay()
+        {
+            var ts = TimeSpan.FromSeconds(9);
+            var b = Configuration.Builder(uri).MaxRetryDelay(ts);
+            Assert.Equal(ts, b.Build().MaxRetryDelay);
+        }
+
+        [Fact]
+        public void NegativeMaxRetryDelayBecomesZero()
+        {
+            var ts = Timeout.InfiniteTimeSpan;
+            var b = Configuration.Builder(uri).MaxRetryDelay(TimeSpan.FromSeconds(-9));
+            Assert.Equal(TimeSpan.Zero, b.Build().MaxRetryDelay);
+        }
+
+        [Fact]
         public void ReadTimeoutHasDefault()
         {
             var b = Configuration.Builder(uri);
