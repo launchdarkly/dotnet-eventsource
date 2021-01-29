@@ -145,9 +145,6 @@ namespace LaunchDarkly.EventSource
         /// <summary>
         /// Gets the <see cref="System.Uri"/> used when connecting to an EventSource API.
         /// </summary>
-        /// <value>
-        /// The <see cref="System.Uri"/>.
-        /// </value>
         public Uri Uri { get; }
 
         #endregion
