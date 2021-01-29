@@ -3,7 +3,7 @@ using Xunit;
 
 namespace LaunchDarkly.EventSource.Tests
 {
-    public class MessageEventTests
+    public class MessageEventTest
     {
         [Theory]
         [InlineData("http://test.com", null, null)]

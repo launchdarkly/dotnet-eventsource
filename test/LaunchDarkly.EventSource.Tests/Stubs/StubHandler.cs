@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace LaunchDarkly.EventSource.Tests
 {
@@ -16,10 +19,20 @@ namespace LaunchDarkly.EventSource.Tests
         private readonly Queue<StubResponse> _responses = new Queue<StubResponse>();
 
         // Requests that were sent via the handler
-        private readonly List<HttpRequestMessage> _requests =
-            new List<HttpRequestMessage>();
+        private readonly BlockingCollection<HttpRequestMessage> _requests =
+            new BlockingCollection<HttpRequestMessage>();
 
         public event EventHandler<HttpRequestMessage> RequestReceived;
+
+        public StubMessageHandler() { }
+
+        public StubMessageHandler(params StubResponse[] resps)
+        {
+            foreach (var resp in resps)
+            {
+                _responses.Enqueue(resp);
+            }
+        }
 
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
@@ -40,6 +53,12 @@ namespace LaunchDarkly.EventSource.Tests
         
         public IEnumerable<HttpRequestMessage> GetRequests() =>
             _requests;
+
+        public HttpRequestMessage AwaitRequest()
+        {
+            Assert.True(_requests.TryTake(out var req, TimeSpan.FromSeconds(5)), "timed out waiting for request");
+            return req;
+        }
     }
 
     public abstract class StubResponse
@@ -123,17 +142,22 @@ namespace LaunchDarkly.EventSource.Tests
             }
             httpResponse.Content = content;
 
-            Task.Run(() => WriteStreamingResponse(streamWrite, cancellationToken));
+            Task.Run(() => WriteStreamingResponse(streamWrite, streamRead, cancellationToken));
 
             return httpResponse;
         }
         
-        private async Task WriteStreamingResponse(Stream output, CancellationToken cancellationToken)
+        private async Task WriteStreamingResponse(Stream output, Stream readStream, CancellationToken cancellationToken)
         {
             try
             {
                 foreach (var action in _actions)
                 {
+                    if (action.CloseEarly)
+                    {
+                        readStream.Close();
+                        return;
+                    }
                     if (action.Delay != TimeSpan.Zero)
                     {
                         await Task.Delay(action.Delay, cancellationToken);
@@ -147,7 +171,7 @@ namespace LaunchDarkly.EventSource.Tests
                     await output.WriteAsync(data, 0, data.Length, cancellationToken);
                 }
                 // if we've run out of actions, leave the stream open until it's cancelled
-                while (true)
+                while (!cancellationToken.IsCancellationRequested)
                 {
                     await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
                 }
@@ -161,25 +185,40 @@ namespace LaunchDarkly.EventSource.Tests
     
     public class StreamAction
     {
-        internal readonly TimeSpan Delay;
-        internal readonly string Content;
-
-        private StreamAction(TimeSpan delay, string content)
-        {
-            Delay = delay;
-            Content = content;
-        }
+        internal TimeSpan Delay { get; private set; }
+        internal string Content { get; private set; }
+        internal bool CloseEarly { get; private set; }
 
         public bool ShouldQuit() => Content is null;
 
         public static StreamAction Write(string content) =>
-            new StreamAction(TimeSpan.Zero, content);
+            new StreamAction { Content = content };
 
-        public static StreamAction CloseStream() =>
-            new StreamAction(TimeSpan.Zero, null);
+        public static StreamAction Write(MessageEvent e)
+        {
+            var s = new StringBuilder();
+            if (e.Name != null)
+            {
+                s.Append("event:").Append(e.Name).Append("\n");
+            }
+            foreach (var line in e.Data.Split('\n'))
+            {
+                s.Append("data:").Append(line).Append("\n");
+            }
+            if (e.LastEventId != null)
+            {
+                s.Append("id:").Append(e.LastEventId).Append("\n");
+            }
+            return Write(s.ToString() + "\n");
+        }
+
+        public static StreamAction CloseStream() => new StreamAction();
+
+        public static StreamAction CloseStreamAbnormally() =>
+            new StreamAction { CloseEarly = true };
 
         public StreamAction AfterDelay(TimeSpan delay) =>
-            new StreamAction(delay, Content);
+            new StreamAction { Content = this.Content, CloseEarly = this.CloseEarly, Delay = delay };
     }
 
     public class HttpResponseMessageWithError : HttpResponseMessage

@@ -1,24 +1,13 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using System.Threading.Tasks;
-using LaunchDarkly.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace LaunchDarkly.EventSource.Tests
 {
-    public class EventSourceEncodingTests
+    public class EventSourceEncodingTest : BaseTest
     {
-        private static readonly Uri _uri = new Uri("http://test.com");
-
-        private ITestOutputHelper _testOutput;
-        private ILogAdapter _testLogging;
-
-        public EventSourceEncodingTests(ITestOutputHelper testOutput)
-        {
-            _testOutput = testOutput;
-            _testLogging = Logs.ToMethod(testOutput.WriteLine);
-        }
+        public EventSourceEncodingTest(ITestOutputHelper testOutput) : base(testOutput) { }
 
         struct StreamTestParams
         {
@@ -76,17 +65,13 @@ namespace LaunchDarkly.EventSource.Tests
             var config = Configuration.Builder(_uri).HttpMessageHandler(handler)
                 .LogAdapter(_testLogging)
                 .Build();
-            using (var evt = new EventSource(config))
+            using (var es = new EventSource(config))
             {
-                var sink = new EventSink(evt)
-                {
-                    ExpectUtf8Data = false,
-                    Output = _testOutput.WriteLine
-                };
+                var eventSink = new EventSink(es, _testLogging) { ExpectUtf8Data = false };
 
-                _ = Task.Run(() => evt.StartAsync());
+                _ = Task.Run(es.StartAsync);
 
-                sink.ExpectActions(BasicStreamTestParams.ExpectedEventActions);
+                eventSink.ExpectActions(BasicStreamTestParams.ExpectedEventActions);
             }
         }
 
@@ -104,17 +89,13 @@ namespace LaunchDarkly.EventSource.Tests
                 .LogAdapter(_testLogging)
                 .PreferDataAsUtf8Bytes(true)
                 .Build();
-            using (var evt = new EventSource(config))
+            using (var es = new EventSource(config))
             {
-                var sink = new EventSink(evt)
-                {
-                    ExpectUtf8Data = true,
-                    Output = _testOutput.WriteLine
-                };
+                var eventSink = new EventSink(es, _testLogging) { ExpectUtf8Data = true };
 
-                _ = Task.Run(() => evt.StartAsync());
+                _ = Task.Run(es.StartAsync);
 
-                sink.ExpectActions(BasicStreamTestParams.ExpectedEventActions);
+                eventSink.ExpectActions(BasicStreamTestParams.ExpectedEventActions);
             }
         }
 
@@ -132,15 +113,11 @@ namespace LaunchDarkly.EventSource.Tests
                 .LogAdapter(_testLogging)
                 .PreferDataAsUtf8Bytes(preferUtf8Data)
                 .Build();
-            using (var evt = new EventSource(config))
+            using (var es = new EventSource(config))
             {
-                var sink = new EventSink(evt)
-                {
-                    ExpectUtf8Data = false,
-                    Output = _testOutput.WriteLine
-                };
+                var sink = new EventSink(es, _testLogging) { ExpectUtf8Data = false };
 
-                _ = Task.Run(() => evt.StartAsync());
+                _ = Task.Run(es.StartAsync);
 
                 sink.ExpectActions(BasicStreamTestParams.ExpectedEventActions);
             }

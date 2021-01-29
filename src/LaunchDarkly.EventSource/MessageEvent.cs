@@ -43,6 +43,12 @@ namespace LaunchDarkly.EventSource
     /// </remarks>
     public struct MessageEvent
     {
+        /// <summary>
+        /// The default value of <see cref="Name"/> if the SSE stream did not specify an
+        /// <c>event:</c> field.
+        /// </summary>
+        public const string DefaultName = "message";
+
         #region Private Fields
 
         private readonly string _name;
@@ -112,7 +118,7 @@ namespace LaunchDarkly.EventSource
         /// <remarks>
         /// This can be specified by the server in the <c>event:</c> field in the SSE data, as in
         /// <c>event: my-event-name</c>. If there is no <c>event:</c> field, the default name
-        /// is "message".
+        /// is <see cref="DefaultName"/>.
         /// </remarks>
         public string Name => _name;
 
