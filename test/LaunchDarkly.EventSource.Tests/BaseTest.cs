@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Threading;
 using LaunchDarkly.Logging;
 using Xunit;
 using Xunit.Abstractions;
@@ -39,6 +40,14 @@ namespace LaunchDarkly.EventSource.Tests
             _logCapture = Logs.Capture();
             _testLogging = _logCapture;
             _testLogger = _testLogging.Logger("");
+
+            // The following line prevents intermittent test failures that can happen due to the low
+            // default setting of ThreadPool.SetMinThreads causing new worker tasks to be severely
+            // throttled: http://joeduffyblog.com/2006/07/08/clr-thread-pool-injection-stuttering-problems/
+            // This makes it difficult to test things such as timeouts. We believe it not to be a real
+            // issue in non-test scenarios, since the tests are starting and stopping an unusually large
+            // number of async tasks in a way that regular use of EventSource would not do.
+            ThreadPool.SetMinThreads(100, 100);
         }
 
         /// <summary>
@@ -47,9 +56,8 @@ namespace LaunchDarkly.EventSource.Tests
         /// if you declare a parameter of that type.
         /// </summary>
         /// <param name="testOutput"></param>
-        public BaseTest(ITestOutputHelper testOutput)
+        public BaseTest(ITestOutputHelper testOutput) : this()
         {
-            _logCapture = Logs.Capture();
             _testLogging = Logs.ToMultiple(
                 Logs.ToMethod(testOutput.WriteLine),
                 _logCapture

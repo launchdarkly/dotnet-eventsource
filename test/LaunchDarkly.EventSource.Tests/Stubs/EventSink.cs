@@ -8,6 +8,8 @@ namespace LaunchDarkly.EventSource.Tests
 {
     public class EventSink
     {
+        private static readonly TimeSpan WaitForActionTimeout = TimeSpan.FromSeconds(10);
+
         public bool? ExpectUtf8Data { get; set; }
         public Action<string> Output { get; set; }
 
@@ -102,7 +104,7 @@ namespace LaunchDarkly.EventSource.Tests
 
         public Action ExpectAction()
         {
-            Assert.True(_actions.TryTake(out var ret, TimeSpan.FromSeconds(5)));
+            Assert.True(_actions.TryTake(out var ret, WaitForActionTimeout));
             return ret;
         }
 
@@ -111,7 +113,7 @@ namespace LaunchDarkly.EventSource.Tests
             int i = 0;
             foreach (var a in expectedActions)
             {
-                Assert.True(_actions.TryTake(out var actual, TimeSpan.FromSeconds(5)),
+                Assert.True(_actions.TryTake(out var actual, WaitForActionTimeout),
                     "timed out waiting for action " + i + " (" + a + ")");
                 if (!a.Equals(actual))
                 {

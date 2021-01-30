@@ -187,7 +187,11 @@ namespace LaunchDarkly.EventSource
                     if (ReadyState != ReadyState.Shutdown)
                     {
                         Exception realException = e;
-                        if (e is OperationCanceledException oe)
+                        if (realException is AggregateException ae && ae.InnerExceptions.Count == 1)
+                        {
+                            realException = ae.InnerException;
+                        }
+                        if (realException is OperationCanceledException oe)
                         {
                             // This exception could either be the result of us explicitly cancelling a request, in which case we don't
                             // need to do anything else, or it could be that the request timed out.
@@ -221,6 +225,34 @@ namespace LaunchDarkly.EventSource
                     await Task.Delay(sleepTime);
                 }
             }
+        }
+
+        /// <summary>
+        /// Triggers the same "close and retry" behavior as if an error had been encountered on the stream.
+        /// </summary>
+        /// <remarks>
+        /// If the stream is currently active, this closes the connection, waits for some amount of time
+        /// as determined by the usual backoff behavior (and <paramref name="resetBackoffDelay"/>), and
+        /// then attempts to reconnect. If the stream is not yet connected, is already waiting to
+        /// reconnect, or has been permanently shut down, this has no effect.
+        /// </remarks>
+        /// <param name="resetBackoffDelay">true if the delay before reconnection should be reset to
+        /// the lowest level (<see cref="ConfigurationBuilder.InitialRetryDelay(TimeSpan)"/>); false if it
+        /// should increase according to the usual exponential backoff logic</param>
+        public void Restart(bool resetBackoffDelay)
+        {
+            lock (this)
+            {
+                if (_readyState != ReadyState.Open)
+                {
+                    return;
+                }
+                if (resetBackoffDelay)
+                {
+                    _backOff.ResetReconnectAttemptCount();
+                }
+            }
+            CancelCurrentRequest();
         }
 
         /// <summary>
