@@ -15,7 +15,7 @@ namespace LaunchDarkly.EventSource
         public MessageEvent Message { get; }
 
         /// <summary>
-        /// Shortcut for getting the <see cref="MessageEvent.Name"/> property of th eevent.
+        /// Shortcut for getting the <see cref="MessageEvent.Name"/> property of the event.
         /// </summary>
         public string EventName => Message.Name;
 
