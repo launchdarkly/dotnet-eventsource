@@ -109,7 +109,7 @@ namespace LaunchDarkly.EventSource
         public Logger Logger { get; }
 
         /// <summary>
-        /// Sets the maximum amount of time to wait before attempting to reconnect.
+        /// The maximum amount of time to wait before attempting to reconnect.
         /// </summary>
         /// <seealso cref="ConfigurationBuilder.MaxRetryDelay(TimeSpan)"/>
         public TimeSpan MaxRetryDelay { get; }
