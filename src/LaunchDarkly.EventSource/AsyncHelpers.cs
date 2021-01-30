@@ -42,20 +42,13 @@ namespace LaunchDarkly.EventSource
         // will terminate any pending I/O.
         internal static Task<T> AllowCancellation<T>(Task<T> task, CancellationToken cancellationToken)
         {
-            var ret = task.ContinueWith(
-                completedTask =>
-                {
-                    if (cancellationToken.IsCancellationRequested && completedTask.IsFaulted)
-                    {
-                        _ = completedTask.Exception; // prevents this from being an unobserved exception
-                    }
-                    return completedTask.GetAwaiter().GetResult();
-                },
+            var cancellableTask = task.ContinueWith(
+                completedTask => completedTask.GetAwaiter().GetResult(),
                 cancellationToken,
                 TaskContinuationOptions.ExecuteSynchronously,
                 TaskScheduler.Default
             );
-            ret.ContinueWith(
+            cancellableTask.ContinueWith(
                 (completedTask, _) =>
                 {
                     if (cancellationToken.IsCancellationRequested)
@@ -66,7 +59,7 @@ namespace LaunchDarkly.EventSource
                 null,
                 TaskScheduler.Default
                 );
-            return ret;
+            return cancellableTask;
         }
 
         /// <summary>
