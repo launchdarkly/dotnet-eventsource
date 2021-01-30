@@ -72,7 +72,7 @@ namespace LaunchDarkly.EventSource
         /// <param name="resetBackoffDelay">true if the delay before reconnection should be reset to
         /// the lowest level (<see cref="ConfigurationBuilder.InitialRetryDelay(TimeSpan)"/>); false if it
         /// should increase according to the usual exponential backoff logic</param>
-        void Restart();
+        void Restart(bool resetBackoffDelay);
 
         /// <summary>
         /// Closes the connection to the SSE server. The <c>EventSource</c> cannot be reopened after this.
