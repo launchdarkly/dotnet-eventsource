@@ -40,20 +40,34 @@ namespace LaunchDarkly.EventSource
         // that can. If you cancel the wrapped task, the inner task will still continue, but we're
         // assuming that in these situations we'll eventually be closing the underlying socket which
         // will terminate any pending I/O.
-        internal static Task<T> AllowCancellation<T>(Task<T> task, CancellationToken cancellationToken)
+        internal static Task<T> AllowCancellation<T>(Task<T> originalTask, CancellationToken cancellationToken)
         {
-            var cancellableTask = task.ContinueWith(
+            var cancellableTask = originalTask.ContinueWith(
                 completedTask => completedTask.GetAwaiter().GetResult(),
                 cancellationToken,
                 TaskContinuationOptions.ExecuteSynchronously,
                 TaskScheduler.Default
             );
+
+            // Now, if originalTask either completes successfully or fails with an exception, anyone who
+            // was waiting on cancellableTask will get the result or the exception.
+            //
+            // But if cancellationToken gets cancelled, cancellableTask will stop and throw an
+            // OperationCancelledException, just as cancellable I/O operation normally would. The
+            // caller is no longer blocked - even though originalTask may still be executing.
+            //
+            // Normally it would be a problem that originalTask could still be hanging around, but
+            // in our case if things are getting cancelled it means the connection is going to be
+            // closed soon, causing any lingering I/O tasks that use that connection to fail. We
+            // just need to use SuppressExceptions to make sure those failures are discarded rather
+            // than causing an "unobserved exception" situation.
+
             cancellableTask.ContinueWith(
                 (completedTask, _) =>
                 {
                     if (cancellationToken.IsCancellationRequested)
                     {
-                        SuppressExceptions(task);
+                        SuppressExceptions(originalTask);
                     }
                 },
                 null,
