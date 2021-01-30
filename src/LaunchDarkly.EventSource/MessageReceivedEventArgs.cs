@@ -3,36 +3,29 @@
 namespace LaunchDarkly.EventSource
 {
     /// <summary>
-    /// Provides data recieved in the EventSource <see cref="EventSource.MessageReceived"/> event.
+    /// The parameter type for a <see cref="EventSource.MessageReceived"/> event handler.
     /// </summary>
     /// <seealso cref="System.EventArgs" />
     public class MessageReceivedEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets the <see cref="MessageEvent"/> data recieved by the Server Sent Event.
+        /// A <see cref="MessageEvent"/> representing the event that was received from the
+        /// SSE stream.
         /// </summary>
-        /// <value>
-        /// The <see cref="MessageEvent"/> data recieved by the Server Sent Event.
-        /// </value>
         public MessageEvent Message { get; }
 
         /// <summary>
-        /// Gets the name of the event type received by the Server Sent Event.
+        /// Shortcut for getting the <see cref="MessageEvent.Name"/> property of the event.
         /// </summary>
-        /// <value>
-        /// The name of the event type.
-        /// </value>
-        public string EventName { get; }
+        public string EventName => Message.Name;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MessageReceivedEventArgs"/> class.
+        /// Initializes a new instance.
         /// </summary>
-        /// <param name="message">The <see cref="MessageEvent"/> data recieved by the Server Sent Event.</param>
-        /// <param name="eventName">Name of the event type received by the Server Sent Event.</param>
-        public MessageReceivedEventArgs(MessageEvent message, string eventName)
+        /// <param name="message">the <see cref="MessageEvent"/> received from the stream</param>
+        public MessageReceivedEventArgs(MessageEvent message)
         {
             Message = message;
-            EventName = eventName;
         }
     }
 }

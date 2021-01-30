@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 
 namespace LaunchDarkly.EventSource
 {
@@ -9,9 +8,7 @@ namespace LaunchDarkly.EventSource
     /// <remarks>
     /// <para>
     /// An SSE event consists of an event name (defaulting to "message" if not specified),
-    /// a data string, and an optional "ID" string that the server may provide. The event
-    /// name is not contained in the <see cref="MessageEvent"/> class; it is passed as a
-    /// separate parameter to your event handler.
+    /// a data string, and an optional "ID" string that the server may provide.
     /// </para>
     /// <para>
     /// The event name and ID properties are always stored as strings. By default, the
@@ -48,6 +45,7 @@ namespace LaunchDarkly.EventSource
     {
         #region Private Fields
 
+        private readonly string _name;
         private readonly string _dataString;
         private readonly Utf8ByteSpan _dataUtf8Bytes;
         private readonly string _lastEventId;
@@ -60,11 +58,13 @@ namespace LaunchDarkly.EventSource
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageEvent"/> class.
         /// </summary>
-        /// <param name="data">The data received in the server-sent event.</param>
-        /// <param name="lastEventId">The last event identifier, or null.</param>
-        /// <param name="origin">The origin URI of the stream.</param>
-        public MessageEvent(string data, string lastEventId, Uri origin)
+        /// <param name="name">the event name</param>
+        /// <param name="data">the data received in the server-sent event</param>
+        /// <param name="lastEventId">the last event identifier, or null</param>
+        /// <param name="origin">the origin URI of the stream</param>
+        public MessageEvent(string name, string data, string lastEventId, Uri origin)
         {
+            _name = name;
             _dataString = data;
             _dataUtf8Bytes = new Utf8ByteSpan();
             _lastEventId = lastEventId;
@@ -75,14 +75,16 @@ namespace LaunchDarkly.EventSource
         /// Initializes a new instance of the <see cref="MessageEvent"/> class,
         /// providing the data as a UTF-8 byte span.
         /// </summary>
-        /// <param name="dataUtf8Bytes">The data received in the server-sent event.
-        ///   The <c>MessageEvent</c> will store a reference to the byte array, rather than
-        ///   copying it, so it should not be modified afterward by the caller.
+        /// <param name="name">the event name</param>
+        /// <param name="dataUtf8Bytes">the data received in the server-sent event;
+        ///   the <c>MessageEvent</c> will store a reference to the byte array, rather than
+        ///   copying it, so it should not be modified afterward by the caller
         /// </param>
-        /// <param name="lastEventId">The last event identifier, or null.</param>
-        /// <param name="origin">The origin URI of the stream.</param>
-        public MessageEvent(Utf8ByteSpan dataUtf8Bytes, string lastEventId, Uri origin)
+        /// <param name="lastEventId">the last event identifier, or null</param>
+        /// <param name="origin">the origin URI of the stream</param>
+        public MessageEvent(string name, Utf8ByteSpan dataUtf8Bytes, string lastEventId, Uri origin)
         {
+            _name = name;
             _dataString = null;
             _dataUtf8Bytes = dataUtf8Bytes;
             _lastEventId = lastEventId;
@@ -92,56 +94,76 @@ namespace LaunchDarkly.EventSource
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageEvent" /> class.
         /// </summary>
-        /// <param name="data">The data received in the server-sent event.</param>
-        /// <param name="origin">The origin URI of the stream.</param>
+        /// <param name="name">the event name</param>
+        /// <param name="data">the data received in the server-sent event</param>
+        /// <param name="origin">the origin URI of the stream</param>
         /// <remarks>
         /// The <see cref="LastEventId" /> will be initialized to null.
         /// </remarks>
-        public MessageEvent(string data, Uri origin) : this(data, null, origin)
-        {
-        }
+        public MessageEvent(string name, string data, Uri origin) : this(name, data, null, origin) { }
 
         #endregion
 
         #region Public Properties
+
+        /// <summary>
+        /// The event name.
+        /// </summary>
+        /// <remarks>
+        /// This can be specified by the server in the <c>event:</c> field in the SSE data, as in
+        /// <c>event: my-event-name</c>. If there is no <c>event:</c> field, the default name
+        /// is "message".
+        /// </remarks>
+        public string Name => _name;
+
         /// <summary>
         /// Gets the data received in the event as a string.
         /// </summary>
         /// <remarks>
-        /// If the data was originally provided as a string, the same string is returned.
-        /// If it was provided as a UTF-8 byte array, the bytes are copied to a new string.
+        /// <para>
+        /// This is the value of the <c>data:</c> field in the SSE data; if there are multiple
+        /// <c>data:</c> lines for a single event, they are concatenated with <c>"\n"</c>.
+        /// </para>
+        /// <para>
+        /// If the data was originally stored as a string, the same string is returned.
+        /// If it was stored as a UTF-8 byte array, the bytes are copied to a new string.
+        /// </para>
         /// </remarks>
-        /// <value>
-        /// The data.
-        /// </value>
         public string Data => _dataString is null ? _dataUtf8Bytes.GetString() : _dataString;
 
         /// <summary>
         /// Gets the data received in the event as a UTF-8 byte span.
         /// </summary>
         /// <remarks>
-        /// If the data was originally provided as UTF-8 bytes, the returned value refers to
+        /// <para>
+        /// This is the value of the <c>data:</c> field in the SSE data; if there are multiple
+        /// <c>data:</c> lines for a single event, they are concatenated with <c>"\n"</c>.
+        /// </para>
+        /// <para>
+        /// If the data was originally stored as UTF-8 bytes, the returned value refers to
         /// the same array, offset, and length (it is the caller's responsibility not to
-        /// modify the byte array). If it was originally provided as a string, the string
+        /// modify the byte array). If it was originally stored as a string, the string
         /// is copied to a new byte array.
+        /// </para>
         /// </remarks>
         public Utf8ByteSpan DataUtf8Bytes => _dataString is null ? _dataUtf8Bytes :
             new Utf8ByteSpan(_dataString);
 
         /// <summary>
-        /// Gets the last event identifier received in the server-sent event. This may be null if not provided by the server.
+        /// Gets the last event identifier received in the server-sent event.
         /// </summary>
-        /// <value>
-        /// The last event identifier.
-        /// </value>
+        /// <remarks>
+        /// This is the value of the <c>id:</c> field in the SSE data. If there is no such
+        /// field, it is null. You can use a previously received <see cref="LastEventId"/>
+        /// value with <see cref="ConfigurationBuilder.LastEventId(string)"/> when starting
+        /// a new <see cref="EventSource"/> to tell the server what the last event you
+        /// received was, although not all servers support this.
+        /// </remarks>
         public string LastEventId => _lastEventId;
 
         /// <summary>
         /// Gets the origin URI of the stream that generated the server-sent event.
         /// </summary>
-        /// <value>
-        /// The origin.
-        /// </value>
         public Uri Origin => _origin;
 
         /// <summary>
@@ -166,17 +188,14 @@ namespace LaunchDarkly.EventSource
         /// <remarks>
         /// This method is potentially inefficient and should be used only in testing.
         /// </remarks>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
+        /// <param name="obj">the <see cref="System.Object" /> to compare with this instance</param>
+        /// <returns><see langword="true"/> if the instances are equal</returns>
         public override bool Equals(object obj)
         {
-            if (!(obj is MessageEvent that))
-            {
-                return false;
-            }
-            if (_lastEventId != that._lastEventId || _origin != that._origin)
+            if (!(obj is MessageEvent that) ||
+                !object.Equals(Name, that.Name) ||
+                !object.Equals(LastEventId, that.LastEventId) ||
+                !object.Equals(Origin, that.Origin))
             {
                 return false;
             }
