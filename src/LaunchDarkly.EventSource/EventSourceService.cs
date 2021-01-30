@@ -78,8 +78,6 @@ namespace LaunchDarkly.EventSource
 
         #region Private Methods
 
-        private static volatile int counter = 1;
-
         private async Task ConnectToEventSourceApi(
             Action<string> processResponseLineString,
             Action<Utf8ByteSpan> processResponseLineUTF8,
@@ -111,17 +109,9 @@ namespace LaunchDarkly.EventSource
                     else
                     {
                         _logger.Debug("Reading stream with {0} encoding and string conversion", encoding.EncodingName);
-                        var id = Interlocked.Increment(ref counter);
                         using (var reader = new StreamReader(stream, encoding))
                         {
-                            try
-                            {
-                                await ProcessResponseFromReaderAsync(processResponseLineString, reader, cancellationToken, id);
-                            }
-                            finally
-                            {
-                                _logger.Warn("*** about to close StreamReader for task {0}", id);
-                            }
+                            await ProcessResponseFromReaderAsync(processResponseLineString, reader, cancellationToken);
                         }
                     }
                 }
@@ -147,7 +137,7 @@ namespace LaunchDarkly.EventSource
         protected virtual async Task ProcessResponseFromReaderAsync(
             Action<string> processResponse,
             StreamReader reader,
-            CancellationToken cancellationToken, int? id
+            CancellationToken cancellationToken
             )
         {
             while (!cancellationToken.IsCancellationRequested)
