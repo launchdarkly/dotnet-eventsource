@@ -1,4 +1,3 @@
-using System;
 
 namespace LaunchDarkly.EventSource
 {
@@ -10,16 +9,20 @@ namespace LaunchDarkly.EventSource
     {
         #region Public Properties
 
-        public int StatusCode
-        {
-            get;
-            private set;
-        }
+        /// <summary>
+        /// The HTTP status code of the response.
+        /// </summary>
+        public int StatusCode { get; }
 
         #endregion
 
         #region Public Constructors 
 
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="message">the exception message</param>
+        /// <param name="statusCode">the HTTP status code of the response</param>
         public EventSourceServiceUnsuccessfulResponseException(string message, int statusCode) : base(message)
         {
             StatusCode = statusCode;

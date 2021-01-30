@@ -73,7 +73,7 @@ namespace LaunchDarkly.EventSource.Tests
                 setExplicitEncoding ? Encoding.UTF8 : null,
                 BasicStreamTestParams.StreamActions));
 
-            var config = Configuration.Builder(_uri).MessageHandler(handler)
+            var config = Configuration.Builder(_uri).HttpMessageHandler(handler)
                 .LogAdapter(_testLogging)
                 .Build();
             using (var evt = new EventSource(config))
@@ -100,7 +100,7 @@ namespace LaunchDarkly.EventSource.Tests
                 setExplicitEncoding ? Encoding.UTF8 : null,
                 BasicStreamTestParams.StreamActions));
 
-            var config = Configuration.Builder(_uri).MessageHandler(handler)
+            var config = Configuration.Builder(_uri).HttpMessageHandler(handler)
                 .LogAdapter(_testLogging)
                 .PreferDataAsUtf8Bytes(true)
                 .Build();
@@ -128,7 +128,7 @@ namespace LaunchDarkly.EventSource.Tests
                 Encoding.GetEncoding("iso-8859-1"),
                 BasicStreamTestParams.StreamActions));
 
-            var config = Configuration.Builder(_uri).MessageHandler(handler)
+            var config = Configuration.Builder(_uri).HttpMessageHandler(handler)
                 .LogAdapter(_testLogging)
                 .PreferDataAsUtf8Bytes(preferUtf8Data)
                 .Build();

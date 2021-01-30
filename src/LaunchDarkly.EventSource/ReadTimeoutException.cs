@@ -14,6 +14,7 @@ namespace LaunchDarkly.EventSource
     /// </remarks>
     public class ReadTimeoutException : Exception
     {
+        /// <inheritdoc/>
         public override string Message => Resources.EventSourceService_Read_Timeout;
     }
 }

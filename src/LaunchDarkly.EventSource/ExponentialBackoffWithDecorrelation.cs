@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace LaunchDarkly.EventSource
 {
-    public class ExponentialBackoffWithDecorrelation
+    internal class ExponentialBackoffWithDecorrelation
     {
         private readonly TimeSpan _minimumDelay;
         private readonly TimeSpan _maximumDelay;

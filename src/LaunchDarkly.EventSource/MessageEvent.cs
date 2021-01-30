@@ -44,7 +44,6 @@ namespace LaunchDarkly.EventSource
     /// UTF-8 byte array from it.</item>
     /// </list>
     /// </remarks>
-    /// <seealso cref=""/>
     public struct MessageEvent
     {
         #region Private Fields

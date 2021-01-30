@@ -46,14 +46,7 @@ namespace LaunchDarkly.EventSource
 
         #region Constructors
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EventSourceService" /> class.
-        /// </summary>
-        /// <param name="configuration">The configuration.</param>
-        /// <exception cref="ArgumentNullException">client
-        /// or
-        /// configuration</exception>
-        public EventSourceService(Configuration configuration, HttpClient httpClient, Logger logger)
+        internal EventSourceService(Configuration configuration, HttpClient httpClient, Logger logger)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
