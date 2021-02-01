@@ -32,16 +32,6 @@ namespace LaunchDarkly.EventSource.Tests
             }
         }
 
-        public StubMessageHandler() { }
-
-        public StubMessageHandler(params StubResponse[] resps)
-        {
-            foreach (var resp in resps)
-            {
-                _responses.Enqueue(resp);
-            }
-        }
-
         protected override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
