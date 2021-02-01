@@ -3,7 +3,7 @@ using Xunit;
 
 namespace LaunchDarkly.EventSource.Tests
 {
-    public class EventParserTests
+    public class EventParserTest
     {
         private static Utf8ByteSpan ToBytes(string s)
         {

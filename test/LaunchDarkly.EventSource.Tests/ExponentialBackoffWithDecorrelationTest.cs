@@ -3,7 +3,7 @@ using Xunit;
 
 namespace LaunchDarkly.EventSource.Tests
 {
-    public class ExponentialBackoffWithDecorrelationTests
+    public class ExponentialBackoffWithDecorrelationTest
     {
         [Fact]
         public void Exponential_backoff_should_not_exceed_maximum()

@@ -186,8 +186,6 @@ namespace LaunchDarkly.EventSource
                     // If the user called Close(), ReadyState = Shutdown, so errors are irrelevant.
                     if (ReadyState != ReadyState.Shutdown)
                     {
-                        Close(ReadyState.Closed);
-
                         Exception realException = e;
                         if (e is OperationCanceledException oe)
                         {
@@ -207,6 +205,7 @@ namespace LaunchDarkly.EventSource
                         {
                             OnError(new ExceptionEventArgs(realException));
                         }
+                        Close(ReadyState.Closed);
                     }
                 }
             }

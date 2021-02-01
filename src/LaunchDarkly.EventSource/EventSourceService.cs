@@ -154,7 +154,7 @@ namespace LaunchDarkly.EventSource
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                string line = await DoTaskWithReadTimeout(() => reader.ReadLineAsync(), needManualTimeout);
+                string line = await DoTaskWithReadTimeout(reader.ReadLineAsync, needManualTimeout);
                 if (line == null)
                 {
                     // this means the stream is done, i.e. the connection was closed
@@ -208,7 +208,7 @@ namespace LaunchDarkly.EventSource
             }
 
             var timeoutCancellation = new CancellationTokenSource();
-            var readTimeoutTask = Task.Delay(_configuration.ReadTimeout, timeoutCancellation.Token);
+            var readTimeoutTask = Task.Run(() => Task.Delay(_configuration.ReadTimeout, timeoutCancellation.Token));
             var readTask = task();
 
             var completedTask = await Task.WhenAny(readTask, readTimeoutTask);

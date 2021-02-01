@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using LaunchDarkly.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -26,7 +27,9 @@ namespace LaunchDarkly.EventSource.Tests
                 Comment == a.Comment &&
                 object.Equals(Message, a.Message) &&
                 ReadyState == a.ReadyState &&
-                object.Equals(Exception, a.Exception);
+                (Exception is null ? a.Exception is null : Exception.GetType() == a.Exception.GetType());
+
+            public override int GetHashCode() => 0;
 
             public override string ToString()
             {
@@ -56,10 +59,15 @@ namespace LaunchDarkly.EventSource.Tests
             es.Error += OnError;
         }
 
-        public static Action OpenedAction(ReadyState state) =>
+        public EventSink(EventSource es, ILogAdapter logging) : this(es)
+        {
+            Output = logging.Logger("EventSink").Info;
+        }
+
+        public static Action OpenedAction(ReadyState state = ReadyState.Open) =>
             new Action { Kind = "Opened", ReadyState = state };
 
-        public static Action ClosedAction(ReadyState state) =>
+        public static Action ClosedAction(ReadyState state = ReadyState.Closed) =>
             new Action { Kind = "Closed", ReadyState = state };
 
         public static Action CommentReceivedAction(string comment) =>

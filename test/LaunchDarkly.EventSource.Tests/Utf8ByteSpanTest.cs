@@ -4,7 +4,7 @@ using Xunit;
 
 namespace LaunchDarkly.EventSource.Tests
 {
-    public class Utf8ByteSpanTests
+    public class Utf8ByteSpanTest
     {
         [Fact]
         public void ConstructorSetsSpanProperties()
