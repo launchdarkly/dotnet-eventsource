@@ -78,7 +78,7 @@ namespace LaunchDarkly.EventSource.Tests
             var nAttempts = 3;
             for (var i = 0; i < nAttempts; i++)
             {
-                handler.QueueResponse(StubResponse.StartStream(StreamAction.CloseStreamAbnormally()));//StubResponse.WithIOError());
+                handler.QueueResponse(StubResponse.StartStream(StreamAction.CloseStreamAbnormally()));
             }
             handler.QueueResponse(StubResponse.StartStream());
 
