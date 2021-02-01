@@ -82,7 +82,7 @@ namespace LaunchDarkly.EventSource.Tests
             {
                 handler.QueueResponse(StubResponse.StartStream(
                     StreamAction.Write(":hi\n"),
-                    StreamAction.CloseStreamAbnormally()));//StubResponse.WithIOError());
+                    StreamAction.CloseStreamAbnormally()));
             }
             handler.QueueResponse(StubResponse.StartStream());
 
