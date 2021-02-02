@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Version>4.0.0-alpha.5</Version>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-    <LicenseExpression>Apache-2.0</LicenseExpression>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <AssemblyName>LaunchDarkly.EventSource</AssemblyName>
     <DebugType>portable</DebugType>
     <OutputType>Library</OutputType>
