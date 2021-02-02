@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <Version>4.0.0-alpha.5</Version>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
@@ -12,7 +11,7 @@
     <Authors>LaunchDarkly</Authors>
     <Owners>LaunchDarkly</Owners>
     <Copyright>Copyright 2017 Catamorphic, Co.</Copyright>
-    <Description>LaunchDarkly .NET Event Source library for Server Sent Events</Description>
+    <Description>LaunchDarkly Server-Sent Events client</Description>
     <PackageProjectUrl>https://github.com/launchdarkly/dotnet-eventsource</PackageProjectUrl>
     <RepositoryUrl>https://github.com/launchdarkly/dotnet-eventsource</RepositoryUrl>
   </PropertyGroup>
