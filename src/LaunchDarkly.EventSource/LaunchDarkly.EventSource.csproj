@@ -6,6 +6,7 @@
     <AssemblyName>LaunchDarkly.EventSource</AssemblyName>
     <DebugType>portable</DebugType>
     <OutputType>Library</OutputType>
+    <LangVersion>7.3</LangVersion>
     <PackageId>LaunchDarkly.EventSource</PackageId>
     <Company>LaunchDarkly</Company>
     <Authors>LaunchDarkly</Authors>
