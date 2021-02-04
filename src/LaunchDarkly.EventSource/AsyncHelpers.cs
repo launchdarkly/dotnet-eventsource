@@ -25,6 +25,15 @@ namespace LaunchDarkly.EventSource
                 task = taskFn(combinedCancellation.Token);
                 return await task;
             }
+            catch (AggregateException e) when (e.InnerException is OperationCanceledException)
+            {
+                SuppressExceptions(task);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    throw e.InnerException;
+                }
+                throw new ReadTimeoutException();
+            }
             catch (OperationCanceledException)
             {
                 SuppressExceptions(task);
