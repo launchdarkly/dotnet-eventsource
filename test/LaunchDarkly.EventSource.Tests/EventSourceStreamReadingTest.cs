@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
+using static LaunchDarkly.EventSource.Tests.TestHelpers;
+
 namespace LaunchDarkly.EventSource.Tests
 {
     public abstract class EventSourceStreamReadingTestBase : BaseTest
@@ -152,7 +154,7 @@ namespace LaunchDarkly.EventSource.Tests
         [Fact]
         public void DetectReadTimeout()
         {
-            TimeSpan readTimeout = TimeSpan.FromMilliseconds(200);
+            TimeSpan readTimeout = TimeSpan.FromMilliseconds(300);
             TimeSpan timeToWait = readTimeout + readTimeout;
 
             var handler = new StubMessageHandler();
@@ -175,41 +177,59 @@ namespace LaunchDarkly.EventSource.Tests
             }
         }
 
-        [Fact]
-        public void TimeoutDoesNotCauseUnobservedException()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CanRestartStream(bool resetBackoff)
         {
-            TimeSpan readTimeout = TimeSpan.FromMilliseconds(10);
+            // This test is in EventSourceStreamReadingTest rather than EventSourceReconnectingTest
+            // because the important thing here is that the stream reading logic can be interrupted.
+            int nAttempts = 3;
+            var initialDelay = TimeSpan.FromMilliseconds(50);
 
+            var anEvent = new MessageEvent("put", "x", _uri);
+            var stream = StubResponse.StartStream(StreamAction.Write(anEvent));
             var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.StartStream()); // stream will hang with no data
-
-            var caughtUnobservedException = false;
-            EventHandler<UnobservedTaskExceptionEventArgs> exceptionHandler = (object sender, UnobservedTaskExceptionEventArgs e) =>
+            for (var i = 0; i <= nAttempts; i++)
             {
-                e.SetObserved();
-                caughtUnobservedException = true;
-            };
-            TaskScheduler.UnobservedTaskException += exceptionHandler;
+                handler.QueueResponse(stream);
+            }
 
-            using (var es = StartEventSource(handler, out var eventSink, config => config.ReadTimeout(readTimeout)))
+            var backoffs = new List<TimeSpan>();
+
+            using (var es = MakeEventSource(handler, builder => builder.InitialRetryDelay(initialDelay)))
             {
-                try
+                var sink = new EventSink(es, _testLogging);
+                es.Closed += (_, ex) =>
                 {
-                    eventSink.ExpectActions(
+                    backoffs.Add(es.BackOffDelay);
+                };
+                _ = Task.Run(es.StartAsync);
+
+                sink.ExpectActions(
+                    EventSink.OpenedAction(),
+                    EventSink.MessageReceivedAction(anEvent)
+                    );
+
+                for (var i = 0; i < nAttempts; i++)
+                {
+                    es.Restart(resetBackoff);
+
+                    sink.ExpectActions(
+                        EventSink.ClosedAction(),
                         EventSink.OpenedAction(),
-                        EventSink.ErrorAction(new ReadTimeoutException())
+                        EventSink.MessageReceivedAction(anEvent)
                         );
-
-                    // Force finalizer to run so that if there was an unobserved exception, it will trigger that event.
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-
-                    Assert.False(caughtUnobservedException);
                 }
-                finally
-                {
-                    TaskScheduler.UnobservedTaskException -= exceptionHandler;
-                }
+            }
+
+            if (resetBackoff)
+            {
+                Assert.All(backoffs, delay => Assert.InRange(delay, TimeSpan.Zero, initialDelay));
+            }
+            else
+            {
+                AssertBackoffsAlwaysIncrease(backoffs, nAttempts);
             }
         }
     }

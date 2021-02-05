@@ -22,8 +22,6 @@ namespace LaunchDarkly.EventSource.Tests
         private readonly BlockingCollection<HttpRequestMessage> _requests =
             new BlockingCollection<HttpRequestMessage>();
 
-        public event EventHandler<HttpRequestMessage> RequestReceived;
-
         public StubMessageHandler() { }
 
         public StubMessageHandler(params StubResponse[] resps)
@@ -40,8 +38,6 @@ namespace LaunchDarkly.EventSource.Tests
         {
             if (_responses.Count == 0)
                 throw new InvalidOperationException("No response configured");
-
-            RequestReceived?.Invoke(this, request);
 
             _requests.Add(request);
 

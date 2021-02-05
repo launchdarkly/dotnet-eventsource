@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
+using static LaunchDarkly.EventSource.Tests.TestHelpers;
+
 namespace LaunchDarkly.EventSource.Tests
 {
     public class EventSourceReconnectingTest : BaseTest
@@ -78,7 +80,9 @@ namespace LaunchDarkly.EventSource.Tests
             var nAttempts = 3;
             for (var i = 0; i < nAttempts; i++)
             {
-                handler.QueueResponse(StubResponse.StartStream(StreamAction.CloseStreamAbnormally()));
+                handler.QueueResponse(StubResponse.StartStream(
+                    StreamAction.Write(":hi\n"),
+                    StreamAction.CloseStreamAbnormally()));
             }
             handler.QueueResponse(StubResponse.StartStream());
 
@@ -100,12 +104,7 @@ namespace LaunchDarkly.EventSource.Tests
                 }
             }
 
-            Assert.NotEmpty(backoffs);
-            for (var i = 0; i < nAttempts - 1; i++)
-            {
-                Assert.NotEqual(backoffs[i], backoffs[i + 1]);
-                Assert.True(backoffs[i + 1] > backoffs[i]);
-            }
+            AssertBackoffsAlwaysIncrease(backoffs, nAttempts);
         }
 
         [Fact]

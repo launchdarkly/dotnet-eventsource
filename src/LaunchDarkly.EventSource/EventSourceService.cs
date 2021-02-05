@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Net.Http;
@@ -9,6 +8,8 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using LaunchDarkly.Logging;
+
+using static LaunchDarkly.EventSource.AsyncHelpers;
 
 namespace LaunchDarkly.EventSource
 {
@@ -99,30 +100,18 @@ namespace LaunchDarkly.EventSource
 
                 using (var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
                 {
-                    bool needManualTimeout = false;
-                    try
-                    {
-                        // Some Stream subclasses on some platforms have their own read timeout implementation; others
-                        // don't. The only way to find out is to try to set it and see if you get an exception. If we
-                        // get an exception, then ReadTimeout won't work and we'll need to implement our own timeout.
-                        stream.ReadTimeout = (int)_configuration.ReadTimeout.TotalMilliseconds;
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        needManualTimeout = true;
-                    }
                     var encoding = DetectEncoding(response);
                     if (encoding == Encoding.UTF8 && _configuration.PreferDataAsUtf8Bytes)
                     {
                         _logger.Debug("Reading UTF-8 stream without string conversion");
-                        await ProcessResponseFromUtf8StreamAsync(processResponseLineUTF8, stream, needManualTimeout, cancellationToken);
+                        await ProcessResponseFromUtf8StreamAsync(processResponseLineUTF8, stream, cancellationToken);
                     }
                     else
                     {
                         _logger.Debug("Reading stream with {0} encoding and string conversion", encoding.EncodingName);
-                        using (var reader = new EventSourceStreamReader(stream, encoding))
+                        using (var reader = new StreamReader(stream, encoding))
                         {
-                            await ProcessResponseFromReaderAsync(processResponseLineString, reader, needManualTimeout, cancellationToken);
+                            await ProcessResponseFromReaderAsync(processResponseLineString, reader, cancellationToken);
                         }
                     }
                 }
@@ -145,16 +134,16 @@ namespace LaunchDarkly.EventSource
             return _configuration.DefaultEncoding ?? Encoding.UTF8;
         }
 
-        protected virtual async Task ProcessResponseFromReaderAsync(Action<string> processResponse, IStreamReader reader,
-            bool needManualTimeout, CancellationToken cancellationToken)
+        protected virtual async Task ProcessResponseFromReaderAsync(
+            Action<string> processResponse,
+            StreamReader reader,
+            CancellationToken cancellationToken
+            )
         {
-            // In a loop, reading from a stream. while reading from the stream, process the lines in the stream.
-            // Reset the timer after processing each line (reading from the stream).
-            // If the read time out occurs, throw exception and exit method.
-
             while (!cancellationToken.IsCancellationRequested)
             {
-                string line = await DoTaskWithReadTimeout(reader.ReadLineAsync, needManualTimeout);
+                var line = await DoWithTimeout(_configuration.ReadTimeout, cancellationToken,
+                    token => AllowCancellation(reader.ReadLineAsync(), token));
                 if (line == null)
                 {
                     // this means the stream is done, i.e. the connection was closed
@@ -164,18 +153,23 @@ namespace LaunchDarkly.EventSource
             }
         }
 
-        protected async Task ProcessResponseFromUtf8StreamAsync(Action<Utf8ByteSpan> processResponseLine, Stream stream,
-            bool needManualTimeout, CancellationToken cancellationToken)
+        protected async Task ProcessResponseFromUtf8StreamAsync(
+            Action<Utf8ByteSpan> processResponseLine,
+            Stream stream,
+            CancellationToken cancellationToken
+            )
         {
             var lineScanner = new ByteArrayLineScanner(Utf8ReadBufferSize);
             while (!cancellationToken.IsCancellationRequested)
             {
-                int bytesRead = await DoTaskWithReadTimeout(
-                    () => stream.ReadAsync(lineScanner.Buffer, lineScanner.Count, lineScanner.Available),
-                    needManualTimeout
-                    );
+                // Note that even though Stream.ReadAsync has an overload that takes a CancellationToken, that
+                // does not actually work for network sockets (https://stackoverflow.com/questions/12421989/networkstream-readasync-with-a-cancellation-token-never-cancels).
+                // So we must use AsyncHelpers.AllowCancellation to wrap it in a cancellable task.
+                int bytesRead = await DoWithTimeout(_configuration.ReadTimeout, cancellationToken,
+                    token => AllowCancellation(stream.ReadAsync(lineScanner.Buffer, lineScanner.Count, lineScanner.Available), token));
                 if (bytesRead == 0)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     return;
                 }
                 lineScanner.AddedBytes(bytesRead);
@@ -183,46 +177,6 @@ namespace LaunchDarkly.EventSource
                 {
                     processResponseLine(lineSpan);
                 }
-            }
-        }
-
-        private async Task<T> DoTaskWithReadTimeout<T>(Func<Task<T>> task, bool needManualTimeout)
-        {
-            if (!needManualTimeout)
-            {
-                try
-                {
-                    return await task();
-                }
-                catch (IOException e)
-                {
-                    if (e.InnerException is SocketException se)
-                    {
-                        if (se.SocketErrorCode == SocketError.TimedOut)
-                        {
-                            throw new ReadTimeoutException();
-                        }
-                    }
-                    throw;
-                }
-            }
-
-            var timeoutCancellation = new CancellationTokenSource();
-            var readTimeoutTask = Task.Run(() => Task.Delay(_configuration.ReadTimeout, timeoutCancellation.Token));
-            var readTask = task();
-
-            var completedTask = await Task.WhenAny(readTask, readTimeoutTask);
-
-            if (completedTask == readTimeoutTask)
-            {
-                Util.SuppressExceptions(readTask); // must do this since we're not going to await the task
-                throw new ReadTimeoutException();
-            }
-            else
-            {
-                Util.SuppressExceptions(readTimeoutTask); // this task should never throw an exception, but you never know
-                timeoutCancellation.Cancel();
-                return readTask.Result;
             }
         }
 

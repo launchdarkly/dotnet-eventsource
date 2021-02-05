@@ -34,37 +34,26 @@ namespace LaunchDarkly.EventSource
 
         #region Public Events
 
-        /// <summary>
-        /// Occurs when the connection to the EventSource API has been opened.
-        /// </summary>
+        /// <inheritdoc/>
         public event EventHandler<StateChangedEventArgs> Opened;
-        /// <summary>
-        /// Occurs when the connection to the EventSource API has been closed.
-        /// </summary>
+
+        /// <inheritdoc/>
         public event EventHandler<StateChangedEventArgs> Closed;
-        /// <summary>
-        /// Occurs when a Server Sent Event from the EventSource API has been received.
-        /// </summary>
+
+        /// <inheritdoc/>
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
-        /// <summary>
-        /// Occurs when a comment has been received from the EventSource API.
-        /// </summary>
+
+        /// <inheritdoc/>
         public event EventHandler<CommentReceivedEventArgs> CommentReceived;
-        /// <summary>
-        /// Occurs when an error has happened when the EventSource is open and processing Server Sent Events.
-        /// </summary>
+
+        /// <inheritdoc/>
         public event EventHandler<ExceptionEventArgs> Error;
 
         #endregion Public Events
 
         #region Public Properties
 
-        /// <summary>
-        /// Gets the state of the EventSource connection.
-        /// </summary>
-        /// <value>
-        /// One of the <see cref="EventSource.ReadyState"/> values, which represents the state of the EventSource connection.
-        /// </value>
+        /// <inheritdoc/>
         public ReadyState ReadyState
         {
             get
@@ -124,13 +113,7 @@ namespace LaunchDarkly.EventSource
 
         #region Public Methods
 
-        /// <summary>
-        /// Initiates a connection to the SSE server and begins parsing events.
-        /// </summary>
-        /// <returns>a <see cref="Task"/> that will be completed only when the
-        /// <c>EventSource</c> is closed</returns>
-        /// <exception cref="InvalidOperationException">if the method was called again after the
-        /// stream connection was already active</exception>
+        /// <inheritdoc/>
         public async Task StartAsync()
         {
             bool firstTime = true;
@@ -187,7 +170,11 @@ namespace LaunchDarkly.EventSource
                     if (ReadyState != ReadyState.Shutdown)
                     {
                         Exception realException = e;
-                        if (e is OperationCanceledException oe)
+                        if (realException is AggregateException ae && ae.InnerExceptions.Count == 1)
+                        {
+                            realException = ae.InnerException;
+                        }
+                        if (realException is OperationCanceledException oe)
                         {
                             // This exception could either be the result of us explicitly cancelling a request, in which case we don't
                             // need to do anything else, or it could be that the request timed out.
@@ -221,6 +208,23 @@ namespace LaunchDarkly.EventSource
                     await Task.Delay(sleepTime);
                 }
             }
+        }
+
+        /// <inheritdoc/>
+        public void Restart(bool resetBackoffDelay)
+        {
+            lock (this)
+            {
+                if (_readyState != ReadyState.Open)
+                {
+                    return;
+                }
+                if (resetBackoffDelay)
+                {
+                    _backOff.ResetReconnectAttemptCount();
+                }
+            }
+            CancelCurrentRequest();
         }
 
         /// <summary>
