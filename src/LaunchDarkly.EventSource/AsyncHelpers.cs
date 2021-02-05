@@ -10,6 +10,10 @@ namespace LaunchDarkly.EventSource
         // Task.Delay. The cancellationToken that is passed in is for explicitly cancelling
         // the operation from elsewhere; DoWithTimeout wraps this to create a token that can
         // also be cancelled by a timeout, and passes that token to taskFn.
+        //
+        // This method will only work if taskFn actually responds to the cancellation token
+        // by throwing an OperationCanceledException. If taskFn ignores the token, timeouts
+        // will not happen.
         internal static async Task<T> DoWithTimeout<T>(
             TimeSpan timeout,
             CancellationToken cancellationToken,
@@ -23,17 +27,30 @@ namespace LaunchDarkly.EventSource
             try
             {
                 task = taskFn(combinedCancellation.Token);
-                return await task;
+                var result = await task;
+                return result;
+            }
+            catch (AggregateException e) when (e.InnerException is OperationCanceledException)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    throw e.InnerException;
+                }
+                throw new ReadTimeoutException();
             }
             catch (OperationCanceledException)
             {
-                SuppressExceptions(task);
                 if (cancellationToken.IsCancellationRequested)
                 {
                     throw;
                 }
                 throw new ReadTimeoutException();
             }
+            // We never need to call SuppressExceptions(task) in this method, because the act
+            // of awaiting the task - whether it completes normally or throws an exception -
+            // makes it "observed". The timeout isn't happening in a different task, it's
+            // causing this task to throw an OperationCanceledException, after which point it
+            // can't generate any other exceptions.
         }
 
         // Take a task that can't be terminated early with a CancellationToken, and wrap it in a task
@@ -63,15 +80,11 @@ namespace LaunchDarkly.EventSource
             // than causing an "unobserved exception" situation.
 
             cancellableTask.ContinueWith(
-                (completedTask, _) =>
+                completedTask =>
                 {
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        SuppressExceptions(originalTask);
-                    }
+                    SuppressExceptions(originalTask);
                 },
-                null,
-                TaskScheduler.Default
+                TaskContinuationOptions.OnlyOnCanceled
                 );
             return cancellableTask;
         }
@@ -85,14 +98,14 @@ namespace LaunchDarkly.EventSource
         /// <param name="task">a task we are not going to await</param>
         internal static void SuppressExceptions(Task task)
         {
-            task.ContinueWith(t =>
-            {
-                if (t.IsFaulted)
+            task.ContinueWith(
+                t =>
                 {
                     // Simply accessing the Exception property makes this exception observed.
                     var e = t.Exception;
-                }
-            });
+                },
+                TaskContinuationOptions.OnlyOnFaulted
+                );
         }
     }
 }

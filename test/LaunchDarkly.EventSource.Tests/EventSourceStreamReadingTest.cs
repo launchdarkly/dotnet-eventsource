@@ -177,50 +177,6 @@ namespace LaunchDarkly.EventSource.Tests
             }
         }
 
-        [Fact]
-        public void TimeoutDoesNotCauseUnobservedException()
-        {
-            TimeSpan readTimeout = TimeSpan.FromMilliseconds(10);
-
-            var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.StartStream()); // stream will hang with no data
-
-            UnobservedTaskExceptionEventArgs receivedUnobservedException = null;
-            EventHandler<UnobservedTaskExceptionEventArgs> exceptionHandler = (object sender, UnobservedTaskExceptionEventArgs e) =>
-            {
-                e.SetObserved();
-                receivedUnobservedException = e;
-            };
-            TaskScheduler.UnobservedTaskException += exceptionHandler;
-
-            // Force finalizer to run so that any unobserved exceptions caused by lingering tasks from earlier
-            // tests will trigger a failure right now, making it clearer that the problem isn't in this test.
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            Assert.Null(receivedUnobservedException);
-
-            using (var es = StartEventSource(handler, out var eventSink, config => config.ReadTimeout(readTimeout)))
-            {
-                try
-                {
-                    eventSink.ExpectActions(
-                        EventSink.OpenedAction(),
-                        EventSink.ErrorAction(new ReadTimeoutException())
-                        );
-
-                    // Force finalizer to run again to trigger any unobserved exceptions we caused now.
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-
-                    Assert.Null(receivedUnobservedException);
-                }
-                finally
-                {
-                    TaskScheduler.UnobservedTaskException -= exceptionHandler;
-                }
-            }
-        }
-
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
