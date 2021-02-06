@@ -1,30 +1,26 @@
-.NET EventSource implementation
-===============================
+# LaunchDarkly EventSource SSE Client for .NET
 
-Project Information
--------------------
+[![NuGet](https://img.shields.io/nuget/v/LaunchDarkly.EventSource.svg?style=flat-square)](https://www.nuget.org/packages/LaunchDarkly.EventSource/)
+[![CircleCI](https://circleci.com/gh/launchdarkly/dotnet-eventsource.svg?style=shield)](https://circleci.com/gh/launchdarkly/dotnet-eventsource)
+[![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)](https://launchdarkly.github.io/dotnet-eventsource)
 
-This libary allows .NET developers to consume Server Sent Events from a remote API. The server sent events spec is defined here: [https://html.spec.whatwg.org/multipage/server-sent-events.html](https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events)
+## Overview
 
-This library supports .NET 4.5.2+ and .NET Standard 2.0+.
+The `LaunchDarkly.EventSource` package allows .NET developers to consume Server-Sent-Events (SSE) from a remote API. The SSE specification is defined here: [https://html.spec.whatwg.org/multipage/server-sent-events.html](https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events)
 
-Quick setup
------------
+## Supported .NET versions
 
-**Nuget Restore**
-1. If you have nuget package restore automatically enabled, Visual Studio will attempt to restore the nuget packages upon opening the LaunchDarkly.EventSource.sln
-2. Otherwise, after you open LaunchDarkly.EventSource.sln, Right+Click on the solution and select "Restore NuGet Packages"
+This version of the library is built for the following targets:
 
-**Build Solution**
-1. In Visual Studio, Build the LaunchDarkly.EventSource.sln solution
+* .NET Framework 4.5.2: runs on .NET Framework 4.5.x and above.
+* .NET Core 2.1: runs on .NET Core 2.x and 3.x, or .NET 5. This target provides an adapter to the standard .NET Core logging framework, `Logs.CoreLogging`, which is not available in .NET Framework.
+* .NET Standard 2.0: runs on .NET Core 2.x and 3.x or .NET 5, or within a library that is targeted to .NET Standard 2.x.
 
-**Usage**
-Included are tests which show example usage for using the LaunchDarkly EventSource library (specifically, LaunchDarkly.EventSource.Tests.EventSourceTests).
+The .NET build tools should automatically load the most appropriate build of the library for whatever platform your application or library is targeted to.
 
-Signing
--------
+## Signing
 
-The published version of this assembly is digitally signed by LaunchDarkly and strong-named. Building the code locally in the default Debug configuration does not sign the assembly and does not require a key file. The public key file is in this repo at `LaunchDarkly.EventSource.pk` as well as here:
+The published version of this assembly is digitally signed with Authenticode and [strong-named](https://docs.microsoft.com/en-us/dotnet/framework/app-domains/strong-named-assemblies). Building the code locally in the default Debug configuration does not use strong-naming and does not require a key file. The public key file is in this repository at `LaunchDarkly.EventSource.pk` as well as here:
 
 ```
 Public key (hash algorithm: sha1):
@@ -37,36 +33,20 @@ efa557867cec3f488906ec0ef6fe6728a7cfdeef861fcce49ea79357ba825d95d56d67597bc9cc
 Public key token is 18e8c36453e3060f
 ```
 
-Development notes
------------------
+## Contributing
 
-This project imports the `dotnet-base` repository as a subtree. See the `README.md` file in that directory for more information.
+We encourage pull requests and other contributions from the community. Check out our [contributing guidelines](CONTRIBUTING.md) for instructions on how to contribute to this project.
 
-Releases are done using the release script in `dotnet-base`. Since the published package includes a .NET Framework build, the release must be done from Windows.
-
-About LaunchDarkly
-------------------
-
+## About LaunchDarkly
+ 
 * LaunchDarkly is a continuous delivery platform that provides feature flags as a service and allows developers to iterate quickly and safely. We allow you to easily flag your features and manage them from the LaunchDarkly dashboard.  With LaunchDarkly, you can:
     * Roll out a new feature to a subset of your users (like a group of users who opt-in to a beta tester group), gathering feedback and bug reports from real-world use cases.
     * Gradually roll out a feature to an increasing percentage of users, and track the effect that the feature has on key metrics (for instance, how likely is a user to complete a purchase if they have feature A versus feature B?).
     * Turn off a feature that you realize is causing performance problems in production, without needing to re-deploy, or even restart the application with a changed configuration file.
     * Grant access to certain features based on user attributes, like payment plan (eg: users on the ‘gold’ plan get access to more features than users in the ‘silver’ plan). Disable parts of your application to facilitate maintenance, without taking everything offline.
-* LaunchDarkly provides feature flag SDKs for
-    * [Java](http://docs.launchdarkly.com/docs/java-sdk-reference "Java SDK")
-    * [JavaScript](http://docs.launchdarkly.com/docs/js-sdk-reference "LaunchDarkly JavaScript SDK")
-    * [PHP](http://docs.launchdarkly.com/docs/php-sdk-reference "LaunchDarkly PHP SDK")
-    * [Python](http://docs.launchdarkly.com/docs/python-sdk-reference "LaunchDarkly Python SDK")
-    * [Go](http://docs.launchdarkly.com/docs/go-sdk-reference "LaunchDarkly Go SDK")
-    * [Node.JS](http://docs.launchdarkly.com/docs/node-sdk-reference "LaunchDarkly Node SDK")
-    * [Electron](http://docs.launchdarkly.com/docs/electron-sdk-reference "LaunchDarkly Electron SDK")
-    * [.NET](http://docs.launchdarkly.com/docs/dotnet-sdk-reference "LaunchDarkly .NET SDK")
-    * [Ruby](http://docs.launchdarkly.com/docs/ruby-sdk-reference "LaunchDarkly Ruby SDK")
-    * [iOS](http://docs.launchdarkly.com/docs/ios-sdk-reference "LaunchDarkly iOS SDK")
-    * [Android](http://docs.launchdarkly.com/docs/android-sdk-reference "LaunchDarkly Android SDK")
+* LaunchDarkly provides feature flag SDKs for a wide variety of languages and technologies. Check out [our documentation](https://docs.launchdarkly.com/docs) for a complete list.
 * Explore LaunchDarkly
-    * [launchdarkly.com](http://www.launchdarkly.com/ "LaunchDarkly Main Website") for more information
-    * [docs.launchdarkly.com](http://docs.launchdarkly.com/  "LaunchDarkly Documentation") for our documentation and SDKs
-    * [apidocs.launchdarkly.com](http://apidocs.launchdarkly.com/  "LaunchDarkly API Documentation") for our API documentation
-    * [blog.launchdarkly.com](http://blog.launchdarkly.com/  "LaunchDarkly Blog Documentation") for the latest product updates
-    * [Feature Flagging Guide](https://github.com/launchdarkly/featureflags/  "Feature Flagging Guide") for best practices and strategies
+    * [launchdarkly.com](https://www.launchdarkly.com/ "LaunchDarkly Main Website") for more information
+    * [docs.launchdarkly.com](https://docs.launchdarkly.com/  "LaunchDarkly Documentation") for our documentation and SDK reference guides
+    * [apidocs.launchdarkly.com](https://apidocs.launchdarkly.com/  "LaunchDarkly API Documentation") for our API documentation
+    * [blog.launchdarkly.com](https://blog.launchdarkly.com/  "LaunchDarkly Blog Documentation") for the latest product updates
