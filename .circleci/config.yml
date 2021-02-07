@@ -13,7 +13,9 @@ jobs:
     steps:
       - run:
           name: install packages
-          command: apt-get -q update && apt-get install -qy awscli
+          command: |
+              lscpu
+              apt-get -q update && apt-get install -qy awscli
       - checkout
       - run: dotnet restore
       - run: dotnet build src/LaunchDarkly.EventSource -f netstandard2.0
