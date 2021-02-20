@@ -15,6 +15,10 @@ workflows:
           name: .NET Core 3.1
           docker-image: mcr.microsoft.com/dotnet/core/sdk:3.1-focal
           test-target-framework: netcoreapp3.1
+      - test-netcore:
+          name: .NET 5.0
+          docker-image: mcr.microsoft.com/dotnet/sdk:5.0-focal
+          test-target-framework: net5.0
       - test-windows-netframework-4-6-1:
           name: .NET Framework 4.6.1
 
