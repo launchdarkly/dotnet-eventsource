@@ -210,9 +210,6 @@ namespace LaunchDarkly.EventSource.Tests
 
         public static StreamAction CloseStream() => new StreamAction();
 
-        public static StreamAction CloseStreamAbnormally() =>
-            new StreamAction { CloseEarly = true };
-
         public StreamAction AfterDelay(TimeSpan delay) =>
             new StreamAction { Content = this.Content, CloseEarly = this.CloseEarly, Delay = delay };
     }
