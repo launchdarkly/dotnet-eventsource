@@ -86,7 +86,7 @@ namespace LaunchDarkly.EventSource.Tests
         [InlineData(true)]
         public void ReadTimeoutIsDetected(bool utf8Mode)
         {
-            TimeSpan readTimeout = TimeSpan.FromMilliseconds(2000);
+            TimeSpan readTimeout = TimeSpan.FromMilliseconds(200);
             IEnumerable<string> DoChunks()
             {
                 yield return "";
