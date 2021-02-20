@@ -1,7 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1;net461</TargetFrameworks>
+    <!-- The TESTFRAMEWORK variable allows us to override the target frameworks with a
+         single framework that we are testing; this allows us to test with older SDK
+         versions that would error out if they saw any newer target frameworks listed
+         here, even if we weren't running those. -->
+    <TestFramework Condition="'$(TESTFRAMEWORK)' == ''">netcoreapp2.1;netcoreapp3.1;net5.0;net461</TestFramework>
+    <TargetFrameworks>$(TESTFRAMEWORK)</TargetFrameworks>
+
     <Copyright>Copyright © 2017 Catamorphic, Co.</Copyright>
   </PropertyGroup>
 
