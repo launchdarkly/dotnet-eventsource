@@ -47,57 +47,33 @@ namespace LaunchDarkly.EventSource {
             }
         }
         
-        internal static string EventSourceService_Read_Timeout {
+        internal static string ErrorReadTimeout {
             get {
-                return ResourceManager.GetString("EventSourceService_Read_Timeout", resourceCulture);
+                return ResourceManager.GetString("ErrorReadTimeout", resourceCulture);
             }
         }
         
-        internal static string EventSource_204_Response {
+        internal static string ErrorAlreadyStarted {
             get {
-                return ResourceManager.GetString("EventSource_204_Response", resourceCulture);
+                return ResourceManager.GetString("ErrorAlreadyStarted", resourceCulture);
             }
         }
         
-        internal static string EventSource_Already_Started {
+        internal static string ErrorHttpStatus {
             get {
-                return ResourceManager.GetString("EventSource_Already_Started", resourceCulture);
+                return ResourceManager.GetString("ErrorHttpStatus", resourceCulture);
             }
         }
         
-        internal static string EventSource_HttpResponse_Not_Successful {
+        internal static string ErrorWrongContentType {
             get {
-                return ResourceManager.GetString("EventSource_HttpResponse_Not_Successful", resourceCulture);
+                return ResourceManager.GetString("ErrorWrongContentType", resourceCulture);
             }
         }
         
-        internal static string EventSource_Invalid_MediaType {
+        internal static string ErrorEmptyResponse {
             get {
-                return ResourceManager.GetString("EventSource_Invalid_MediaType", resourceCulture);
-            }
-        }
-        
-        internal static string EventSource_Logger_Closed {
-            get {
-                return ResourceManager.GetString("EventSource_Logger_Closed", resourceCulture);
-            }
-        }
-        
-        internal static string EventSource_Logger_Connection_Error {
-            get {
-                return ResourceManager.GetString("EventSource_Logger_Connection_Error", resourceCulture);
-            }
-        }
-        
-        internal static string EventSource_Logger_Disconnected {
-            get {
-                return ResourceManager.GetString("EventSource_Logger_Disconnected", resourceCulture);
-            }
-        }
-        
-        internal static string EventSource_Response_Content_Empty {
-            get {
-                return ResourceManager.GetString("EventSource_Response_Content_Empty", resourceCulture);
+                return ResourceManager.GetString("ErrorEmptyResponse", resourceCulture);
             }
         }
     }

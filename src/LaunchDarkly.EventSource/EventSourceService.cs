@@ -94,7 +94,7 @@ namespace LaunchDarkly.EventSource
                 cancellationToken).ConfigureAwait(false))
             {
                 _logger.Debug("Response status: {0}", (int)response.StatusCode);
-                HandleInvalidResponses(response);
+                ValidateResponse(response);
 
                 OnConnectionOpened();
 
@@ -228,46 +228,23 @@ namespace LaunchDarkly.EventSource
             return request;
         }
 
-        private void HandleInvalidResponses(HttpResponseMessage response)
+        private void ValidateResponse(HttpResponseMessage response)
         {
-            HandleUnsuccessfulStatusCodes(response);
-
-            // According to Specs, a client can be told to stop reconnecting using the HTTP 204 No Content response code
-            HandleNoContent(response);
-
-            // According to Specs, HTTP 200 OK responses that have a Content-Type specifying an unsupported type, 
-            // or that have no Content-Type at all, must cause the user agent to fail the connection.
-            HandleIncorrectMediaType(response);
-        }
-
-        private void HandleNoContent(HttpResponseMessage response)
-        {
-            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+            // Any non-2xx response status is an error. A 204 (no content) is also an error.
+            if (!response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NoContent)
             {
-                throw new EventSourceServiceUnsuccessfulResponseException(Resources.EventSource_204_Response, (int)response.StatusCode);
+                throw new EventSourceServiceUnsuccessfulResponseException((int)response.StatusCode);
             }
 
             if (response.Content == null)
             {
-                throw new EventSourceServiceCancelledException(Resources.EventSource_Response_Content_Empty);
+                throw new EventSourceServiceCancelledException(Resources.ErrorEmptyResponse);
             }
-        }
 
-        private void HandleIncorrectMediaType(HttpResponseMessage response)
-        {
-            if (response.IsSuccessStatusCode && response.Content != null && response.Content.Headers.ContentType.MediaType !=
-                Constants.EventStreamContentType)
+            if (response.Content.Headers.ContentType.MediaType != Constants.EventStreamContentType)
             {
-                throw new EventSourceServiceCancelledException(Resources.EventSource_Invalid_MediaType);
-            }
-        }
-
-        private void HandleUnsuccessfulStatusCodes(HttpResponseMessage response)
-        {
-            if (response.IsSuccessStatusCode == false)
-            {
-                throw new EventSourceServiceUnsuccessfulResponseException(string.Format(Resources.EventSource_HttpResponse_Not_Successful, (int)response.StatusCode),
-                    (int)response.StatusCode);
+                throw new EventSourceServiceCancelledException(
+                    string.Format(Resources.ErrorWrongContentType, response.Content.Headers.ContentType));
             }
         }
 

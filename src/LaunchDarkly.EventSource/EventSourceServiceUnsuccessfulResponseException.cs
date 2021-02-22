@@ -21,9 +21,9 @@ namespace LaunchDarkly.EventSource
         /// <summary>
         /// Creates a new instance.
         /// </summary>
-        /// <param name="message">the exception message</param>
         /// <param name="statusCode">the HTTP status code of the response</param>
-        public EventSourceServiceUnsuccessfulResponseException(string message, int statusCode) : base(message)
+        public EventSourceServiceUnsuccessfulResponseException(int statusCode) :
+            base(string.Format(Resources.ErrorHttpStatus, statusCode))
         {
             StatusCode = statusCode;
         }

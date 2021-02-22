@@ -149,7 +149,7 @@ namespace LaunchDarkly.EventSource
 
                 if (ReadyState == ReadyState.Connecting || ReadyState == ReadyState.Open)
                 {
-                    throw new InvalidOperationException(string.Format(Resources.EventSource_Already_Started, ReadyState));
+                    throw new InvalidOperationException(string.Format(Resources.ErrorAlreadyStarted, ReadyState));
                 }
 
                 SetReadyState(ReadyState.Connecting);
