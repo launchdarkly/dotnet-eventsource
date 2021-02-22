@@ -2,6 +2,41 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [4.0.0] - 2021-02-22
+Starting with this version, the API documentation for the latest release is viewable at https://launchdarkly.github.io/dotnet-eventsource.
+
+The 4.x major version of `LaunchDarkly.EventSource` will be used in the upcoming major version releases of LaunchDarkly&#39;s .NET-based SDKs. This release streamlines the API, updates platform compatibility, and improves performance.
+
+### Added:
+- `EventSource.Restart`: this method allows the caller to trigger a connection restart even if there was not an error on the stream.
+- `MessageEvent.Name`: previously, the event name was only available as a property of `MessageReceivedEventArgs`.
+- `ConfigurationBuilder.DefaultEncoding`: sets the character encoding to use for parsing the stream data if the server did not specify an encoding in its `Content-Type`.
+- `ConfigurationBuilder.PreferDataAsUtf8Bytes`: an optional mode in which `EventSource` will read the `data:` property of events as a raw UTF-8 byte array (assuming the stream encoding is UTF-8) to avoid unnecessarily allocating a UTF-16 `string`. This is meant as an optimization for applications that will be processing the data with a UTF-8-based API such as `System.Text.Json`.
+- Simple `EventSource(Uri)` constructor for cases where you do not need any other configuration options.
+- Standard .NET XML documentation of all public types and methods is now produced in the build.
+- The release now publishes a [Source Link](https://github.com/dotnet/sourcelink/blob/master/README.md) package.
+
+### Changed:
+- The minimum .NET Standard compatibility version is now 2.0.
+- The minimum .NET Framework compatibility version is now 4.5.2.
+- Logging now works through the new [`LaunchDarkly.Logging`](https://github.com/launchdarkly/dotnet-logging) facade which is used by LaunchDarkly .NET-based SDKs, instead of `Common.Logging`.
+- `ConfigurationBuilder` methods no longer throw any exceptions, except for one case: passing `null` for the stream URI. In all cases where a property has a maximum and/or minimum value, if you try to set a value outside that range it will simply be changed to the closest valid value. If two properties do not make sense to use together (such as a non-null `HttpClient` and a non-null `HttpMessageHandler`), one will simply override the other as described in the API documentation.
+- `ConfigurationBuilder.DelayRetryDuration` is named to `InitialRetryDelay`, which more accurately describes its meaning.
+- `ConfigurationBuilder.MessageHandler` is renamed to `HttpMessageHandler`, since that&#39;s the name of its type (also, &#34;message&#34; has other meanings in this API).
+- The type of `Configuration.HttpContentFactory` is now simply `Func&lt;HttpContent&gt;` rather than using a custom delegate type.
+- If you pass a `Dictionary` of headers to `ConfigurationBuilder.RequestHeaders`, it will now be copied. Previously the configuration retained a reference to the original `Dictionary`, which could cause problems if it was later modified.
+- `EventSource` now implements the stream read timeout in a way that uses the task scheduler more efficiently. Previously, it executed an additional task for each read with `Task.Delay`; now, it uses a timed cancellation token.
+- Exception messages have been rewritten for clarity and style.
+
+### Fixed:
+- `ConfigurationBuilder.BackoffResetThreshold` had no effect; the default value was being used regardless of what you set it to.
+- When reading the SSE stream, `EventSource` was using a case-insensitive comparison to recognize field names like `event` and `data`. The [SSE specification](https://html.spec.whatwg.org/multipage/server-sent-events.html#event-stream-interpretation) states that field name &#34;must be compared literally, with no case folding performed,&#34; so a field name like `EVENT` is invalid.
+
+### Removed:
+- Removed all types and methods that were marked as deprecated/obsolete in the last 3.x version.
+- `Configuration` no longer has a public constructor. Instances must now be created with `Configuration.Builder`.
+- The helper class `ExponentialBackoffWithDecorrelation` is no longer public.
+
 ## [3.4.0] - 2020-12-03
 ### Added:
 - You can now tell EventSource to use an `HttpClient` instance that you provide by calling `ConfigurationBuilder.HttpClient`. (Thanks, [thorstenfleischmann](https://github.com/launchdarkly/dotnet-eventsource/pull/61)!)
