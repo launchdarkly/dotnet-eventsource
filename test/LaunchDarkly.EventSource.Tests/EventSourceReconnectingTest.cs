@@ -82,7 +82,7 @@ namespace LaunchDarkly.EventSource.Tests
             {
                 handler.QueueResponse(StubResponse.StartStream(
                     StreamAction.Write(":hi\n"),
-                    StreamAction.CloseStreamAbnormally()));
+                    StreamAction.CloseStream()));
             }
             handler.QueueResponse(StubResponse.StartStream());
 
@@ -91,7 +91,7 @@ namespace LaunchDarkly.EventSource.Tests
             using (var es = MakeEventSource(handler, builder => builder.InitialRetryDelay(TimeSpan.FromMilliseconds(100))))
             {
                 _ = new EventSink(es, _testLogging);
-                es.Error += (_, ex) =>
+                es.Closed += (_, state) =>
                 {
                     backoffs.Add(es.BackOffDelay);
                 };

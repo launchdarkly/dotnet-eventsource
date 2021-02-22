@@ -29,100 +29,78 @@ namespace LaunchDarkly.EventSource.Tests
             // parsed correctly regardless of how the chunks line up with the events.
 
             var eventData = new List<string>();
-            var chunks = new List<string>();
             for (var i = 0; i < 200; i++)
             {
                 eventData.Add(string.Format("data{0}", i) + new string('x', i % 7));
             }
             var allBody = string.Concat(eventData.Select(data => "data:" + data + "\n\n"));
-            for (var pos = 0; ;)
+            var allEventsReceived = new EventWaitHandle(false, EventResetMode.ManualReset);
+
+            IEnumerable<string> DoChunks()
             {
-                int i = chunks.Count;
-                int chunkSize = i % 20 + 1;
-                if (pos + chunkSize >= allBody.Length)
+                var i = 0;
+                for (var pos = 0; ;)
                 {
-                    chunks.Add(allBody.Substring(pos));
-                    break;
+                    int chunkSize = i % 20 + 1;
+                    if (pos + chunkSize >= allBody.Length)
+                    {
+                        yield return allBody.Substring(pos);
+                        break;
+                    }
+                    yield return allBody.Substring(pos, chunkSize);
+                    pos += chunkSize;
+                    i++;
                 }
-                chunks.Add(allBody.Substring(pos, chunkSize));
-                pos += chunkSize;
+                allEventsReceived.WaitOne();
             }
 
-            using (var server = StartWebServerOnAvailablePort(out var uri, ctx =>
+            try
             {
-                ctx.Response.ContentType = "text/event-stream";
-                ctx.Response.SendChunked = true;
-                var stream = ctx.Response.OutputStream;
-                foreach (var chunk in chunks)
+                using (var server = StartWebServerOnAvailablePort(out var uri,
+                    RespondWithChunks("text/event-stream", DoChunks)))
                 {
-                    WriteChunk(stream, chunk);
-                }
-            }))
-            {
-                var expectedActions = new List<EventSink.Action>();
-                expectedActions.Add(EventSink.OpenedAction());
-                foreach (var data in eventData)
-                {
-                    expectedActions.Add(EventSink.MessageReceivedAction(new MessageEvent(MessageEvent.DefaultName, data, uri)));
-                }
+                    var expectedActions = new List<EventSink.Action>();
+                    expectedActions.Add(EventSink.OpenedAction());
+                    foreach (var data in eventData)
+                    {
+                        expectedActions.Add(EventSink.MessageReceivedAction(new MessageEvent(MessageEvent.DefaultName, data, uri)));
+                    }
 
-                var config = Configuration.Builder(uri).LogAdapter(_testLogging).Build();
-                using (var es = new EventSource(config))
-                {
-                    var sink = new EventSink(es);
-                    _ = es.StartAsync();
-                    sink.ExpectActions(expectedActions.ToArray());
+                    var config = Configuration.Builder(uri).LogAdapter(_testLogging).Build();
+                    using (var es = new EventSource(config))
+                    {
+                        var sink = new EventSink(es);
+                        _ = es.StartAsync();
+                        sink.ExpectActions(expectedActions.ToArray());
+                    }
                 }
             }
-        }
-
-        [Fact]
-        public void ReadTimeoutIsDetectedInDefaultStringStreamReadingMode()
-        {
-            TimeSpan readTimeout = TimeSpan.FromMilliseconds(200);
-            using (var server = StartWebServerOnAvailablePort(out var uri, ctx =>
+            finally
             {
-                ctx.Response.ContentType = "text/event-stream";
-                ctx.Response.SendChunked = true;
-                var stream = ctx.Response.OutputStream;
-                WriteChunk(stream, "data: event1\n\ndata: e");
-                Thread.Sleep(readTimeout + readTimeout);
-                WriteChunk(stream, "vent2\n\n");
-            }))
-            {
-                var config = Configuration.Builder(uri).LogAdapter(_testLogging)
-                    .ReadTimeout(readTimeout).Build();
-                using (var es = new EventSource(config))
-                {
-                    var sink = new EventSink(es) { Output = _testLogger.Debug };
-                    _ = es.StartAsync();
-                    sink.ExpectActions(
-                        EventSink.OpenedAction(),
-                        EventSink.MessageReceivedAction(new MessageEvent(MessageEvent.DefaultName, "event1", uri)),
-                        EventSink.ErrorAction(new ReadTimeoutException()),
-                        EventSink.ClosedAction()
-                        );
-                }
+                allEventsReceived.Set();
             }
         }
 
-        [Fact]
-        public void ReadTimeoutIsDetectedInRawUtf8ReadingMode()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ReadTimeoutIsDetected(bool utf8Mode)
         {
             TimeSpan readTimeout = TimeSpan.FromMilliseconds(200);
-            using (var server = StartWebServerOnAvailablePort(out var uri, ctx =>
+            IEnumerable<string> DoChunks()
             {
-                ctx.Response.ContentType = "text/event-stream";
-                ctx.Response.SendChunked = true;
-                var stream = ctx.Response.OutputStream;
-                WriteChunk(stream, "data: event1\n\ndata: e");
+                yield return "";
+                yield return "data: event1\n\ndata: e";
                 Thread.Sleep(readTimeout + readTimeout);
-                WriteChunk(stream, "vent2\n\n");
-            }))
+                yield return "vent2\n\n";
+            }
+            using (var server = StartWebServerOnAvailablePort(out var uri, RespondWithChunks("text/event-stream", DoChunks)))
             {
-                var config = Configuration.Builder(uri).LogAdapter(_testLogging)
+                var config = Configuration.Builder(uri)
+                    .LogAdapter(_testLogging)
                     .ReadTimeout(readTimeout)
-                    .DefaultEncoding(Encoding.UTF8).PreferDataAsUtf8Bytes(true).Build();
+                    .PreferDataAsUtf8Bytes(utf8Mode)
+                    .Build();
                 using (var es = new EventSource(config))
                 {
                     var sink = new EventSink(es) { Output = _testLogger.Debug };
@@ -135,13 +113,6 @@ namespace LaunchDarkly.EventSource.Tests
                         );
                 }
             }
-        }
-
-        private static void WriteChunk(Stream stream, string data)
-        {
-            var bytes = Encoding.UTF8.GetBytes(data);
-            stream.Write(bytes, 0, bytes.Length);
-            stream.Flush();
         }
 
         private static WebServer StartWebServerOnAvailablePort(out Uri serverUri, Action<IHttpContext> handler)
@@ -150,7 +121,10 @@ namespace LaunchDarkly.EventSource.Tests
 
             for (int port = 10000; ; port++)
             {
-                var server = new WebServer(port).WithModule(module);
+                var options = new WebServerOptions()
+                    .WithUrlPrefix($"http://*:{port}")
+                    .WithMode(HttpListenerMode.EmbedIO);
+                var server = new WebServer(options).WithModule(module);
                 try
                 {
                     _ = server.RunAsync();
@@ -163,6 +137,20 @@ namespace LaunchDarkly.EventSource.Tests
                 return server;
             }
         }
+
+        private static Action<IHttpContext> RespondWithChunks(string contentType, Func<IEnumerable<string>> chunks) =>
+            ctx =>
+            {
+                ctx.Response.ContentType = contentType;
+                ctx.Response.SendChunked = true;
+                var stream = ctx.Response.OutputStream;
+                foreach (var chunk in chunks())
+                {
+                    var bytes = Encoding.UTF8.GetBytes(chunk);
+                    stream.Write(bytes, 0, bytes.Length);
+                    stream.Flush();
+                }
+            };
 
         // A simple web server handler for use with EmbedIO, delegating to a function you provide.
         private sealed class SimpleModule : IWebModule

@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Pipelines;
 using System.IO.Pipes;
 using System.Linq;
 using System.Net;
@@ -128,9 +129,9 @@ namespace LaunchDarkly.EventSource.Tests
         override public HttpResponseMessage MakeResponse(CancellationToken cancellationToken)
         {
             var httpResponse = new HttpResponseMessage(HttpStatusCode.OK);
-            var streamRead = new AnonymousPipeServerStream(PipeDirection.In);
-            var streamWrite = new AnonymousPipeClientStream(PipeDirection.Out, streamRead.ClientSafePipeHandle);
-            var content = new StreamContent(streamRead);
+            var pipe = new Pipe();
+            var readStream = pipe.Reader.AsStream(true);
+            var content = new StreamContent(readStream);
             content.Headers.ContentType = new MediaTypeHeaderValue("text/event-stream");
             if (_specifiedEncoding)
             {
@@ -138,12 +139,12 @@ namespace LaunchDarkly.EventSource.Tests
             }
             httpResponse.Content = content;
 
-            Task.Run(() => WriteStreamingResponse(streamWrite, streamRead, cancellationToken));
+            Task.Run(() => WriteStreamingResponse(pipe.Writer, readStream, cancellationToken));
 
             return httpResponse;
         }
         
-        private async Task WriteStreamingResponse(Stream output, Stream readStream, CancellationToken cancellationToken)
+        private async Task WriteStreamingResponse(PipeWriter output, Stream readStream, CancellationToken cancellationToken)
         {
             try
             {
@@ -152,6 +153,7 @@ namespace LaunchDarkly.EventSource.Tests
                     if (action.CloseEarly)
                     {
                         readStream.Close();
+                        output.Complete();
                         return;
                     }
                     if (action.Delay != TimeSpan.Zero)
@@ -160,11 +162,11 @@ namespace LaunchDarkly.EventSource.Tests
                     }
                     if (action.ShouldQuit())
                     {
-                        output.Close();
+                        output.Complete();
                         return;
                     }
                     var data = _encoding.GetBytes(action.Content);
-                    await output.WriteAsync(data, 0, data.Length, cancellationToken);
+                    await output.WriteAsync(new ReadOnlyMemory<byte>(data), cancellationToken);
                 }
                 // if we've run out of actions, leave the stream open until it's cancelled
                 while (!cancellationToken.IsCancellationRequested)
@@ -209,9 +211,6 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         public static StreamAction CloseStream() => new StreamAction();
-
-        public static StreamAction CloseStreamAbnormally() =>
-            new StreamAction { CloseEarly = true };
 
         public StreamAction AfterDelay(TimeSpan delay) =>
             new StreamAction { Content = this.Content, CloseEarly = this.CloseEarly, Delay = delay };

@@ -1,13 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1;net461</TargetFrameworks>
+    <!-- The TESTFRAMEWORK variable allows us to override the target frameworks with a
+         single framework that we are testing; this allows us to test with older SDK
+         versions that would error out if they saw any newer target frameworks listed
+         here, even if we weren't running those. -->
+    <TestFramework Condition="'$(TESTFRAMEWORK)' == ''">netcoreapp2.1;net461</TestFramework>
+    <TargetFrameworks>$(TESTFRAMEWORK)</TargetFrameworks>
+
     <Copyright>Copyright © 2017 Catamorphic, Co.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="EmbedIO" Version="3.4.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
+    <PackageReference Include="System.IO.Pipelines" Version="5.0.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
   </ItemGroup>
