@@ -117,31 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="EventSourceService_Read_Timeout" xml:space="preserve">
-    <value>A timeout occurred while reading the request from the remote EventSource API</value>
+  <data name="ErrorReadTimeout" xml:space="preserve">
+    <value>Read timeout elapsed with no new data from server; connection may have been silently dropped</value>
   </data>
-  <data name="EventSource_204_Response" xml:space="preserve">
-    <value>Remote EventSource API returned Http Status Code 204.</value>
+  <data name="ErrorAlreadyStarted" xml:space="preserve">
+    <value>Invalid attempt to call Start() while the connection state is {0}</value>
   </data>
-  <data name="EventSource_Already_Started" xml:space="preserve">
-    <value>Invalid attempt to call Start() while the connection is {0}.</value>
+  <data name="ErrorHttpStatus" xml:space="preserve">
+    <value>Unexpected HTTP status code {0} from server</value>
   </data>
-  <data name="EventSource_HttpResponse_Not_Successful" xml:space="preserve">
-    <value>Http Status Code '{0}' indicates an unsuccessful response returned from the remote EventSource API.</value>
+  <data name="ErrorWrongContentType" xml:space="preserve">
+    <value>Unexpected HTTP content type "{0}"; should be "text/event-stream"</value>
   </data>
-  <data name="EventSource_Invalid_MediaType" xml:space="preserve">
-    <value>HTTP Content-Type returned from the remote EventSource API does not match 'text/event-stream'.</value>
-  </data>
-  <data name="EventSource_Logger_Closed" xml:space="preserve">
-    <value>EventSource.Close called</value>
-  </data>
-  <data name="EventSource_Logger_Connection_Error" xml:space="preserve">
-    <value>Encountered exception in EventSourceService.ConnectToEventSourceApi method. Exception Message: {0}</value>
-  </data>
-  <data name="EventSource_Logger_Disconnected" xml:space="preserve">
-    <value>EventSource Disconnected. Automatically delaying {0}ms before reconnecting.</value>
-  </data>
-  <data name="EventSource_Response_Content_Empty" xml:space="preserve">
-    <value>Http Response contained no content.</value>
+  <data name="ErrorEmptyResponse" xml:space="preserve">
+    <value>HTTP response had no body</value>
   </data>
 </root>

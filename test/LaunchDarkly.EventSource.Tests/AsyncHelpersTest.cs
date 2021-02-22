@@ -53,7 +53,7 @@ namespace LaunchDarkly.EventSource.Tests
                     async (token) =>
                     {
                         await Task.Yield();
-                        throw new EventSourceServiceUnsuccessfulResponseException("", 401);
+                        throw new EventSourceServiceUnsuccessfulResponseException(401);
                     });
             });
         }

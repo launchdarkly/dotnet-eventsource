@@ -163,7 +163,7 @@ namespace LaunchDarkly.EventSource.Tests
 
                 var errorAction = eventSink.ExpectAction();
                 var ex = Assert.IsType<EventSourceServiceCancelledException>(errorAction.Exception);
-                Assert.Contains("Content-Type", ex.Message);
+                Assert.Matches(".*content type.*text/html", ex.Message);
             }
         }
 
