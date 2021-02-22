@@ -1,0 +1,301 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<HelpKI>
+  <HelpKINode Title="BackoffResetThreshold method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_BackoffResetThreshold.htm" />
+  <HelpKINode Title="BackoffResetThreshold property" Url="html/P_LaunchDarkly_EventSource_Configuration_BackoffResetThreshold.htm" />
+  <HelpKINode Title="Build method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_Build.htm" />
+  <HelpKINode Title="Builder method" Url="html/M_LaunchDarkly_EventSource_Configuration_Builder.htm" />
+  <HelpKINode Title="Close method">
+    <HelpKINode Title="EventSource.Close Method " Url="html/M_LaunchDarkly_EventSource_EventSource_Close.htm" />
+    <HelpKINode Title="IEventSource.Close Method " Url="html/M_LaunchDarkly_EventSource_IEventSource_Close.htm" />
+  </HelpKINode>
+  <HelpKINode Title="Closed enumeration member" Url="html/T_LaunchDarkly_EventSource_ReadyState.htm" />
+  <HelpKINode Title="Closed event">
+    <HelpKINode Title="EventSource.Closed Event" Url="html/E_LaunchDarkly_EventSource_EventSource_Closed.htm" />
+    <HelpKINode Title="IEventSource.Closed Event" Url="html/E_LaunchDarkly_EventSource_IEventSource_Closed.htm" />
+  </HelpKINode>
+  <HelpKINode Title="Comment property" Url="html/P_LaunchDarkly_EventSource_CommentReceivedEventArgs_Comment.htm" />
+  <HelpKINode Title="CommentReceived event">
+    <HelpKINode Title="EventSource.CommentReceived Event" Url="html/E_LaunchDarkly_EventSource_EventSource_CommentReceived.htm" />
+    <HelpKINode Title="IEventSource.CommentReceived Event" Url="html/E_LaunchDarkly_EventSource_IEventSource_CommentReceived.htm" />
+  </HelpKINode>
+  <HelpKINode Title="CommentReceivedEventArgs class">
+    <HelpKINode Title="CommentReceivedEventArgs Class" Url="html/T_LaunchDarkly_EventSource_CommentReceivedEventArgs.htm" />
+    <HelpKINode Title="constructor" Url="html/M_LaunchDarkly_EventSource_CommentReceivedEventArgs__ctor.htm" />
+    <HelpKINode Title="methods" Url="html/Methods_T_LaunchDarkly_EventSource_CommentReceivedEventArgs.htm" />
+    <HelpKINode Title="properties" Url="html/Properties_T_LaunchDarkly_EventSource_CommentReceivedEventArgs.htm" />
+  </HelpKINode>
+  <HelpKINode Title="CommentReceivedEventArgs.Comment property" Url="html/P_LaunchDarkly_EventSource_CommentReceivedEventArgs_Comment.htm" />
+  <HelpKINode Title="CommentReceivedEventArgs.CommentReceivedEventArgs constructor" Url="html/M_LaunchDarkly_EventSource_CommentReceivedEventArgs__ctor.htm" />
+  <HelpKINode Title="Configuration class">
+    <HelpKINode Title="Configuration Class" Url="html/T_LaunchDarkly_EventSource_Configuration.htm" />
+    <HelpKINode Title="fields" Url="html/Fields_T_LaunchDarkly_EventSource_Configuration.htm" />
+    <HelpKINode Title="methods" Url="html/Methods_T_LaunchDarkly_EventSource_Configuration.htm" />
+    <HelpKINode Title="properties" Url="html/Properties_T_LaunchDarkly_EventSource_Configuration.htm" />
+  </HelpKINode>
+  <HelpKINode Title="Configuration.BackoffResetThreshold property" Url="html/P_LaunchDarkly_EventSource_Configuration_BackoffResetThreshold.htm" />
+  <HelpKINode Title="Configuration.Builder method" Url="html/M_LaunchDarkly_EventSource_Configuration_Builder.htm" />
+  <HelpKINode Title="Configuration.ConnectionTimeout property" Url="html/P_LaunchDarkly_EventSource_Configuration_ConnectionTimeout.htm" />
+  <HelpKINode Title="Configuration.DefaultBackoffResetThreshold field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultBackoffResetThreshold.htm" />
+  <HelpKINode Title="Configuration.DefaultConnectionTimeout field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultConnectionTimeout.htm" />
+  <HelpKINode Title="Configuration.DefaultEncoding property" Url="html/P_LaunchDarkly_EventSource_Configuration_DefaultEncoding.htm" />
+  <HelpKINode Title="Configuration.DefaultInitialRetryDelay field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultInitialRetryDelay.htm" />
+  <HelpKINode Title="Configuration.DefaultLoggerName field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultLoggerName.htm" />
+  <HelpKINode Title="Configuration.DefaultMaxRetryDelay field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultMaxRetryDelay.htm" />
+  <HelpKINode Title="Configuration.DefaultReadTimeout field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultReadTimeout.htm" />
+  <HelpKINode Title="Configuration.HttpClient property" Url="html/P_LaunchDarkly_EventSource_Configuration_HttpClient.htm" />
+  <HelpKINode Title="Configuration.HttpMessageHandler property" Url="html/P_LaunchDarkly_EventSource_Configuration_HttpMessageHandler.htm" />
+  <HelpKINode Title="Configuration.InitialRetryDelay property" Url="html/P_LaunchDarkly_EventSource_Configuration_InitialRetryDelay.htm" />
+  <HelpKINode Title="Configuration.LastEventId property" Url="html/P_LaunchDarkly_EventSource_Configuration_LastEventId.htm" />
+  <HelpKINode Title="Configuration.Logger property" Url="html/P_LaunchDarkly_EventSource_Configuration_Logger.htm" />
+  <HelpKINode Title="Configuration.MaxRetryDelay property" Url="html/P_LaunchDarkly_EventSource_Configuration_MaxRetryDelay.htm" />
+  <HelpKINode Title="Configuration.Method property" Url="html/P_LaunchDarkly_EventSource_Configuration_Method.htm" />
+  <HelpKINode Title="Configuration.PreferDataAsUtf8Bytes property" Url="html/P_LaunchDarkly_EventSource_Configuration_PreferDataAsUtf8Bytes.htm" />
+  <HelpKINode Title="Configuration.ReadTimeout property" Url="html/P_LaunchDarkly_EventSource_Configuration_ReadTimeout.htm" />
+  <HelpKINode Title="Configuration.RequestBodyFactory property" Url="html/P_LaunchDarkly_EventSource_Configuration_RequestBodyFactory.htm" />
+  <HelpKINode Title="Configuration.RequestHeaders property" Url="html/P_LaunchDarkly_EventSource_Configuration_RequestHeaders.htm" />
+  <HelpKINode Title="Configuration.Uri property" Url="html/P_LaunchDarkly_EventSource_Configuration_Uri.htm" />
+  <HelpKINode Title="ConfigurationBuilder class">
+    <HelpKINode Title="ConfigurationBuilder Class" Url="html/T_LaunchDarkly_EventSource_ConfigurationBuilder.htm" />
+    <HelpKINode Title="methods" Url="html/Methods_T_LaunchDarkly_EventSource_ConfigurationBuilder.htm" />
+  </HelpKINode>
+  <HelpKINode Title="ConfigurationBuilder.BackoffResetThreshold method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_BackoffResetThreshold.htm" />
+  <HelpKINode Title="ConfigurationBuilder.Build method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_Build.htm" />
+  <HelpKINode Title="ConfigurationBuilder.ConnectionTimeout method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_ConnectionTimeout.htm" />
+  <HelpKINode Title="ConfigurationBuilder.DefaultEncoding method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_DefaultEncoding.htm" />
+  <HelpKINode Title="ConfigurationBuilder.HttpClient method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_HttpClient.htm" />
+  <HelpKINode Title="ConfigurationBuilder.HttpMessageHandler method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_HttpMessageHandler.htm" />
+  <HelpKINode Title="ConfigurationBuilder.InitialRetryDelay method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_InitialRetryDelay.htm" />
+  <HelpKINode Title="ConfigurationBuilder.LastEventId method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_LastEventId.htm" />
+  <HelpKINode Title="ConfigurationBuilder.LogAdapter method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_LogAdapter.htm" />
+  <HelpKINode Title="ConfigurationBuilder.Logger method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_Logger.htm" />
+  <HelpKINode Title="ConfigurationBuilder.MaxRetryDelay method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_MaxRetryDelay.htm" />
+  <HelpKINode Title="ConfigurationBuilder.Method method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_Method.htm" />
+  <HelpKINode Title="ConfigurationBuilder.PreferDataAsUtf8Bytes method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_PreferDataAsUtf8Bytes.htm" />
+  <HelpKINode Title="ConfigurationBuilder.ReadTimeout method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_ReadTimeout.htm" />
+  <HelpKINode Title="ConfigurationBuilder.RequestBody method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_RequestBody.htm" />
+  <HelpKINode Title="ConfigurationBuilder.RequestBodyFactory method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_RequestBodyFactory.htm" />
+  <HelpKINode Title="ConfigurationBuilder.RequestHeader method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_RequestHeader.htm" />
+  <HelpKINode Title="ConfigurationBuilder.RequestHeaders method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_RequestHeaders.htm" />
+  <HelpKINode Title="Connecting enumeration member" Url="html/T_LaunchDarkly_EventSource_ReadyState.htm" />
+  <HelpKINode Title="ConnectionTimeout method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_ConnectionTimeout.htm" />
+  <HelpKINode Title="ConnectionTimeout property" Url="html/P_LaunchDarkly_EventSource_Configuration_ConnectionTimeout.htm" />
+  <HelpKINode Title="Data property">
+    <HelpKINode Title="MessageEvent.Data Property " Url="html/P_LaunchDarkly_EventSource_MessageEvent_Data.htm" />
+    <HelpKINode Title="Utf8ByteSpan.Data Property " Url="html/P_LaunchDarkly_EventSource_Utf8ByteSpan_Data.htm" />
+  </HelpKINode>
+  <HelpKINode Title="DataUtf8Bytes property" Url="html/P_LaunchDarkly_EventSource_MessageEvent_DataUtf8Bytes.htm" />
+  <HelpKINode Title="DefaultBackoffResetThreshold field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultBackoffResetThreshold.htm" />
+  <HelpKINode Title="DefaultConnectionTimeout field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultConnectionTimeout.htm" />
+  <HelpKINode Title="DefaultEncoding method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_DefaultEncoding.htm" />
+  <HelpKINode Title="DefaultEncoding property" Url="html/P_LaunchDarkly_EventSource_Configuration_DefaultEncoding.htm" />
+  <HelpKINode Title="DefaultInitialRetryDelay field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultInitialRetryDelay.htm" />
+  <HelpKINode Title="DefaultLoggerName field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultLoggerName.htm" />
+  <HelpKINode Title="DefaultMaxRetryDelay field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultMaxRetryDelay.htm" />
+  <HelpKINode Title="DefaultName field" Url="html/F_LaunchDarkly_EventSource_MessageEvent_DefaultName.htm" />
+  <HelpKINode Title="DefaultReadTimeout field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultReadTimeout.htm" />
+  <HelpKINode Title="Dispose method" Url="html/M_LaunchDarkly_EventSource_EventSource_Dispose.htm" />
+  <HelpKINode Title="Equals method">
+    <HelpKINode Title="MessageEvent.Equals Method " Url="html/M_LaunchDarkly_EventSource_MessageEvent_Equals.htm" />
+    <HelpKINode Title="Utf8ByteSpan.Equals Method " Url="html/Overload_LaunchDarkly_EventSource_Utf8ByteSpan_Equals.htm" />
+  </HelpKINode>
+  <HelpKINode Title="Error event">
+    <HelpKINode Title="EventSource.Error Event" Url="html/E_LaunchDarkly_EventSource_EventSource_Error.htm" />
+    <HelpKINode Title="IEventSource.Error Event" Url="html/E_LaunchDarkly_EventSource_IEventSource_Error.htm" />
+  </HelpKINode>
+  <HelpKINode Title="EventName property" Url="html/P_LaunchDarkly_EventSource_MessageReceivedEventArgs_EventName.htm" />
+  <HelpKINode Title="EventSource class">
+    <HelpKINode Title="EventSource Class" Url="html/T_LaunchDarkly_EventSource_EventSource.htm" />
+    <HelpKINode Title="constructor" Url="html/Overload_LaunchDarkly_EventSource_EventSource__ctor.htm" />
+    <HelpKINode Title="events" Url="html/Events_T_LaunchDarkly_EventSource_EventSource.htm" />
+    <HelpKINode Title="methods" Url="html/Methods_T_LaunchDarkly_EventSource_EventSource.htm" />
+    <HelpKINode Title="properties" Url="html/Properties_T_LaunchDarkly_EventSource_EventSource.htm" />
+  </HelpKINode>
+  <HelpKINode Title="EventSource.Close method" Url="html/M_LaunchDarkly_EventSource_EventSource_Close.htm" />
+  <HelpKINode Title="EventSource.Closed event" Url="html/E_LaunchDarkly_EventSource_EventSource_Closed.htm" />
+  <HelpKINode Title="EventSource.CommentReceived event" Url="html/E_LaunchDarkly_EventSource_EventSource_CommentReceived.htm" />
+  <HelpKINode Title="EventSource.Dispose method" Url="html/M_LaunchDarkly_EventSource_EventSource_Dispose.htm" />
+  <HelpKINode Title="EventSource.Error event" Url="html/E_LaunchDarkly_EventSource_EventSource_Error.htm" />
+  <HelpKINode Title="EventSource.EventSource constructor" Url="html/Overload_LaunchDarkly_EventSource_EventSource__ctor.htm" />
+  <HelpKINode Title="EventSource.MessageReceived event" Url="html/E_LaunchDarkly_EventSource_EventSource_MessageReceived.htm" />
+  <HelpKINode Title="EventSource.Opened event" Url="html/E_LaunchDarkly_EventSource_EventSource_Opened.htm" />
+  <HelpKINode Title="EventSource.ReadyState property" Url="html/P_LaunchDarkly_EventSource_EventSource_ReadyState.htm" />
+  <HelpKINode Title="EventSource.Restart method" Url="html/M_LaunchDarkly_EventSource_EventSource_Restart.htm" />
+  <HelpKINode Title="EventSource.StartAsync method" Url="html/M_LaunchDarkly_EventSource_EventSource_StartAsync.htm" />
+  <HelpKINode Title="EventSourceServiceCancelledException class">
+    <HelpKINode Title="EventSourceServiceCancelledException Class" Url="html/T_LaunchDarkly_EventSource_EventSourceServiceCancelledException.htm" />
+    <HelpKINode Title="constructor" Url="html/Overload_LaunchDarkly_EventSource_EventSourceServiceCancelledException__ctor.htm" />
+    <HelpKINode Title="events" Url="html/Events_T_LaunchDarkly_EventSource_EventSourceServiceCancelledException.htm" />
+    <HelpKINode Title="methods" Url="html/Methods_T_LaunchDarkly_EventSource_EventSourceServiceCancelledException.htm" />
+    <HelpKINode Title="properties" Url="html/Properties_T_LaunchDarkly_EventSource_EventSourceServiceCancelledException.htm" />
+  </HelpKINode>
+  <HelpKINode Title="EventSourceServiceCancelledException.EventSourceServiceCancelledException constructor" Url="html/Overload_LaunchDarkly_EventSource_EventSourceServiceCancelledException__ctor.htm" />
+  <HelpKINode Title="EventSourceServiceUnsuccessfulResponseException class">
+    <HelpKINode Title="EventSourceServiceUnsuccessfulResponseException Class" Url="html/T_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException.htm" />
+    <HelpKINode Title="constructor" Url="html/M_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException__ctor.htm" />
+    <HelpKINode Title="events" Url="html/Events_T_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException.htm" />
+    <HelpKINode Title="methods" Url="html/Methods_T_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException.htm" />
+    <HelpKINode Title="properties" Url="html/Properties_T_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException.htm" />
+  </HelpKINode>
+  <HelpKINode Title="EventSourceServiceUnsuccessfulResponseException.EventSourceServiceUnsuccessfulResponseException constructor" Url="html/M_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException__ctor.htm" />
+  <HelpKINode Title="EventSourceServiceUnsuccessfulResponseException.StatusCode property" Url="html/P_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException_StatusCode.htm" />
+  <HelpKINode Title="Exception property" Url="html/P_LaunchDarkly_EventSource_ExceptionEventArgs_Exception.htm" />
+  <HelpKINode Title="ExceptionEventArgs class">
+    <HelpKINode Title="ExceptionEventArgs Class" Url="html/T_LaunchDarkly_EventSource_ExceptionEventArgs.htm" />
+    <HelpKINode Title="constructor" Url="html/M_LaunchDarkly_EventSource_ExceptionEventArgs__ctor.htm" />
+    <HelpKINode Title="methods" Url="html/Methods_T_LaunchDarkly_EventSource_ExceptionEventArgs.htm" />
+    <HelpKINode Title="properties" Url="html/Properties_T_LaunchDarkly_EventSource_ExceptionEventArgs.htm" />
+  </HelpKINode>
+  <HelpKINode Title="ExceptionEventArgs.Exception property" Url="html/P_LaunchDarkly_EventSource_ExceptionEventArgs_Exception.htm" />
+  <HelpKINode Title="ExceptionEventArgs.ExceptionEventArgs constructor" Url="html/M_LaunchDarkly_EventSource_ExceptionEventArgs__ctor.htm" />
+  <HelpKINode Title="GetHashCode method" Url="html/M_LaunchDarkly_EventSource_MessageEvent_GetHashCode.htm" />
+  <HelpKINode Title="GetString method" Url="html/M_LaunchDarkly_EventSource_Utf8ByteSpan_GetString.htm" />
+  <HelpKINode Title="HttpClient method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_HttpClient.htm" />
+  <HelpKINode Title="HttpClient property" Url="html/P_LaunchDarkly_EventSource_Configuration_HttpClient.htm" />
+  <HelpKINode Title="HttpMessageHandler method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_HttpMessageHandler.htm" />
+  <HelpKINode Title="HttpMessageHandler property" Url="html/P_LaunchDarkly_EventSource_Configuration_HttpMessageHandler.htm" />
+  <HelpKINode Title="IEventSource interface">
+    <HelpKINode Title="IEventSource Interface" Url="html/T_LaunchDarkly_EventSource_IEventSource.htm" />
+    <HelpKINode Title="events" Url="html/Events_T_LaunchDarkly_EventSource_IEventSource.htm" />
+    <HelpKINode Title="methods" Url="html/Methods_T_LaunchDarkly_EventSource_IEventSource.htm" />
+    <HelpKINode Title="properties" Url="html/Properties_T_LaunchDarkly_EventSource_IEventSource.htm" />
+  </HelpKINode>
+  <HelpKINode Title="IEventSource.Close method" Url="html/M_LaunchDarkly_EventSource_IEventSource_Close.htm" />
+  <HelpKINode Title="IEventSource.Closed event" Url="html/E_LaunchDarkly_EventSource_IEventSource_Closed.htm" />
+  <HelpKINode Title="IEventSource.CommentReceived event" Url="html/E_LaunchDarkly_EventSource_IEventSource_CommentReceived.htm" />
+  <HelpKINode Title="IEventSource.Error event" Url="html/E_LaunchDarkly_EventSource_IEventSource_Error.htm" />
+  <HelpKINode Title="IEventSource.MessageReceived event" Url="html/E_LaunchDarkly_EventSource_IEventSource_MessageReceived.htm" />
+  <HelpKINode Title="IEventSource.Opened event" Url="html/E_LaunchDarkly_EventSource_IEventSource_Opened.htm" />
+  <HelpKINode Title="IEventSource.ReadyState property" Url="html/P_LaunchDarkly_EventSource_IEventSource_ReadyState.htm" />
+  <HelpKINode Title="IEventSource.Restart method" Url="html/M_LaunchDarkly_EventSource_IEventSource_Restart.htm" />
+  <HelpKINode Title="IEventSource.StartAsync method" Url="html/M_LaunchDarkly_EventSource_IEventSource_StartAsync.htm" />
+  <HelpKINode Title="InitialRetryDelay method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_InitialRetryDelay.htm" />
+  <HelpKINode Title="InitialRetryDelay property" Url="html/P_LaunchDarkly_EventSource_Configuration_InitialRetryDelay.htm" />
+  <HelpKINode Title="IsDataUtf8Bytes property" Url="html/P_LaunchDarkly_EventSource_MessageEvent_IsDataUtf8Bytes.htm" />
+  <HelpKINode Title="LastEventId method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_LastEventId.htm" />
+  <HelpKINode Title="LastEventId property">
+    <HelpKINode Title="Configuration.LastEventId Property " Url="html/P_LaunchDarkly_EventSource_Configuration_LastEventId.htm" />
+    <HelpKINode Title="MessageEvent.LastEventId Property " Url="html/P_LaunchDarkly_EventSource_MessageEvent_LastEventId.htm" />
+  </HelpKINode>
+  <HelpKINode Title="LaunchDarkly.EventSource namespace" Url="html/N_LaunchDarkly_EventSource.htm" />
+  <HelpKINode Title="LaunchDarkly.EventSource.CommentReceivedEventArgs class" Url="html/T_LaunchDarkly_EventSource_CommentReceivedEventArgs.htm" />
+  <HelpKINode Title="LaunchDarkly.EventSource.Configuration class" Url="html/T_LaunchDarkly_EventSource_Configuration.htm" />
+  <HelpKINode Title="LaunchDarkly.EventSource.ConfigurationBuilder class" Url="html/T_LaunchDarkly_EventSource_ConfigurationBuilder.htm" />
+  <HelpKINode Title="LaunchDarkly.EventSource.EventSource class" Url="html/T_LaunchDarkly_EventSource_EventSource.htm" />
+  <HelpKINode Title="LaunchDarkly.EventSource.EventSourceServiceCancelledException class" Url="html/T_LaunchDarkly_EventSource_EventSourceServiceCancelledException.htm" />
+  <HelpKINode Title="LaunchDarkly.EventSource.EventSourceServiceUnsuccessfulResponseException class" Url="html/T_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException.htm" />
+  <HelpKINode Title="LaunchDarkly.EventSource.ExceptionEventArgs class" Url="html/T_LaunchDarkly_EventSource_ExceptionEventArgs.htm" />
+  <HelpKINode Title="LaunchDarkly.EventSource.IEventSource interface" Url="html/T_LaunchDarkly_EventSource_IEventSource.htm" />
+  <HelpKINode Title="LaunchDarkly.EventSource.MessageEvent structure" Url="html/T_LaunchDarkly_EventSource_MessageEvent.htm" />
+  <HelpKINode Title="LaunchDarkly.EventSource.MessageReceivedEventArgs class" Url="html/T_LaunchDarkly_EventSource_MessageReceivedEventArgs.htm" />
+  <HelpKINode Title="LaunchDarkly.EventSource.ReadTimeoutException class" Url="html/T_LaunchDarkly_EventSource_ReadTimeoutException.htm" />
+  <HelpKINode Title="LaunchDarkly.EventSource.ReadyState enumeration" Url="html/T_LaunchDarkly_EventSource_ReadyState.htm" />
+  <HelpKINode Title="LaunchDarkly.EventSource.StateChangedEventArgs class" Url="html/T_LaunchDarkly_EventSource_StateChangedEventArgs.htm" />
+  <HelpKINode Title="LaunchDarkly.EventSource.Utf8ByteSpan structure" Url="html/T_LaunchDarkly_EventSource_Utf8ByteSpan.htm" />
+  <HelpKINode Title="Length property" Url="html/P_LaunchDarkly_EventSource_Utf8ByteSpan_Length.htm" />
+  <HelpKINode Title="LogAdapter method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_LogAdapter.htm" />
+  <HelpKINode Title="Logger method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_Logger.htm" />
+  <HelpKINode Title="Logger property" Url="html/P_LaunchDarkly_EventSource_Configuration_Logger.htm" />
+  <HelpKINode Title="MaxRetryDelay method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_MaxRetryDelay.htm" />
+  <HelpKINode Title="MaxRetryDelay property" Url="html/P_LaunchDarkly_EventSource_Configuration_MaxRetryDelay.htm" />
+  <HelpKINode Title="Message property">
+    <HelpKINode Title="MessageReceivedEventArgs.Message Property " Url="html/P_LaunchDarkly_EventSource_MessageReceivedEventArgs_Message.htm" />
+    <HelpKINode Title="ReadTimeoutException.Message Property " Url="html/P_LaunchDarkly_EventSource_ReadTimeoutException_Message.htm" />
+  </HelpKINode>
+  <HelpKINode Title="MessageEvent structure">
+    <HelpKINode Title="MessageEvent Structure" Url="html/T_LaunchDarkly_EventSource_MessageEvent.htm" />
+    <HelpKINode Title="constructor" Url="html/Overload_LaunchDarkly_EventSource_MessageEvent__ctor.htm" />
+    <HelpKINode Title="fields" Url="html/Fields_T_LaunchDarkly_EventSource_MessageEvent.htm" />
+    <HelpKINode Title="methods" Url="html/Methods_T_LaunchDarkly_EventSource_MessageEvent.htm" />
+    <HelpKINode Title="properties" Url="html/Properties_T_LaunchDarkly_EventSource_MessageEvent.htm" />
+  </HelpKINode>
+  <HelpKINode Title="MessageEvent.Data property" Url="html/P_LaunchDarkly_EventSource_MessageEvent_Data.htm" />
+  <HelpKINode Title="MessageEvent.DataUtf8Bytes property" Url="html/P_LaunchDarkly_EventSource_MessageEvent_DataUtf8Bytes.htm" />
+  <HelpKINode Title="MessageEvent.DefaultName field" Url="html/F_LaunchDarkly_EventSource_MessageEvent_DefaultName.htm" />
+  <HelpKINode Title="MessageEvent.Equals method" Url="html/M_LaunchDarkly_EventSource_MessageEvent_Equals.htm" />
+  <HelpKINode Title="MessageEvent.GetHashCode method" Url="html/M_LaunchDarkly_EventSource_MessageEvent_GetHashCode.htm" />
+  <HelpKINode Title="MessageEvent.IsDataUtf8Bytes property" Url="html/P_LaunchDarkly_EventSource_MessageEvent_IsDataUtf8Bytes.htm" />
+  <HelpKINode Title="MessageEvent.LastEventId property" Url="html/P_LaunchDarkly_EventSource_MessageEvent_LastEventId.htm" />
+  <HelpKINode Title="MessageEvent.MessageEvent constructor" Url="html/Overload_LaunchDarkly_EventSource_MessageEvent__ctor.htm" />
+  <HelpKINode Title="MessageEvent.Name property" Url="html/P_LaunchDarkly_EventSource_MessageEvent_Name.htm" />
+  <HelpKINode Title="MessageEvent.Origin property" Url="html/P_LaunchDarkly_EventSource_MessageEvent_Origin.htm" />
+  <HelpKINode Title="MessageReceived event">
+    <HelpKINode Title="EventSource.MessageReceived Event" Url="html/E_LaunchDarkly_EventSource_EventSource_MessageReceived.htm" />
+    <HelpKINode Title="IEventSource.MessageReceived Event" Url="html/E_LaunchDarkly_EventSource_IEventSource_MessageReceived.htm" />
+  </HelpKINode>
+  <HelpKINode Title="MessageReceivedEventArgs class">
+    <HelpKINode Title="MessageReceivedEventArgs Class" Url="html/T_LaunchDarkly_EventSource_MessageReceivedEventArgs.htm" />
+    <HelpKINode Title="constructor" Url="html/M_LaunchDarkly_EventSource_MessageReceivedEventArgs__ctor.htm" />
+    <HelpKINode Title="methods" Url="html/Methods_T_LaunchDarkly_EventSource_MessageReceivedEventArgs.htm" />
+    <HelpKINode Title="properties" Url="html/Properties_T_LaunchDarkly_EventSource_MessageReceivedEventArgs.htm" />
+  </HelpKINode>
+  <HelpKINode Title="MessageReceivedEventArgs.EventName property" Url="html/P_LaunchDarkly_EventSource_MessageReceivedEventArgs_EventName.htm" />
+  <HelpKINode Title="MessageReceivedEventArgs.Message property" Url="html/P_LaunchDarkly_EventSource_MessageReceivedEventArgs_Message.htm" />
+  <HelpKINode Title="MessageReceivedEventArgs.MessageReceivedEventArgs constructor" Url="html/M_LaunchDarkly_EventSource_MessageReceivedEventArgs__ctor.htm" />
+  <HelpKINode Title="Method method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_Method.htm" />
+  <HelpKINode Title="Method property" Url="html/P_LaunchDarkly_EventSource_Configuration_Method.htm" />
+  <HelpKINode Title="Name property" Url="html/P_LaunchDarkly_EventSource_MessageEvent_Name.htm" />
+  <HelpKINode Title="Offset property" Url="html/P_LaunchDarkly_EventSource_Utf8ByteSpan_Offset.htm" />
+  <HelpKINode Title="Open enumeration member" Url="html/T_LaunchDarkly_EventSource_ReadyState.htm" />
+  <HelpKINode Title="Opened event">
+    <HelpKINode Title="EventSource.Opened Event" Url="html/E_LaunchDarkly_EventSource_EventSource_Opened.htm" />
+    <HelpKINode Title="IEventSource.Opened Event" Url="html/E_LaunchDarkly_EventSource_IEventSource_Opened.htm" />
+  </HelpKINode>
+  <HelpKINode Title="Origin property" Url="html/P_LaunchDarkly_EventSource_MessageEvent_Origin.htm" />
+  <HelpKINode Title="PreferDataAsUtf8Bytes method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_PreferDataAsUtf8Bytes.htm" />
+  <HelpKINode Title="PreferDataAsUtf8Bytes property" Url="html/P_LaunchDarkly_EventSource_Configuration_PreferDataAsUtf8Bytes.htm" />
+  <HelpKINode Title="Raw enumeration member" Url="html/T_LaunchDarkly_EventSource_ReadyState.htm" />
+  <HelpKINode Title="ReadTimeout method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_ReadTimeout.htm" />
+  <HelpKINode Title="ReadTimeout property" Url="html/P_LaunchDarkly_EventSource_Configuration_ReadTimeout.htm" />
+  <HelpKINode Title="ReadTimeoutException class">
+    <HelpKINode Title="ReadTimeoutException Class" Url="html/T_LaunchDarkly_EventSource_ReadTimeoutException.htm" />
+    <HelpKINode Title="constructor" Url="html/M_LaunchDarkly_EventSource_ReadTimeoutException__ctor.htm" />
+    <HelpKINode Title="events" Url="html/Events_T_LaunchDarkly_EventSource_ReadTimeoutException.htm" />
+    <HelpKINode Title="methods" Url="html/Methods_T_LaunchDarkly_EventSource_ReadTimeoutException.htm" />
+    <HelpKINode Title="properties" Url="html/Properties_T_LaunchDarkly_EventSource_ReadTimeoutException.htm" />
+  </HelpKINode>
+  <HelpKINode Title="ReadTimeoutException.Message property" Url="html/P_LaunchDarkly_EventSource_ReadTimeoutException_Message.htm" />
+  <HelpKINode Title="ReadTimeoutException.ReadTimeoutException constructor" Url="html/M_LaunchDarkly_EventSource_ReadTimeoutException__ctor.htm" />
+  <HelpKINode Title="ReadyState enumeration" Url="html/T_LaunchDarkly_EventSource_ReadyState.htm" />
+  <HelpKINode Title="ReadyState property">
+    <HelpKINode Title="EventSource.ReadyState Property " Url="html/P_LaunchDarkly_EventSource_EventSource_ReadyState.htm" />
+    <HelpKINode Title="IEventSource.ReadyState Property " Url="html/P_LaunchDarkly_EventSource_IEventSource_ReadyState.htm" />
+    <HelpKINode Title="StateChangedEventArgs.ReadyState Property " Url="html/P_LaunchDarkly_EventSource_StateChangedEventArgs_ReadyState.htm" />
+  </HelpKINode>
+  <HelpKINode Title="RequestBody method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_RequestBody.htm" />
+  <HelpKINode Title="RequestBodyFactory method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_RequestBodyFactory.htm" />
+  <HelpKINode Title="RequestBodyFactory property" Url="html/P_LaunchDarkly_EventSource_Configuration_RequestBodyFactory.htm" />
+  <HelpKINode Title="RequestHeader method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_RequestHeader.htm" />
+  <HelpKINode Title="RequestHeaders method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_RequestHeaders.htm" />
+  <HelpKINode Title="RequestHeaders property" Url="html/P_LaunchDarkly_EventSource_Configuration_RequestHeaders.htm" />
+  <HelpKINode Title="Restart method">
+    <HelpKINode Title="EventSource.Restart Method " Url="html/M_LaunchDarkly_EventSource_EventSource_Restart.htm" />
+    <HelpKINode Title="IEventSource.Restart Method " Url="html/M_LaunchDarkly_EventSource_IEventSource_Restart.htm" />
+  </HelpKINode>
+  <HelpKINode Title="Shutdown enumeration member" Url="html/T_LaunchDarkly_EventSource_ReadyState.htm" />
+  <HelpKINode Title="StartAsync method">
+    <HelpKINode Title="EventSource.StartAsync Method " Url="html/M_LaunchDarkly_EventSource_EventSource_StartAsync.htm" />
+    <HelpKINode Title="IEventSource.StartAsync Method " Url="html/M_LaunchDarkly_EventSource_IEventSource_StartAsync.htm" />
+  </HelpKINode>
+  <HelpKINode Title="StateChangedEventArgs class">
+    <HelpKINode Title="StateChangedEventArgs Class" Url="html/T_LaunchDarkly_EventSource_StateChangedEventArgs.htm" />
+    <HelpKINode Title="constructor" Url="html/M_LaunchDarkly_EventSource_StateChangedEventArgs__ctor.htm" />
+    <HelpKINode Title="methods" Url="html/Methods_T_LaunchDarkly_EventSource_StateChangedEventArgs.htm" />
+    <HelpKINode Title="properties" Url="html/Properties_T_LaunchDarkly_EventSource_StateChangedEventArgs.htm" />
+  </HelpKINode>
+  <HelpKINode Title="StateChangedEventArgs.ReadyState property" Url="html/P_LaunchDarkly_EventSource_StateChangedEventArgs_ReadyState.htm" />
+  <HelpKINode Title="StateChangedEventArgs.StateChangedEventArgs constructor" Url="html/M_LaunchDarkly_EventSource_StateChangedEventArgs__ctor.htm" />
+  <HelpKINode Title="StatusCode property" Url="html/P_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException_StatusCode.htm" />
+  <HelpKINode Title="Uri property" Url="html/P_LaunchDarkly_EventSource_Configuration_Uri.htm" />
+  <HelpKINode Title="Utf8ByteSpan structure">
+    <HelpKINode Title="Utf8ByteSpan Structure" Url="html/T_LaunchDarkly_EventSource_Utf8ByteSpan.htm" />
+    <HelpKINode Title="constructor" Url="html/Overload_LaunchDarkly_EventSource_Utf8ByteSpan__ctor.htm" />
+    <HelpKINode Title="methods" Url="html/Methods_T_LaunchDarkly_EventSource_Utf8ByteSpan.htm" />
+    <HelpKINode Title="properties" Url="html/Properties_T_LaunchDarkly_EventSource_Utf8ByteSpan.htm" />
+  </HelpKINode>
+  <HelpKINode Title="Utf8ByteSpan.Data property" Url="html/P_LaunchDarkly_EventSource_Utf8ByteSpan_Data.htm" />
+  <HelpKINode Title="Utf8ByteSpan.Equals method" Url="html/Overload_LaunchDarkly_EventSource_Utf8ByteSpan_Equals.htm" />
+  <HelpKINode Title="Utf8ByteSpan.GetString method" Url="html/M_LaunchDarkly_EventSource_Utf8ByteSpan_GetString.htm" />
+  <HelpKINode Title="Utf8ByteSpan.Length property" Url="html/P_LaunchDarkly_EventSource_Utf8ByteSpan_Length.htm" />
+  <HelpKINode Title="Utf8ByteSpan.Offset property" Url="html/P_LaunchDarkly_EventSource_Utf8ByteSpan_Offset.htm" />
+  <HelpKINode Title="Utf8ByteSpan.Utf8ByteSpan constructor" Url="html/Overload_LaunchDarkly_EventSource_Utf8ByteSpan__ctor.htm" />
+</HelpKI>
