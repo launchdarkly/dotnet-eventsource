@@ -20,7 +20,7 @@ namespace LaunchDarkly.EventSource.Tests
             HttpStatusCode error1 = HttpStatusCode.BadRequest, error2 = HttpStatusCode.InternalServerError;
             var message = new MessageEvent("put", "hello", _uri);
 
-            var handler = ForRequestsInSequence(
+            var handler = Handlers.Sequential(
                 Handlers.Status((int)error1),
                 Handlers.Status((int)error2),
                 StartStream().Then(WriteEvent(message)).Then(LeaveStreamOpen())
@@ -56,7 +56,7 @@ namespace LaunchDarkly.EventSource.Tests
             var eventId1 = "xyz456";
             var message1 = new MessageEvent("put", "this is a test message", eventId1, _uri);
 
-            var handler = ForRequestsInSequence(
+            var handler = Handlers.Sequential(
                 StartStream().Then(WriteEvent(message1)),
                 StartStream().Then(LeaveStreamOpen())
                 );
@@ -85,7 +85,7 @@ namespace LaunchDarkly.EventSource.Tests
                 steps.Add(Handlers.WriteChunkString(":hi\n"));
             }
             steps.Add(LeaveStreamOpen());
-            var handler = ForRequestsInSequence(steps.ToArray());
+            var handler = Handlers.Sequential(steps.ToArray());
 
             var backoffs = new List<TimeSpan>();
 
@@ -111,7 +111,7 @@ namespace LaunchDarkly.EventSource.Tests
         [Fact]
         public async Task NoReconnectAttemptIsMadeIfErrorHandlerClosesEventSource()
         {
-            var handler = ForRequestsInSequence(
+            var handler = Handlers.Sequential(
                 Handlers.Status((int)HttpStatusCode.Unauthorized),
                 StartStream().Then(LeaveStreamOpen())
                 );

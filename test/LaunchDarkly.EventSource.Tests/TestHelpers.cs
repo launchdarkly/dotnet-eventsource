@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading;
 using LaunchDarkly.TestHelpers.HttpTest;
 using Xunit;
 
@@ -31,20 +30,6 @@ namespace LaunchDarkly.EventSource.Tests
                 s.Append("id:").Append(e.LastEventId).Append("\n");
             }
             return Handlers.WriteChunkString(s.ToString() + "\n");
-        }
-
-        public static Handler ForRequestsInSequence(params Handler[] handlers)
-        {
-            int index = 0;
-            return async ctx =>
-            {
-                int i = Interlocked.Increment(ref index) - 1;
-                if (i >= handlers.Length)
-                {
-                    throw new Exception("test server received unexpected message");
-                }
-                await handlers[i](ctx);
-            };
         }
 
         public static void AssertBackoffsAlwaysIncrease(List<TimeSpan> backoffs, int desiredCount)

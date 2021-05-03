@@ -197,7 +197,7 @@ namespace LaunchDarkly.EventSource.Tests
             var initialDelay = TimeSpan.FromMilliseconds(50);
 
             var anEvent = new MessageEvent("put", "x", _uri);
-            var handler = ForRequestsInSequence(
+            var handler = Handlers.Sequential(
                 Enumerable.Range(0, nAttempts + 1).Select(_ =>
                     StartStream().Then(WriteEvent(anEvent)).Then(LeaveStreamOpen())
                 ).ToArray());
