@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Threading;
 using LaunchDarkly.Logging;
+using LaunchDarkly.TestHelpers.HttpTest;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -65,14 +66,34 @@ namespace LaunchDarkly.EventSource.Tests
             _testLogger = _testLogging.Logger("");
         }
 
-        protected EventSource MakeEventSource(HttpMessageHandler httpHandler, Action<ConfigurationBuilder> modConfig = null)
+        protected EventSource MakeEventSource(Uri uri, Action<ConfigurationBuilder> modConfig = null)
         {
-            var builder = Configuration.Builder(_uri)
-                .HttpMessageHandler(httpHandler)
+            var builder = Configuration.Builder(uri)
                 .LogAdapter(_testLogging);
             AddBaseConfig(builder);
             modConfig?.Invoke(builder);
             return new EventSource(builder.Build());
+        }
+
+        protected EventSource MakeEventSource(HttpMessageHandler httpHandler, Action<ConfigurationBuilder> modConfig = null) =>
+            MakeEventSource(_uri, builder =>
+            {
+                builder.HttpMessageHandler(httpHandler);
+                modConfig?.Invoke(builder);
+            });
+
+        protected void WithServerAndEventSource(Handler handler, Action<HttpServer, EventSource> action) =>
+            WithServerAndEventSource(handler, null, action);
+
+        protected void WithServerAndEventSource(Handler handler, Action<ConfigurationBuilder> modConfig, Action<HttpServer, EventSource> action)
+        {
+            using (var server = HttpServer.Start(handler))
+            {
+                using (var es = MakeEventSource(server.Uri, modConfig))
+                {
+                    action(server, es);
+                }
+            }
         }
 
         /// <summary>
@@ -81,5 +102,8 @@ namespace LaunchDarkly.EventSource.Tests
         /// </summary>
         /// <param name="builder"></param>
         protected virtual void AddBaseConfig(ConfigurationBuilder builder) { }
+
+        protected static Handler EmptyStreamThatStaysOpen =>
+            Handlers.SSE.Start().Then(Handlers.SSE.LeaveOpen());
     }
 }

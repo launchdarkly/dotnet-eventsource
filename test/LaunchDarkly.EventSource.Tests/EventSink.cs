@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using LaunchDarkly.Logging;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace LaunchDarkly.EventSource.Tests
 {
@@ -15,7 +14,7 @@ namespace LaunchDarkly.EventSource.Tests
 
         private readonly BlockingCollection<Action> _actions = new BlockingCollection<Action>();
 
-        public class Action
+        public struct Action
         {
             public string Kind { get; set; }
             public string Comment { get; set; }
@@ -115,10 +114,20 @@ namespace LaunchDarkly.EventSource.Tests
             {
                 Assert.True(_actions.TryTake(out var actual, WaitForActionTimeout),
                     "timed out waiting for action " + i + " (" + a + ")");
-                if (!a.Equals(actual))
+
+                // The MessageEvent.Equals method takes Origin into account, which is inconvenient for
+                // our tests because the origin will vary for each embedded test server. So, ignore it.
+                var expected = a;
+                if (expected.Message.Origin != null)
                 {
-                    Assert.True(false, "action " + i + " should have been " + a + ", was " + actual);
-                    a.Equals(actual);
+                    expected.Message = new MessageEvent(expected.Message.Name,
+                        expected.Message.Data, expected.Message.LastEventId,
+                        actual.Message.Origin);
+                }
+
+                if (!actual.Equals(expected))
+                {
+                    Assert.True(false, "action " + i + " should have been " + expected + ", was " + actual);
                 }
                 if (actual.Kind == "MessageReceived" && ExpectUtf8Data.HasValue)
                 {
@@ -127,7 +136,7 @@ namespace LaunchDarkly.EventSource.Tests
                         Assert.True(false, "action " + i + "(" + actual + ") - data should have been read as "
                             + (ExpectUtf8Data.Value ? "UTF8 bytes" : "string"));
                     }
-                    Assert.True(actual.Message.DataUtf8Bytes.Equals(a.Message.DataUtf8Bytes));
+                    Assert.True(actual.Message.DataUtf8Bytes.Equals(expected.Message.DataUtf8Bytes));
                 }
                 i++;
             }

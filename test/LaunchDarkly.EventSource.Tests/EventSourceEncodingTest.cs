@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Threading.Tasks;
+using LaunchDarkly.TestHelpers.HttpTest;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -9,37 +10,28 @@ namespace LaunchDarkly.EventSource.Tests
     {
         public EventSourceEncodingTest(ITestOutputHelper testOutput) : base(testOutput) { }
 
-        struct StreamTestParams
+        private static readonly string[] streamChunks = new string[]
         {
-            public StreamAction[] StreamActions { get; set; }
-            public EventSink.Action[] ExpectedEventActions { get; set; }
-        }
-
-        private static readonly StreamTestParams BasicStreamTestParams = new StreamTestParams
-        {
-            StreamActions = new StreamAction[]
-            {
-                StreamAction.Write(": hello\n"),
-                StreamAction.Write("data: value1"),
-                StreamAction.Write("\n\nevent: event2\ndata:"),
-                StreamAction.Write("ça\ndata: qu"),
-                StreamAction.Write("é\n"),
-                StreamAction.Write("\n"),
-                StreamAction.Write("data:" + MakeLongString(0, 500)),
-                StreamAction.Write(MakeLongString(500, 1000) + "\n\n")
-            },
-
-            ExpectedEventActions = new EventSink.Action[]
-            {
-                EventSink.OpenedAction(ReadyState.Open),
-                EventSink.CommentReceivedAction(": hello"),
-                EventSink.MessageReceivedAction(new MessageEvent("message", "value1", null, _uri)),
-                EventSink.MessageReceivedAction(new MessageEvent("event2", "ça\nqué", null, _uri)),
-                EventSink.MessageReceivedAction(new MessageEvent("message",
-                    MakeLongString(0, 500) + MakeLongString(500, 1000), null, _uri))
-            }
+            ": hello\n",
+            "data: value1",
+            "\n\nevent: event2\ndata:",
+            "ça\ndata: qu",
+            "é\n",
+            "\n",
+            "data:" + MakeLongString(0, 500),
+            MakeLongString(500, 1000) + "\n\n"
         };
 
+        private static readonly EventSink.Action[] expectedEventActions = new EventSink.Action[]
+        {
+            EventSink.OpenedAction(ReadyState.Open),
+            EventSink.CommentReceivedAction(": hello"),
+            EventSink.MessageReceivedAction(new MessageEvent("message", "value1", null, _uri)),
+            EventSink.MessageReceivedAction(new MessageEvent("event2", "ça\nqué", null, _uri)),
+            EventSink.MessageReceivedAction(new MessageEvent("message",
+                MakeLongString(0, 500) + MakeLongString(500, 1000), null, _uri))
+        };
+        
         private static string MakeLongString(int startNum, int endNum)
         {
             // This is meant to verify that we're able to read event data from the stream
@@ -52,26 +44,34 @@ namespace LaunchDarkly.EventSource.Tests
             return ret.ToString();
         }
 
+        private static Handler MakeStreamHandler(Encoding encoding)
+        {
+            var ret = Handlers.StartChunks("text/event-stream", encoding);
+            foreach (var chunk in streamChunks)
+            {
+                ret = ret.Then(Handlers.WriteChunkString(chunk, encoding));
+            }
+            return ret.Then(Handlers.Hang());
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public void CanReceiveUtf8EventDataAsStrings(bool setExplicitEncoding)
         {
-            var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.StartStream(
-                setExplicitEncoding ? Encoding.UTF8 : null,
-                BasicStreamTestParams.StreamActions));
-
-            var config = Configuration.Builder(_uri).HttpMessageHandler(handler)
-                .LogAdapter(_testLogging)
-                .Build();
-            using (var es = new EventSource(config))
+            using (var server = HttpServer.Start(MakeStreamHandler(setExplicitEncoding ? Encoding.UTF8 : null)))
             {
-                var eventSink = new EventSink(es, _testLogging) { ExpectUtf8Data = false };
+                var config = Configuration.Builder(server.Uri)
+                    .LogAdapter(_testLogging)
+                    .Build();
+                using (var es = new EventSource(config))
+                {
+                    var eventSink = new EventSink(es, _testLogging) { ExpectUtf8Data = false };
 
-                _ = Task.Run(es.StartAsync);
+                    _ = Task.Run(es.StartAsync);
 
-                eventSink.ExpectActions(BasicStreamTestParams.ExpectedEventActions);
+                    eventSink.ExpectActions(expectedEventActions);
+                }
             }
         }
 
@@ -80,22 +80,20 @@ namespace LaunchDarkly.EventSource.Tests
         [InlineData(false)]
         public void CanReceiveUtf8EventDataAsBytes(bool setExplicitEncoding)
         {
-            var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.StartStream(
-                setExplicitEncoding ? Encoding.UTF8 : null,
-                BasicStreamTestParams.StreamActions));
-
-            var config = Configuration.Builder(_uri).HttpMessageHandler(handler)
-                .LogAdapter(_testLogging)
-                .PreferDataAsUtf8Bytes(true)
-                .Build();
-            using (var es = new EventSource(config))
+            using (var server = HttpServer.Start(MakeStreamHandler(setExplicitEncoding ? Encoding.UTF8 : null)))
             {
-                var eventSink = new EventSink(es, _testLogging) { ExpectUtf8Data = true };
+                var config = Configuration.Builder(server.Uri)
+                    .LogAdapter(_testLogging)
+                    .PreferDataAsUtf8Bytes(true)
+                    .Build();
+                using (var es = new EventSource(config))
+                {
+                    var eventSink = new EventSink(es, _testLogging) { ExpectUtf8Data = true };
 
-                _ = Task.Run(es.StartAsync);
+                    _ = Task.Run(es.StartAsync);
 
-                eventSink.ExpectActions(BasicStreamTestParams.ExpectedEventActions);
+                    eventSink.ExpectActions(expectedEventActions);
+                }
             }
         }
 
@@ -104,22 +102,20 @@ namespace LaunchDarkly.EventSource.Tests
         [InlineData(false)]
         public void NonUtf8EncodingIsReadAsStrings(bool preferUtf8Data)
         {
-            var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.StartStream(
-                Encoding.GetEncoding("iso-8859-1"),
-                BasicStreamTestParams.StreamActions));
-
-            var config = Configuration.Builder(_uri).HttpMessageHandler(handler)
-                .LogAdapter(_testLogging)
-                .PreferDataAsUtf8Bytes(preferUtf8Data)
-                .Build();
-            using (var es = new EventSource(config))
+            using (var server = HttpServer.Start(MakeStreamHandler(Encoding.GetEncoding("iso-8859-1"))))
             {
-                var sink = new EventSink(es, _testLogging) { ExpectUtf8Data = false };
+                var config = Configuration.Builder(server.Uri)
+                    .LogAdapter(_testLogging)
+                    .PreferDataAsUtf8Bytes(preferUtf8Data)
+                    .Build();
+                using (var es = new EventSource(config))
+                {
+                    var sink = new EventSink(es, _testLogging) { ExpectUtf8Data = false };
 
-                _ = Task.Run(es.StartAsync);
+                    _ = Task.Run(es.StartAsync);
 
-                sink.ExpectActions(BasicStreamTestParams.ExpectedEventActions);
+                    sink.ExpectActions(expectedEventActions);
+                }
             }
         }
     }
