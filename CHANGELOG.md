@@ -11,13 +11,8 @@ All notable changes to the LaunchDarkly's EventSource implementation for C# will
 ### Deprecated:
 - `ConfigurationBuilder.ConnectionTimeout`
 
-
 ## [4.1.0] - 2021-05-04
-### Added:
-- `ConfigurationBuilder.ResponseStartTimeout`-- added as a more accurately named replacement for `ConnectionTimeout`.
-
-### Deprecated:
-- `ConfigurationBuilder.ConnectionTimeout`
+_This release was an accidental duplicate of 4.0.0. Please use 4.1.1 instead._
 
 ## [4.0.0] - 2021-02-22
 Starting with this version, the API documentation for the latest release is viewable at https://launchdarkly.github.io/dotnet-eventsource.
