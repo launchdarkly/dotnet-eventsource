@@ -270,7 +270,7 @@ namespace LaunchDarkly.EventSource
             var client =_configuration.HttpMessageHandler is null ?
                 new HttpClient() :
                 new HttpClient(_configuration.HttpMessageHandler, false);
-            client.Timeout = _configuration.ConnectionTimeout;
+            client.Timeout = _configuration.ResponseStartTimeout;
             return client;
         }
 

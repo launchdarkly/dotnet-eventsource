@@ -28,11 +28,9 @@ namespace LaunchDarkly.EventSource
         #region Private Fields
 
         internal readonly Uri _uri;
-        internal TimeSpan? _connectionTimeout = null;
         internal Encoding _defaultEncoding = Encoding.UTF8;
         internal TimeSpan _initialRetryDelay = Configuration.DefaultInitialRetryDelay;
         internal TimeSpan _backoffResetThreshold = Configuration.DefaultBackoffResetThreshold;
-        internal TimeSpan _readTimeout = Configuration.DefaultReadTimeout;
         internal string _lastEventId;
         internal ILogAdapter _logAdapter;
         internal Logger _logger;
@@ -42,7 +40,9 @@ namespace LaunchDarkly.EventSource
         internal TimeSpan _maxRetryDelay = Configuration.DefaultMaxRetryDelay;
         internal HttpMethod _method = HttpMethod.Get;
         internal bool _preferDataAsUtf8Bytes = false;
+        internal TimeSpan _readTimeout = Configuration.DefaultReadTimeout;
         internal Func<HttpContent> _requestBodyFactory;
+        internal TimeSpan _responseStartTimeout = Configuration.DefaultResponseStartTimeout;
 
         #endregion
 
@@ -69,18 +69,13 @@ namespace LaunchDarkly.EventSource
             new Configuration(this);
 
         /// <summary>
-        /// Sets the connection timeout value used when connecting to the EventSource API.
+        /// Obsolete name for <see cref="ResponseStartTimeout(TimeSpan)"/>.
         /// </summary>
-        /// <remarks>
-        /// The default value is <see cref="Configuration.DefaultConnectionTimeout"/>.
-        /// </remarks>
-        /// <param name="connectionTimeout">the timeout</param>
+        /// <param name="responseStartTimeout">the timeout</param>
         /// <returns>the builder</returns>
-        public ConfigurationBuilder ConnectionTimeout(TimeSpan connectionTimeout)
-        {
-            _connectionTimeout = TimeSpanCanBeInfinite(connectionTimeout);
-            return this;
-        }
+        [Obsolete("Use ResponseStartTimeout")]
+        public ConfigurationBuilder ConnectionTimeout(TimeSpan responseStartTimeout) =>
+            ResponseStartTimeout(responseStartTimeout);
 
         /// <summary>
         /// Sets the character encoding to use when reading the stream if the server did not specify
@@ -166,6 +161,32 @@ namespace LaunchDarkly.EventSource
         public ConfigurationBuilder BackoffResetThreshold(TimeSpan backoffResetThreshold)
         {
             _backoffResetThreshold = FiniteTimeSpan(backoffResetThreshold);
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the maximum amount of time EventSource will wait between starting an HTTP request and
+        /// receiving the response headers.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This is the same as the <c>Timeout</c> property in .NET's <c>HttpClient</c>. The default value is
+        /// <see cref="Configuration.DefaultConnectionTimeout"/>.
+        /// </para>
+        /// <para>
+        /// It is <i>not</i> the same as a TCP connection timeout. A connection timeout would include only the
+        /// time of establishing the connection, not the time it takes for the server to prepare the beginning
+        /// of the response. .NET does not consistently support a connection timeout, but if you are using .NET
+        /// Core or .NET 5+ you can implement it by using <c>SocketsHttpHandler</c> as your
+        /// <see cref="HttpMessageHandler(System.Net.Http.HttpMessageHandler)"/> and setting the
+        /// <c>ConnectTimeout</c> property there.
+        /// </para>
+        /// </remarks>
+        /// <param name="responseStartTimeout">the timeout</param>
+        /// <returns></returns>
+        public ConfigurationBuilder ResponseStartTimeout(TimeSpan responseStartTimeout)
+        {
+            _responseStartTimeout = TimeSpanCanBeInfinite(responseStartTimeout);
             return this;
         }
 
