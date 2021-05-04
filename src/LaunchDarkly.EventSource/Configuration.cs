@@ -28,10 +28,16 @@ namespace LaunchDarkly.EventSource
         public static readonly TimeSpan DefaultMaxRetryDelay = TimeSpan.FromSeconds(30);
 
         /// <summary>
-        /// The default value for <see cref="ConfigurationBuilder.ConnectionTimeout(TimeSpan)"/>:
+        /// The default value for <see cref="ConfigurationBuilder.ResponseStartTimeout(TimeSpan)"/>:
         /// 10 seconds.
         /// </summary>
-        public static readonly TimeSpan DefaultConnectionTimeout = TimeSpan.FromSeconds(10);
+        public static readonly TimeSpan DefaultResponseStartTimeout = TimeSpan.FromSeconds(10);
+
+        /// <summary>
+        /// Obsolete name for <see cref="DefaultResponseStartTimeout"/>.
+        /// </summary>
+        [Obsolete("Use DefaultResponseStartTimeout")]
+        public static readonly TimeSpan DefaultConnectionTimeout = DefaultResponseStartTimeout;
 
         /// <summary>
         /// The default value for <see cref="ConfigurationBuilder.ReadTimeout(TimeSpan)"/>:
@@ -63,10 +69,10 @@ namespace LaunchDarkly.EventSource
         public TimeSpan BackoffResetThreshold { get; }
 
         /// <summary>
-        /// the connection timeout value used when connecting to the EventSource API.
+        /// Obsolete name for <see cref="ResponseStartTimeout"/>.
         /// </summary>
-        /// <seealso cref="ConfigurationBuilder.ConnectionTimeout(TimeSpan)"/>
-        public TimeSpan ConnectionTimeout { get; }
+        [Obsolete("Use ResponseStartTimeout")]
+        public TimeSpan ConnectionTimeout => ResponseStartTimeout;
 
         /// <summary>
         /// The character encoding to use when reading the stream if the server did not specify
@@ -148,6 +154,13 @@ namespace LaunchDarkly.EventSource
         public IDictionary<string, string> RequestHeaders { get; }
 
         /// <summary>
+        /// The maximum amount of time to wait between starting an HTTP request and receiving the response
+        /// headers.
+        /// </summary>
+        /// <seealso cref="ConfigurationBuilder.ResponseStartTimeout(TimeSpan)"/>
+        public TimeSpan ResponseStartTimeout { get; }
+
+        /// <summary>
         /// Gets the <see cref="System.Uri"/> used when connecting to an EventSource API.
         /// </summary>
         public Uri Uri { get; }
@@ -164,7 +177,6 @@ namespace LaunchDarkly.EventSource
                 (builder._logAdapter is null ? null : builder._logAdapter.Logger(Configuration.DefaultLoggerName));
 
             BackoffResetThreshold = builder._backoffResetThreshold;
-            ConnectionTimeout = builder._connectionTimeout ?? DefaultConnectionTimeout;
             DefaultEncoding = builder._defaultEncoding ?? Encoding.UTF8;
             HttpClient = builder._httpClient;
             HttpMessageHandler = (builder._httpClient != null) ? null : builder._httpMessageHandler;
@@ -173,9 +185,10 @@ namespace LaunchDarkly.EventSource
             Logger = logger ?? Logs.None.Logger("");
             MaxRetryDelay = builder._maxRetryDelay;
             Method = builder._method;
+            PreferDataAsUtf8Bytes = builder._preferDataAsUtf8Bytes;
             ReadTimeout = builder._readTimeout;
             RequestHeaders = new Dictionary<string, string>(builder._requestHeaders);
-            PreferDataAsUtf8Bytes = builder._preferDataAsUtf8Bytes;
+            ResponseStartTimeout = builder._responseStartTimeout;
             RequestBodyFactory = builder._requestBodyFactory;
         }
 

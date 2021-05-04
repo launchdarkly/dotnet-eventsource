@@ -25,36 +25,42 @@ namespace LaunchDarkly.EventSource.Tests
             Assert.IsType<ArgumentNullException>(e);
         }
 
+#pragma warning disable 0618
         [Fact]
-        public void ConnectionTimeoutHasDefault()
+        public void DeprecatedConnectionTimeoutHasDefault()
         {
             var b = Configuration.Builder(uri);
             Assert.Equal(Configuration.DefaultConnectionTimeout, b.Build().ConnectionTimeout);
+            Assert.Equal(Configuration.DefaultConnectionTimeout, b.Build().ResponseStartTimeout);
         }
 
         [Fact]
-        public void BuilderSetsConnectionTimeout()
+        public void BuilderSetsDeprecatedConnectionTimeout()
         {
             var ts = TimeSpan.FromSeconds(9);
             var b = Configuration.Builder(uri).ConnectionTimeout(ts);
             Assert.Equal(ts, b.Build().ConnectionTimeout);
+            Assert.Equal(ts, b.Build().ResponseStartTimeout);
         }
 
         [Fact]
-        public void ConnectionTimeoutCanBeInfinite()
+        public void DeprecatedConnectionTimeoutCanBeInfinite()
         {
             var ts = Timeout.InfiniteTimeSpan;
             var b = Configuration.Builder(uri).ConnectionTimeout(ts);
             Assert.Equal(ts, b.Build().ConnectionTimeout);
+            Assert.Equal(ts, b.Build().ResponseStartTimeout);
         }
 
         [Fact]
-        public void AnyNegativeConnectionTimeoutIsInfinite()
+        public void AnyNegativeDeprecatedConnectionTimeoutIsInfinite()
         {
             var ts = TimeSpan.FromSeconds(-9);
             var b = Configuration.Builder(uri).ConnectionTimeout(ts);
             Assert.Equal(Timeout.InfiniteTimeSpan, b.Build().ConnectionTimeout);
+            Assert.Equal(Timeout.InfiniteTimeSpan, b.Build().ResponseStartTimeout);
         }
+#pragma warning restore 0618
 
         [Fact]
         public void InitialRetryDelayRetryHasDefault()
@@ -131,6 +137,36 @@ namespace LaunchDarkly.EventSource.Tests
             var ts = TimeSpan.FromSeconds(-9);
             var b = Configuration.Builder(uri).ReadTimeout(ts);
             Assert.Equal(Timeout.InfiniteTimeSpan, b.Build().ReadTimeout);
+        }
+        [Fact]
+        public void ResponseStartTimeoutHasDefault()
+        {
+            var b = Configuration.Builder(uri);
+            Assert.Equal(Configuration.DefaultResponseStartTimeout, b.Build().ResponseStartTimeout);
+        }
+
+        [Fact]
+        public void BuilderSetsResponseStartTimeout()
+        {
+            var ts = TimeSpan.FromSeconds(9);
+            var b = Configuration.Builder(uri).ResponseStartTimeout(ts);
+            Assert.Equal(ts, b.Build().ResponseStartTimeout);
+        }
+
+        [Fact]
+        public void ResponseStartTimeoutCanBeInfinite()
+        {
+            var ts = Timeout.InfiniteTimeSpan;
+            var b = Configuration.Builder(uri).ResponseStartTimeout(ts);
+            Assert.Equal(ts, b.Build().ResponseStartTimeout);
+        }
+
+        [Fact]
+        public void AnyNegativeResponseStartTimeoutIsInfinite()
+        {
+            var ts = TimeSpan.FromSeconds(-9);
+            var b = Configuration.Builder(uri).ResponseStartTimeout(ts);
+            Assert.Equal(Timeout.InfiniteTimeSpan, b.Build().ResponseStartTimeout);
         }
 
         [Fact]
