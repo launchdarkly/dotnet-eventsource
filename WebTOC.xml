@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <HelpTOC>
 
-  <HelpTOCNode Id="5ee95807-df95-48a5-9acc-419aa1481150" Title="Namespaces" Url="html/R_Project_Documentation.htm">
-    <HelpTOCNode Id="2bbd55c5-ead7-4a77-bb67-edae814448f8" Title="LaunchDarkly.EventSource" Url="html/N_LaunchDarkly_EventSource.htm">
-      <HelpTOCNode Id="284eaf44-9d15-4bd2-9fd7-dd1f7640ac88" Title="CommentReceivedEventArgs Class" Url="html/T_LaunchDarkly_EventSource_CommentReceivedEventArgs.htm">
+  <HelpTOCNode Id="2006e26c-ee6b-49c9-a047-50754029511b" Title="Namespaces" Url="html/R_Project_Documentation.htm">
+    <HelpTOCNode Id="714b6185-a2f4-4fd3-a076-446e7e7440b3" Title="LaunchDarkly.EventSource" Url="html/N_LaunchDarkly_EventSource.htm">
+      <HelpTOCNode Id="5580c9f3-1507-40d8-bb95-0ecd70f17085" Title="CommentReceivedEventArgs Class" Url="html/T_LaunchDarkly_EventSource_CommentReceivedEventArgs.htm">
         <HelpTOCNode Title="CommentReceivedEventArgs Constructor " Url="html/M_LaunchDarkly_EventSource_CommentReceivedEventArgs__ctor.htm" />
-        <HelpTOCNode Id="175d3ab4-6c23-4052-a13a-2ac2e485f3a2" Title="CommentReceivedEventArgs Properties" Url="html/Properties_T_LaunchDarkly_EventSource_CommentReceivedEventArgs.htm">
+        <HelpTOCNode Id="5d68b964-45e9-4de1-ab96-9338492f1d88" Title="CommentReceivedEventArgs Properties" Url="html/Properties_T_LaunchDarkly_EventSource_CommentReceivedEventArgs.htm">
           <HelpTOCNode Title="Comment Property " Url="html/P_LaunchDarkly_EventSource_CommentReceivedEventArgs_Comment.htm" />
         </HelpTOCNode>
         <HelpTOCNode Title="CommentReceivedEventArgs Methods" Url="html/Methods_T_LaunchDarkly_EventSource_CommentReceivedEventArgs.htm" />
       </HelpTOCNode>
-      <HelpTOCNode Id="8e35ec05-d856-412f-8a39-85d09481c269" Title="Configuration Class" Url="html/T_LaunchDarkly_EventSource_Configuration.htm">
-        <HelpTOCNode Id="cd62fb46-85c1-430d-a786-b857d88d019c" Title="Configuration Properties" Url="html/Properties_T_LaunchDarkly_EventSource_Configuration.htm">
+      <HelpTOCNode Id="da3eaf93-1c0d-400a-a5ae-92346238beb1" Title="Configuration Class" Url="html/T_LaunchDarkly_EventSource_Configuration.htm">
+        <HelpTOCNode Id="0a8ceff8-1175-4784-bd73-e8feebd4ff43" Title="Configuration Properties" Url="html/Properties_T_LaunchDarkly_EventSource_Configuration.htm">
           <HelpTOCNode Title="BackoffResetThreshold Property " Url="html/P_LaunchDarkly_EventSource_Configuration_BackoffResetThreshold.htm" />
           <HelpTOCNode Title="ConnectionTimeout Property " Url="html/P_LaunchDarkly_EventSource_Configuration_ConnectionTimeout.htm" />
           <HelpTOCNode Title="DefaultEncoding Property " Url="html/P_LaunchDarkly_EventSource_Configuration_DefaultEncoding.htm" />
@@ -28,10 +28,10 @@
           <HelpTOCNode Title="RequestHeaders Property " Url="html/P_LaunchDarkly_EventSource_Configuration_RequestHeaders.htm" />
           <HelpTOCNode Title="Uri Property " Url="html/P_LaunchDarkly_EventSource_Configuration_Uri.htm" />
         </HelpTOCNode>
-        <HelpTOCNode Id="2c72d8dc-34f9-40c9-bfb5-eee89f979829" Title="Configuration Methods" Url="html/Methods_T_LaunchDarkly_EventSource_Configuration.htm">
+        <HelpTOCNode Id="1d536309-ca21-4708-99ef-b8aa83737767" Title="Configuration Methods" Url="html/Methods_T_LaunchDarkly_EventSource_Configuration.htm">
           <HelpTOCNode Title="Builder Method " Url="html/M_LaunchDarkly_EventSource_Configuration_Builder.htm" />
         </HelpTOCNode>
-        <HelpTOCNode Id="4f402e05-3721-4e31-8968-589b15386cc7" Title="Configuration Fields" Url="html/Fields_T_LaunchDarkly_EventSource_Configuration.htm">
+        <HelpTOCNode Id="f40a6b91-d0a0-4af8-8e8b-55a4c3772b14" Title="Configuration Fields" Url="html/Fields_T_LaunchDarkly_EventSource_Configuration.htm">
           <HelpTOCNode Title="DefaultBackoffResetThreshold Field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultBackoffResetThreshold.htm" />
           <HelpTOCNode Title="DefaultConnectionTimeout Field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultConnectionTimeout.htm" />
           <HelpTOCNode Title="DefaultInitialRetryDelay Field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultInitialRetryDelay.htm" />
@@ -40,8 +40,8 @@
           <HelpTOCNode Title="DefaultReadTimeout Field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultReadTimeout.htm" />
         </HelpTOCNode>
       </HelpTOCNode>
-      <HelpTOCNode Id="7129359a-b374-47a3-887c-d7d59b14d9aa" Title="ConfigurationBuilder Class" Url="html/T_LaunchDarkly_EventSource_ConfigurationBuilder.htm">
-        <HelpTOCNode Id="30c17865-e217-4341-b6eb-a9ffcd922d38" Title="ConfigurationBuilder Methods" Url="html/Methods_T_LaunchDarkly_EventSource_ConfigurationBuilder.htm">
+      <HelpTOCNode Id="56b958f3-4871-4ea1-8555-513aba62386d" Title="ConfigurationBuilder Class" Url="html/T_LaunchDarkly_EventSource_ConfigurationBuilder.htm">
+        <HelpTOCNode Id="e887cb1e-00d7-4a46-8b44-00fae0492a0d" Title="ConfigurationBuilder Methods" Url="html/Methods_T_LaunchDarkly_EventSource_ConfigurationBuilder.htm">
           <HelpTOCNode Title="BackoffResetThreshold Method " Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_BackoffResetThreshold.htm" />
           <HelpTOCNode Title="Build Method " Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_Build.htm" />
           <HelpTOCNode Title="ConnectionTimeout Method " Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_ConnectionTimeout.htm" />
@@ -62,21 +62,21 @@
           <HelpTOCNode Title="RequestHeaders Method " Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_RequestHeaders.htm" />
         </HelpTOCNode>
       </HelpTOCNode>
-      <HelpTOCNode Id="ac6daddf-c139-4aba-a38f-6dca4b313663" Title="EventSource Class" Url="html/T_LaunchDarkly_EventSource_EventSource.htm">
-        <HelpTOCNode Id="852f5fba-4a8e-4f66-b8f0-9addc0d6610e" Title="EventSource Constructor " Url="html/Overload_LaunchDarkly_EventSource_EventSource__ctor.htm">
+      <HelpTOCNode Id="bfd93543-d0f8-48dc-a78d-9897a32d1284" Title="EventSource Class" Url="html/T_LaunchDarkly_EventSource_EventSource.htm">
+        <HelpTOCNode Id="bbd067fb-f749-4a87-bf46-1dd081f12c25" Title="EventSource Constructor " Url="html/Overload_LaunchDarkly_EventSource_EventSource__ctor.htm">
           <HelpTOCNode Title="EventSource Constructor (Uri)" Url="html/M_LaunchDarkly_EventSource_EventSource__ctor_1.htm" />
           <HelpTOCNode Title="EventSource Constructor (Configuration)" Url="html/M_LaunchDarkly_EventSource_EventSource__ctor.htm" />
         </HelpTOCNode>
-        <HelpTOCNode Id="55461c76-bf68-421f-97f6-2e2d78204450" Title="EventSource Properties" Url="html/Properties_T_LaunchDarkly_EventSource_EventSource.htm">
+        <HelpTOCNode Id="7fef0560-7c63-4f71-80bc-40dcbb170acb" Title="EventSource Properties" Url="html/Properties_T_LaunchDarkly_EventSource_EventSource.htm">
           <HelpTOCNode Title="ReadyState Property " Url="html/P_LaunchDarkly_EventSource_EventSource_ReadyState.htm" />
         </HelpTOCNode>
-        <HelpTOCNode Id="3586da21-577a-4919-bbbb-51125b9c9cb2" Title="EventSource Methods" Url="html/Methods_T_LaunchDarkly_EventSource_EventSource.htm">
+        <HelpTOCNode Id="16f0efb4-bbc9-4557-bea9-d2164d01ac45" Title="EventSource Methods" Url="html/Methods_T_LaunchDarkly_EventSource_EventSource.htm">
           <HelpTOCNode Title="Close Method " Url="html/M_LaunchDarkly_EventSource_EventSource_Close.htm" />
           <HelpTOCNode Title="Dispose Method " Url="html/M_LaunchDarkly_EventSource_EventSource_Dispose.htm" />
           <HelpTOCNode Title="Restart Method " Url="html/M_LaunchDarkly_EventSource_EventSource_Restart.htm" />
           <HelpTOCNode Title="StartAsync Method " Url="html/M_LaunchDarkly_EventSource_EventSource_StartAsync.htm" />
         </HelpTOCNode>
-        <HelpTOCNode Id="2d865cf8-7656-41b2-ba65-240372afdc0a" Title="EventSource Events" Url="html/Events_T_LaunchDarkly_EventSource_EventSource.htm">
+        <HelpTOCNode Id="ddf1d547-3baa-484e-9587-456d1c823a6d" Title="EventSource Events" Url="html/Events_T_LaunchDarkly_EventSource_EventSource.htm">
           <HelpTOCNode Title="Closed Event" Url="html/E_LaunchDarkly_EventSource_EventSource_Closed.htm" />
           <HelpTOCNode Title="CommentReceived Event" Url="html/E_LaunchDarkly_EventSource_EventSource_CommentReceived.htm" />
           <HelpTOCNode Title="Error Event" Url="html/E_LaunchDarkly_EventSource_EventSource_Error.htm" />
@@ -84,8 +84,8 @@
           <HelpTOCNode Title="Opened Event" Url="html/E_LaunchDarkly_EventSource_EventSource_Opened.htm" />
         </HelpTOCNode>
       </HelpTOCNode>
-      <HelpTOCNode Id="2043f197-59b1-4994-aa33-08a29d4b78a3" Title="EventSourceServiceCancelledException Class" Url="html/T_LaunchDarkly_EventSource_EventSourceServiceCancelledException.htm">
-        <HelpTOCNode Id="cd020556-4a4b-4af3-bffa-25314ecc5243" Title="EventSourceServiceCancelledException Constructor " Url="html/Overload_LaunchDarkly_EventSource_EventSourceServiceCancelledException__ctor.htm">
+      <HelpTOCNode Id="e6a8889f-1279-4fa6-9be9-99d9b5b1d715" Title="EventSourceServiceCancelledException Class" Url="html/T_LaunchDarkly_EventSource_EventSourceServiceCancelledException.htm">
+        <HelpTOCNode Id="91ca901f-e70f-4467-8a12-312e29015e9f" Title="EventSourceServiceCancelledException Constructor " Url="html/Overload_LaunchDarkly_EventSource_EventSourceServiceCancelledException__ctor.htm">
           <HelpTOCNode Title="EventSourceServiceCancelledException Constructor (String)" Url="html/M_LaunchDarkly_EventSource_EventSourceServiceCancelledException__ctor.htm" />
           <HelpTOCNode Title="EventSourceServiceCancelledException Constructor (String, Exception)" Url="html/M_LaunchDarkly_EventSource_EventSourceServiceCancelledException__ctor_1.htm" />
         </HelpTOCNode>
@@ -93,31 +93,31 @@
         <HelpTOCNode Title="EventSourceServiceCancelledException Methods" Url="html/Methods_T_LaunchDarkly_EventSource_EventSourceServiceCancelledException.htm" />
         <HelpTOCNode Title="EventSourceServiceCancelledException Events" Url="html/Events_T_LaunchDarkly_EventSource_EventSourceServiceCancelledException.htm" />
       </HelpTOCNode>
-      <HelpTOCNode Id="e476bddf-6f06-4d3a-9144-d6eca4d88302" Title="EventSourceServiceUnsuccessfulResponseException Class" Url="html/T_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException.htm">
+      <HelpTOCNode Id="33e2b7bd-d3de-4503-8169-1d6b001a7bba" Title="EventSourceServiceUnsuccessfulResponseException Class" Url="html/T_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException.htm">
         <HelpTOCNode Title="EventSourceServiceUnsuccessfulResponseException Constructor " Url="html/M_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException__ctor.htm" />
-        <HelpTOCNode Id="0b420a88-caff-4c12-83f2-a10dbc61e041" Title="EventSourceServiceUnsuccessfulResponseException Properties" Url="html/Properties_T_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException.htm">
+        <HelpTOCNode Id="e4234bba-d5e5-4543-955a-a014c0e28881" Title="EventSourceServiceUnsuccessfulResponseException Properties" Url="html/Properties_T_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException.htm">
           <HelpTOCNode Title="StatusCode Property " Url="html/P_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException_StatusCode.htm" />
         </HelpTOCNode>
         <HelpTOCNode Title="EventSourceServiceUnsuccessfulResponseException Methods" Url="html/Methods_T_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException.htm" />
         <HelpTOCNode Title="EventSourceServiceUnsuccessfulResponseException Events" Url="html/Events_T_LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException.htm" />
       </HelpTOCNode>
-      <HelpTOCNode Id="01e15fe2-f3d8-42d4-9ee2-cff3630059d8" Title="ExceptionEventArgs Class" Url="html/T_LaunchDarkly_EventSource_ExceptionEventArgs.htm">
+      <HelpTOCNode Id="25944359-9749-4941-b0f1-db6fb4ee0acb" Title="ExceptionEventArgs Class" Url="html/T_LaunchDarkly_EventSource_ExceptionEventArgs.htm">
         <HelpTOCNode Title="ExceptionEventArgs Constructor " Url="html/M_LaunchDarkly_EventSource_ExceptionEventArgs__ctor.htm" />
-        <HelpTOCNode Id="7c36b7ff-7253-4a54-b624-1b63cf42b1da" Title="ExceptionEventArgs Properties" Url="html/Properties_T_LaunchDarkly_EventSource_ExceptionEventArgs.htm">
+        <HelpTOCNode Id="37f2a80f-3925-4b19-9cb7-7de72022f72e" Title="ExceptionEventArgs Properties" Url="html/Properties_T_LaunchDarkly_EventSource_ExceptionEventArgs.htm">
           <HelpTOCNode Title="Exception Property " Url="html/P_LaunchDarkly_EventSource_ExceptionEventArgs_Exception.htm" />
         </HelpTOCNode>
         <HelpTOCNode Title="ExceptionEventArgs Methods" Url="html/Methods_T_LaunchDarkly_EventSource_ExceptionEventArgs.htm" />
       </HelpTOCNode>
-      <HelpTOCNode Id="21b54f7c-a920-401f-8dd3-a56322612377" Title="IEventSource Interface" Url="html/T_LaunchDarkly_EventSource_IEventSource.htm">
-        <HelpTOCNode Id="2025c4be-f840-4bd5-9194-f86625ed76ca" Title="IEventSource Properties" Url="html/Properties_T_LaunchDarkly_EventSource_IEventSource.htm">
+      <HelpTOCNode Id="7356063f-e750-4052-a859-72f90cf2f377" Title="IEventSource Interface" Url="html/T_LaunchDarkly_EventSource_IEventSource.htm">
+        <HelpTOCNode Id="6bf2c81f-ab5d-40f7-acaf-c73ad8a1bef9" Title="IEventSource Properties" Url="html/Properties_T_LaunchDarkly_EventSource_IEventSource.htm">
           <HelpTOCNode Title="ReadyState Property " Url="html/P_LaunchDarkly_EventSource_IEventSource_ReadyState.htm" />
         </HelpTOCNode>
-        <HelpTOCNode Id="0e851acb-6d63-40dd-9e7d-23053cc0ec2f" Title="IEventSource Methods" Url="html/Methods_T_LaunchDarkly_EventSource_IEventSource.htm">
+        <HelpTOCNode Id="e0a6cff2-4c2e-4e80-aca6-e26efc01be77" Title="IEventSource Methods" Url="html/Methods_T_LaunchDarkly_EventSource_IEventSource.htm">
           <HelpTOCNode Title="Close Method " Url="html/M_LaunchDarkly_EventSource_IEventSource_Close.htm" />
           <HelpTOCNode Title="Restart Method " Url="html/M_LaunchDarkly_EventSource_IEventSource_Restart.htm" />
           <HelpTOCNode Title="StartAsync Method " Url="html/M_LaunchDarkly_EventSource_IEventSource_StartAsync.htm" />
         </HelpTOCNode>
-        <HelpTOCNode Id="a3d5d2d2-8e97-492e-b3db-43b75a419771" Title="IEventSource Events" Url="html/Events_T_LaunchDarkly_EventSource_IEventSource.htm">
+        <HelpTOCNode Id="e4645fb7-bdb6-4f38-97e0-cd3559cc7ad4" Title="IEventSource Events" Url="html/Events_T_LaunchDarkly_EventSource_IEventSource.htm">
           <HelpTOCNode Title="Closed Event" Url="html/E_LaunchDarkly_EventSource_IEventSource_Closed.htm" />
           <HelpTOCNode Title="CommentReceived Event" Url="html/E_LaunchDarkly_EventSource_IEventSource_CommentReceived.htm" />
           <HelpTOCNode Title="Error Event" Url="html/E_LaunchDarkly_EventSource_IEventSource_Error.htm" />
@@ -125,13 +125,13 @@
           <HelpTOCNode Title="Opened Event" Url="html/E_LaunchDarkly_EventSource_IEventSource_Opened.htm" />
         </HelpTOCNode>
       </HelpTOCNode>
-      <HelpTOCNode Id="cc9e2325-18ee-4b61-b8fe-7232890619df" Title="MessageEvent Structure" Url="html/T_LaunchDarkly_EventSource_MessageEvent.htm">
-        <HelpTOCNode Id="6dee8824-f7e0-41e3-9c1d-dc2a3f027968" Title="MessageEvent Constructor " Url="html/Overload_LaunchDarkly_EventSource_MessageEvent__ctor.htm">
+      <HelpTOCNode Id="7358bbff-8757-4f59-9989-5d18b78353f2" Title="MessageEvent Structure" Url="html/T_LaunchDarkly_EventSource_MessageEvent.htm">
+        <HelpTOCNode Id="484002c7-bf66-4295-bb73-4af47b24abde" Title="MessageEvent Constructor " Url="html/Overload_LaunchDarkly_EventSource_MessageEvent__ctor.htm">
           <HelpTOCNode Title="MessageEvent Constructor (String, String, Uri)" Url="html/M_LaunchDarkly_EventSource_MessageEvent__ctor_2.htm" />
           <HelpTOCNode Title="MessageEvent Constructor (String, Utf8ByteSpan, String, Uri)" Url="html/M_LaunchDarkly_EventSource_MessageEvent__ctor.htm" />
           <HelpTOCNode Title="MessageEvent Constructor (String, String, String, Uri)" Url="html/M_LaunchDarkly_EventSource_MessageEvent__ctor_1.htm" />
         </HelpTOCNode>
-        <HelpTOCNode Id="01d89988-a39f-4b73-845b-f548343dfb89" Title="MessageEvent Properties" Url="html/Properties_T_LaunchDarkly_EventSource_MessageEvent.htm">
+        <HelpTOCNode Id="b3c22783-78dc-481b-8d47-d1d0d6ac13b9" Title="MessageEvent Properties" Url="html/Properties_T_LaunchDarkly_EventSource_MessageEvent.htm">
           <HelpTOCNode Title="Data Property " Url="html/P_LaunchDarkly_EventSource_MessageEvent_Data.htm" />
           <HelpTOCNode Title="DataUtf8Bytes Property " Url="html/P_LaunchDarkly_EventSource_MessageEvent_DataUtf8Bytes.htm" />
           <HelpTOCNode Title="IsDataUtf8Bytes Property " Url="html/P_LaunchDarkly_EventSource_MessageEvent_IsDataUtf8Bytes.htm" />
@@ -139,50 +139,50 @@
           <HelpTOCNode Title="Name Property " Url="html/P_LaunchDarkly_EventSource_MessageEvent_Name.htm" />
           <HelpTOCNode Title="Origin Property " Url="html/P_LaunchDarkly_EventSource_MessageEvent_Origin.htm" />
         </HelpTOCNode>
-        <HelpTOCNode Id="0ff179cd-dbaa-4155-8c62-e651135d4739" Title="MessageEvent Methods" Url="html/Methods_T_LaunchDarkly_EventSource_MessageEvent.htm">
+        <HelpTOCNode Id="a815aa0e-7b5a-40e5-ad01-07225b0089c9" Title="MessageEvent Methods" Url="html/Methods_T_LaunchDarkly_EventSource_MessageEvent.htm">
           <HelpTOCNode Title="Equals Method " Url="html/M_LaunchDarkly_EventSource_MessageEvent_Equals.htm" />
           <HelpTOCNode Title="GetHashCode Method " Url="html/M_LaunchDarkly_EventSource_MessageEvent_GetHashCode.htm" />
         </HelpTOCNode>
-        <HelpTOCNode Id="4678c6c1-9712-4440-8336-44df8b77d78f" Title="MessageEvent Fields" Url="html/Fields_T_LaunchDarkly_EventSource_MessageEvent.htm">
+        <HelpTOCNode Id="5c21180c-402f-4a02-af9f-41af9e0233a8" Title="MessageEvent Fields" Url="html/Fields_T_LaunchDarkly_EventSource_MessageEvent.htm">
           <HelpTOCNode Title="DefaultName Field" Url="html/F_LaunchDarkly_EventSource_MessageEvent_DefaultName.htm" />
         </HelpTOCNode>
       </HelpTOCNode>
-      <HelpTOCNode Id="08f11162-3c02-4dc1-95f7-383878ea4f1a" Title="MessageReceivedEventArgs Class" Url="html/T_LaunchDarkly_EventSource_MessageReceivedEventArgs.htm">
+      <HelpTOCNode Id="d6de992e-6da0-4a5e-8574-315ce77fb84f" Title="MessageReceivedEventArgs Class" Url="html/T_LaunchDarkly_EventSource_MessageReceivedEventArgs.htm">
         <HelpTOCNode Title="MessageReceivedEventArgs Constructor " Url="html/M_LaunchDarkly_EventSource_MessageReceivedEventArgs__ctor.htm" />
-        <HelpTOCNode Id="fa3c82db-2499-42b2-ba7f-0b2f01092383" Title="MessageReceivedEventArgs Properties" Url="html/Properties_T_LaunchDarkly_EventSource_MessageReceivedEventArgs.htm">
+        <HelpTOCNode Id="4501d85e-dc42-446f-aed1-7799b5afc35b" Title="MessageReceivedEventArgs Properties" Url="html/Properties_T_LaunchDarkly_EventSource_MessageReceivedEventArgs.htm">
           <HelpTOCNode Title="EventName Property " Url="html/P_LaunchDarkly_EventSource_MessageReceivedEventArgs_EventName.htm" />
           <HelpTOCNode Title="Message Property " Url="html/P_LaunchDarkly_EventSource_MessageReceivedEventArgs_Message.htm" />
         </HelpTOCNode>
         <HelpTOCNode Title="MessageReceivedEventArgs Methods" Url="html/Methods_T_LaunchDarkly_EventSource_MessageReceivedEventArgs.htm" />
       </HelpTOCNode>
-      <HelpTOCNode Id="1cd95f6d-9902-4956-868e-8839f530de09" Title="ReadTimeoutException Class" Url="html/T_LaunchDarkly_EventSource_ReadTimeoutException.htm">
+      <HelpTOCNode Id="7a30c10c-9440-465f-ab52-89509edf57af" Title="ReadTimeoutException Class" Url="html/T_LaunchDarkly_EventSource_ReadTimeoutException.htm">
         <HelpTOCNode Title="ReadTimeoutException Constructor " Url="html/M_LaunchDarkly_EventSource_ReadTimeoutException__ctor.htm" />
-        <HelpTOCNode Id="b18006e4-868e-4e5d-8299-8758bfc0974d" Title="ReadTimeoutException Properties" Url="html/Properties_T_LaunchDarkly_EventSource_ReadTimeoutException.htm">
+        <HelpTOCNode Id="53cf7f63-cc72-4baf-8f62-8f5940a708d7" Title="ReadTimeoutException Properties" Url="html/Properties_T_LaunchDarkly_EventSource_ReadTimeoutException.htm">
           <HelpTOCNode Title="Message Property " Url="html/P_LaunchDarkly_EventSource_ReadTimeoutException_Message.htm" />
         </HelpTOCNode>
         <HelpTOCNode Title="ReadTimeoutException Methods" Url="html/Methods_T_LaunchDarkly_EventSource_ReadTimeoutException.htm" />
         <HelpTOCNode Title="ReadTimeoutException Events" Url="html/Events_T_LaunchDarkly_EventSource_ReadTimeoutException.htm" />
       </HelpTOCNode>
       <HelpTOCNode Title="ReadyState Enumeration" Url="html/T_LaunchDarkly_EventSource_ReadyState.htm" />
-      <HelpTOCNode Id="8c2cb9e8-183b-40eb-8cc6-e680d4ffa529" Title="StateChangedEventArgs Class" Url="html/T_LaunchDarkly_EventSource_StateChangedEventArgs.htm">
+      <HelpTOCNode Id="2ecaaf2b-b967-42be-9179-7c75f10f432b" Title="StateChangedEventArgs Class" Url="html/T_LaunchDarkly_EventSource_StateChangedEventArgs.htm">
         <HelpTOCNode Title="StateChangedEventArgs Constructor " Url="html/M_LaunchDarkly_EventSource_StateChangedEventArgs__ctor.htm" />
-        <HelpTOCNode Id="1df81757-67c9-45ab-a0e4-d3f2c82e5fbc" Title="StateChangedEventArgs Properties" Url="html/Properties_T_LaunchDarkly_EventSource_StateChangedEventArgs.htm">
+        <HelpTOCNode Id="976ef6a2-572c-44e0-a944-3a2855fe0648" Title="StateChangedEventArgs Properties" Url="html/Properties_T_LaunchDarkly_EventSource_StateChangedEventArgs.htm">
           <HelpTOCNode Title="ReadyState Property " Url="html/P_LaunchDarkly_EventSource_StateChangedEventArgs_ReadyState.htm" />
         </HelpTOCNode>
         <HelpTOCNode Title="StateChangedEventArgs Methods" Url="html/Methods_T_LaunchDarkly_EventSource_StateChangedEventArgs.htm" />
       </HelpTOCNode>
-      <HelpTOCNode Id="676088f8-603b-4dd6-835c-2eb65ed94a52" Title="Utf8ByteSpan Structure" Url="html/T_LaunchDarkly_EventSource_Utf8ByteSpan.htm">
-        <HelpTOCNode Id="15a64313-f1da-470c-ae89-2a136b7dc4b8" Title="Utf8ByteSpan Constructor " Url="html/Overload_LaunchDarkly_EventSource_Utf8ByteSpan__ctor.htm">
+      <HelpTOCNode Id="6bf64c91-79c5-4795-b150-01ff5c4ebc4d" Title="Utf8ByteSpan Structure" Url="html/T_LaunchDarkly_EventSource_Utf8ByteSpan.htm">
+        <HelpTOCNode Id="4a29cc1c-21dd-4662-80b0-3ec27827c2b6" Title="Utf8ByteSpan Constructor " Url="html/Overload_LaunchDarkly_EventSource_Utf8ByteSpan__ctor.htm">
           <HelpTOCNode Title="Utf8ByteSpan Constructor (String)" Url="html/M_LaunchDarkly_EventSource_Utf8ByteSpan__ctor_1.htm" />
           <HelpTOCNode Title="Utf8ByteSpan Constructor (Byte[], Int32, Int32)" Url="html/M_LaunchDarkly_EventSource_Utf8ByteSpan__ctor.htm" />
         </HelpTOCNode>
-        <HelpTOCNode Id="443663a8-3096-4cc7-9f42-3c898ffe7fd5" Title="Utf8ByteSpan Properties" Url="html/Properties_T_LaunchDarkly_EventSource_Utf8ByteSpan.htm">
+        <HelpTOCNode Id="9bdb4ff9-e7ca-4d7b-aa49-9cb4ba9e0b9b" Title="Utf8ByteSpan Properties" Url="html/Properties_T_LaunchDarkly_EventSource_Utf8ByteSpan.htm">
           <HelpTOCNode Title="Data Property " Url="html/P_LaunchDarkly_EventSource_Utf8ByteSpan_Data.htm" />
           <HelpTOCNode Title="Length Property " Url="html/P_LaunchDarkly_EventSource_Utf8ByteSpan_Length.htm" />
           <HelpTOCNode Title="Offset Property " Url="html/P_LaunchDarkly_EventSource_Utf8ByteSpan_Offset.htm" />
         </HelpTOCNode>
-        <HelpTOCNode Id="50ef0606-466c-4a30-b191-67b0638da42b" Title="Utf8ByteSpan Methods" Url="html/Methods_T_LaunchDarkly_EventSource_Utf8ByteSpan.htm">
-          <HelpTOCNode Id="75535c22-28c0-47a5-9dd0-b60108f161eb" Title="Equals Method " Url="html/Overload_LaunchDarkly_EventSource_Utf8ByteSpan_Equals.htm">
+        <HelpTOCNode Id="2f999286-f893-45c0-b726-377a60e9a67c" Title="Utf8ByteSpan Methods" Url="html/Methods_T_LaunchDarkly_EventSource_Utf8ByteSpan.htm">
+          <HelpTOCNode Id="342b75e4-cdba-41fd-90d3-bd7db7b3235f" Title="Equals Method " Url="html/Overload_LaunchDarkly_EventSource_Utf8ByteSpan_Equals.htm">
             <HelpTOCNode Title="Equals Method (String)" Url="html/M_LaunchDarkly_EventSource_Utf8ByteSpan_Equals_1.htm" />
             <HelpTOCNode Title="Equals Method (Utf8ByteSpan)" Url="html/M_LaunchDarkly_EventSource_Utf8ByteSpan_Equals.htm" />
           </HelpTOCNode>
