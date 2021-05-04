@@ -2,6 +2,16 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [4.1.1] - 2021-05-04
+(The 4.1.0 release was an accidental duplicate of 4.0.0 and did not include these changes.)
+
+### Added:
+- `ConfigurationBuilder.ResponseStartTimeout`-- added as a more accurately named replacement for `ConnectionTimeout`.
+
+### Deprecated:
+- `ConfigurationBuilder.ConnectionTimeout`
+
+
 ## [4.1.0] - 2021-05-04
 ### Added:
 - `ConfigurationBuilder.ResponseStartTimeout`-- added as a more accurately named replacement for `ConnectionTimeout`.
