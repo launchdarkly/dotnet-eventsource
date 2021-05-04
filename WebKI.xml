@@ -42,6 +42,7 @@
   <HelpKINode Title="Configuration.DefaultLoggerName field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultLoggerName.htm" />
   <HelpKINode Title="Configuration.DefaultMaxRetryDelay field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultMaxRetryDelay.htm" />
   <HelpKINode Title="Configuration.DefaultReadTimeout field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultReadTimeout.htm" />
+  <HelpKINode Title="Configuration.DefaultResponseStartTimeout field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultResponseStartTimeout.htm" />
   <HelpKINode Title="Configuration.HttpClient property" Url="html/P_LaunchDarkly_EventSource_Configuration_HttpClient.htm" />
   <HelpKINode Title="Configuration.HttpMessageHandler property" Url="html/P_LaunchDarkly_EventSource_Configuration_HttpMessageHandler.htm" />
   <HelpKINode Title="Configuration.InitialRetryDelay property" Url="html/P_LaunchDarkly_EventSource_Configuration_InitialRetryDelay.htm" />
@@ -53,6 +54,7 @@
   <HelpKINode Title="Configuration.ReadTimeout property" Url="html/P_LaunchDarkly_EventSource_Configuration_ReadTimeout.htm" />
   <HelpKINode Title="Configuration.RequestBodyFactory property" Url="html/P_LaunchDarkly_EventSource_Configuration_RequestBodyFactory.htm" />
   <HelpKINode Title="Configuration.RequestHeaders property" Url="html/P_LaunchDarkly_EventSource_Configuration_RequestHeaders.htm" />
+  <HelpKINode Title="Configuration.ResponseStartTimeout property" Url="html/P_LaunchDarkly_EventSource_Configuration_ResponseStartTimeout.htm" />
   <HelpKINode Title="Configuration.Uri property" Url="html/P_LaunchDarkly_EventSource_Configuration_Uri.htm" />
   <HelpKINode Title="ConfigurationBuilder class">
     <HelpKINode Title="ConfigurationBuilder Class" Url="html/T_LaunchDarkly_EventSource_ConfigurationBuilder.htm" />
@@ -76,6 +78,7 @@
   <HelpKINode Title="ConfigurationBuilder.RequestBodyFactory method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_RequestBodyFactory.htm" />
   <HelpKINode Title="ConfigurationBuilder.RequestHeader method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_RequestHeader.htm" />
   <HelpKINode Title="ConfigurationBuilder.RequestHeaders method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_RequestHeaders.htm" />
+  <HelpKINode Title="ConfigurationBuilder.ResponseStartTimeout method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_ResponseStartTimeout.htm" />
   <HelpKINode Title="Connecting enumeration member" Url="html/T_LaunchDarkly_EventSource_ReadyState.htm" />
   <HelpKINode Title="ConnectionTimeout method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_ConnectionTimeout.htm" />
   <HelpKINode Title="ConnectionTimeout property" Url="html/P_LaunchDarkly_EventSource_Configuration_ConnectionTimeout.htm" />
@@ -93,6 +96,7 @@
   <HelpKINode Title="DefaultMaxRetryDelay field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultMaxRetryDelay.htm" />
   <HelpKINode Title="DefaultName field" Url="html/F_LaunchDarkly_EventSource_MessageEvent_DefaultName.htm" />
   <HelpKINode Title="DefaultReadTimeout field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultReadTimeout.htm" />
+  <HelpKINode Title="DefaultResponseStartTimeout field" Url="html/F_LaunchDarkly_EventSource_Configuration_DefaultResponseStartTimeout.htm" />
   <HelpKINode Title="Dispose method" Url="html/M_LaunchDarkly_EventSource_EventSource_Dispose.htm" />
   <HelpKINode Title="Equals method">
     <HelpKINode Title="MessageEvent.Equals Method " Url="html/M_LaunchDarkly_EventSource_MessageEvent_Equals.htm" />
@@ -267,6 +271,8 @@
   <HelpKINode Title="RequestHeader method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_RequestHeader.htm" />
   <HelpKINode Title="RequestHeaders method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_RequestHeaders.htm" />
   <HelpKINode Title="RequestHeaders property" Url="html/P_LaunchDarkly_EventSource_Configuration_RequestHeaders.htm" />
+  <HelpKINode Title="ResponseStartTimeout method" Url="html/M_LaunchDarkly_EventSource_ConfigurationBuilder_ResponseStartTimeout.htm" />
+  <HelpKINode Title="ResponseStartTimeout property" Url="html/P_LaunchDarkly_EventSource_Configuration_ResponseStartTimeout.htm" />
   <HelpKINode Title="Restart method">
     <HelpKINode Title="EventSource.Restart Method " Url="html/M_LaunchDarkly_EventSource_EventSource_Restart.htm" />
     <HelpKINode Title="IEventSource.Restart Method " Url="html/M_LaunchDarkly_EventSource_IEventSource_Restart.htm" />
