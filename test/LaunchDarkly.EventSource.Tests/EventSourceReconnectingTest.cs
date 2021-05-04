@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using LaunchDarkly.TestHelpers.HttpTest;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -19,12 +20,13 @@ namespace LaunchDarkly.EventSource.Tests
             HttpStatusCode error1 = HttpStatusCode.BadRequest, error2 = HttpStatusCode.InternalServerError;
             var message = new MessageEvent("put", "hello", _uri);
 
-            var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.WithStatus(error1));
-            handler.QueueResponse(StubResponse.WithStatus(error2));
-            handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(message)));
+            var handler = Handlers.Sequential(
+                Handlers.Status((int)error1),
+                Handlers.Status((int)error2),
+                StartStream().Then(WriteEvent(message)).Then(LeaveStreamOpen())
+                );
 
-            using (var es = MakeEventSource(handler, builder => builder.InitialRetryDelay(TimeSpan.FromMilliseconds(20))))
+            WithServerAndEventSource(handler, c => c.InitialRetryDelay(TimeSpan.FromMilliseconds(20)), (server, es) =>
             {
                 var eventSink = new EventSink(es, _testLogging);
                 _ = Task.Run(es.StartAsync);
@@ -44,7 +46,7 @@ namespace LaunchDarkly.EventSource.Tests
                     EventSink.OpenedAction(),
                     EventSink.MessageReceivedAction(message)
                     );
-            }
+            });
         }
 
         [Fact]
@@ -54,41 +56,40 @@ namespace LaunchDarkly.EventSource.Tests
             var eventId1 = "xyz456";
             var message1 = new MessageEvent("put", "this is a test message", eventId1, _uri);
 
-            var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(message1), StreamAction.CloseStream()));
-            handler.QueueResponse(StubResponse.StartStream());
+            var handler = Handlers.Sequential(
+                StartStream().Then(WriteEvent(message1)),
+                StartStream().Then(LeaveStreamOpen())
+                );
 
-            using (var es = MakeEventSource(handler, builder => builder.InitialRetryDelay(TimeSpan.FromMilliseconds(20))
-                .LastEventId(initialEventId)))
+            WithServerAndEventSource(handler, c => c.InitialRetryDelay(TimeSpan.FromMilliseconds(20)).LastEventId(initialEventId), (server, es) =>
             {
                 var eventSink = new EventSink(es, _testLogging);
                 _ = Task.Run(es.StartAsync);
 
-                var req1 = handler.AwaitRequest();
-                Assert.Contains(initialEventId, req1.Headers.GetValues("Last-Event-Id"));
+                var req1 = server.Recorder.RequireRequest();
+                Assert.Equal(initialEventId, req1.Headers["Last-Event-Id"]);
 
-                var req2 = handler.AwaitRequest();
-                Assert.Contains(eventId1, req2.Headers.GetValues("Last-Event-Id"));
-            }
+                var req2 = server.Recorder.RequireRequest();
+                Assert.Equal(eventId1, req2.Headers["Last-Event-Id"]);
+            });
         }
 
         [Fact]
         public void RetryDelayDurationsShouldIncrease()
         {
-            var handler = new StubMessageHandler();
-
             var nAttempts = 3;
+            var steps = new List<Handler>();
+            steps.Add(StartStream());
             for (var i = 0; i < nAttempts; i++)
             {
-                handler.QueueResponse(StubResponse.StartStream(
-                    StreamAction.Write(":hi\n"),
-                    StreamAction.CloseStream()));
+                steps.Add(Handlers.WriteChunkString(":hi\n"));
             }
-            handler.QueueResponse(StubResponse.StartStream());
+            steps.Add(LeaveStreamOpen());
+            var handler = Handlers.Sequential(steps.ToArray());
 
             var backoffs = new List<TimeSpan>();
 
-            using (var es = MakeEventSource(handler, builder => builder.InitialRetryDelay(TimeSpan.FromMilliseconds(100))))
+            WithServerAndEventSource(handler, c => c.InitialRetryDelay(TimeSpan.FromMilliseconds(100)), (server, es) =>
             {
                 _ = new EventSink(es, _testLogging);
                 es.Closed += (_, state) =>
@@ -100,27 +101,33 @@ namespace LaunchDarkly.EventSource.Tests
 
                 for (int i = 0; i <= nAttempts; i++)
                 {
-                    _ = handler.AwaitRequest();
+                    _ = server.Recorder.RequireRequest();
                 }
-            }
+            });
 
             AssertBackoffsAlwaysIncrease(backoffs, nAttempts);
         }
 
         [Fact]
-        public async void NoReconnectAttemptIsMadeIfErrorHandlerClosesEventSource()
+        public async Task NoReconnectAttemptIsMadeIfErrorHandlerClosesEventSource()
         {
-            var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.WithStatus(HttpStatusCode.Unauthorized));
-            handler.QueueResponse(StubResponse.StartStream());
+            var handler = Handlers.Sequential(
+                Handlers.Status((int)HttpStatusCode.Unauthorized),
+                StartStream().Then(LeaveStreamOpen())
+                );
 
-            using (var es = MakeEventSource(handler))
+            using (var server = HttpServer.Start(handler))
             {
-                es.Error += (_, e) => es.Close();
-                await es.StartAsync();
-            }
+                using (var es = MakeEventSource(server.Uri))
+                {
+                    es.Error += (_, e) => es.Close();
 
-            Assert.Single(handler.GetRequests());
+                    await es.StartAsync();
+
+                    server.Recorder.RequireRequest();
+                    server.Recorder.RequireNoRequests(TimeSpan.FromMilliseconds(100));
+                }
+            }
         }
     }
 }

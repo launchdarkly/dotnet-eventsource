@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using LaunchDarkly.TestHelpers.HttpTest;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -17,153 +17,244 @@ namespace LaunchDarkly.EventSource.Tests
         [Fact]
         public async Task CustomHttpClientIsNotClosedWhenEventSourceCloses()
         {
-            var handler = new StubMessageHandler(StubResponse.WithStatus(HttpStatusCode.OK));
-
-            using (var client = new HttpClient(handler))
+            using (var server = HttpServer.Start(Handlers.Status(200)))
             {
-                var es = new EventSource(Configuration.Builder(_uri).HttpClient(client).Build());
-                es.Close();
+                using (var client = new HttpClient())
+                {
+                    var es = new EventSource(Configuration.Builder(server.Uri).HttpClient(client).Build());
+                    es.Close();
 
-                await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, _uri));
+                    await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, server.Uri));
+                }
             }
         }
 
         [Fact]
         public void DefaultMethod()
         {
-            var handler = new StubMessageHandler(StubResponse.StartStream());
-            using (var es = MakeEventSource(handler))
+            using (var server = HttpServer.Start(EmptyStreamThatStaysOpen))
             {
-                _ = Task.Run(es.StartAsync);
+                using (var es = MakeEventSource(server.Uri))
+                {
+                    _ = Task.Run(es.StartAsync);
 
-                var req = handler.AwaitRequest();
-                Assert.Equal(HttpMethod.Get, req.Method);
+                    var req = server.Recorder.RequireRequest();
+                    Assert.Equal("GET", req.Method);
+                }
             }
         }
 
         [Fact]
         public void CustomMethod()
         {
-            var handler = new StubMessageHandler(StubResponse.StartStream());
-            using (var es = MakeEventSource(handler, builder => builder.Method(HttpMethod.Post)))
+            using (var server = HttpServer.Start(EmptyStreamThatStaysOpen))
             {
-                _ = Task.Run(es.StartAsync);
+                using (var es = MakeEventSource(server.Uri, builder => builder.Method(HttpMethod.Post)))
+                {
+                    _ = Task.Run(es.StartAsync);
 
-                var req = handler.AwaitRequest();
-                Assert.Equal(HttpMethod.Post, req.Method);
+                    var req = server.Recorder.RequireRequest();
+                    Assert.Equal("POST", req.Method);
+                }
             }
         }
 
         [Fact]
         public void CustomMethodWithRequestBody()
         {
-            var handler = new StubMessageHandler(StubResponse.StartStream());
-
-            HttpContent content = new StringContent("{}");
-            Func<HttpContent> contentFn = () => content;
-
-            using (var es = MakeEventSource(handler, builder =>
-                builder.Method(HttpMethod.Post).RequestBodyFactory(contentFn)))
+            using (var server = HttpServer.Start(EmptyStreamThatStaysOpen))
             {
-                _ = Task.Run(es.StartAsync);
+                var content = "{}";
+                Func<HttpContent> contentFn = () => new StringContent(content);
 
-                var req = handler.AwaitRequest();
-                Assert.Equal(content, req.Content);
+                using (var es = MakeEventSource(server.Uri, builder =>
+                    builder.Method(HttpMethod.Post).RequestBodyFactory(contentFn)))
+                {
+                    _ = Task.Run(es.StartAsync);
+
+                    var req = server.Recorder.RequireRequest();
+                    Assert.Equal(content, req.Body);
+                }
             }
         }
 
         [Fact]
         public void AcceptHeaderIsAlwaysPresent()
         {
-            var handler = new StubMessageHandler(StubResponse.StartStream());
-
-            HttpContent content = new StringContent("{}");
-            Func<HttpContent> contentFn = () => content;
-
-            using (var es = MakeEventSource(handler, builder =>
-                builder.Method(HttpMethod.Post).RequestBodyFactory(contentFn)))
+            using (var server = HttpServer.Start(EmptyStreamThatStaysOpen))
             {
-                _ = Task.Run(es.StartAsync);
+                using (var es = MakeEventSource(server.Uri))
+                {
+                    _ = Task.Run(es.StartAsync);
 
-                var req = handler.AwaitRequest();
-                Assert.True(req.Headers.Contains(Constants.AcceptHttpHeader));
-                Assert.Contains(Constants.EventStreamContentType, req.Headers.GetValues(Constants.AcceptHttpHeader));
+                    var req = server.Recorder.RequireRequest();
+                    Assert.Contains(Constants.EventStreamContentType, req.Headers.GetValues(Constants.AcceptHttpHeader));
+                }
             }
         }
 
         [Fact]
         public void LastEventIdHeaderIsNotSetByDefault()
         {
-            var handler = new StubMessageHandler(StubResponse.StartStream());
-
-            using (var es = MakeEventSource(handler))
+            using (var server = HttpServer.Start(EmptyStreamThatStaysOpen))
             {
-                _ = Task.Run(es.StartAsync);
+                using (var es = MakeEventSource(server.Uri))
+                {
+                    _ = Task.Run(es.StartAsync);
 
-                var req = handler.AwaitRequest();
-                Assert.False(req.Headers.Contains(Constants.LastEventIdHttpHeader));
+                    var req = server.Recorder.RequireRequest();
+                    Assert.Null(req.Headers.Get(Constants.LastEventIdHttpHeader));
+                }
             }
         }
 
         [Fact]
         public void LastEventIdHeaderIsSetIfConfigured()
         {
-            var handler = new StubMessageHandler(StubResponse.StartStream());
-            var lastEventId = "abc123";
-
-            using (var es = MakeEventSource(handler, builder => builder.LastEventId(lastEventId)))
+            using (var server = HttpServer.Start(EmptyStreamThatStaysOpen))
             {
-                _ = Task.Run(es.StartAsync);
+                var lastEventId = "abc123";
 
-                var req = handler.AwaitRequest();
-                Assert.True(req.Headers.Contains(Constants.LastEventIdHttpHeader));
-                Assert.Contains(lastEventId, req.Headers.GetValues(Constants.LastEventIdHttpHeader));
+                using (var es = MakeEventSource(server.Uri, builder => builder.LastEventId(lastEventId)))
+                {
+                    _ = Task.Run(es.StartAsync);
+
+                    var req = server.Recorder.RequireRequest();
+                    Assert.Equal(lastEventId, req.Headers.Get(Constants.LastEventIdHttpHeader));
+                }
             }
         }
 
         [Fact]
         public void CustomRequestHeaders()
         {
-            var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.StartStream());
-
-            var headers = new Dictionary<string, string> { { "User-Agent", "mozilla" }, { "Authorization", "testing" } };
-
-            using (var es = MakeEventSource(handler, builder => builder.RequestHeaders(headers)))
+            using (var server = HttpServer.Start(EmptyStreamThatStaysOpen))
             {
-                _ = Task.Run(es.StartAsync);
+                var headers = new Dictionary<string, string> { { "User-Agent", "mozilla" }, { "Authorization", "testing" } };
 
-                var req = handler.AwaitRequest();
-                Assert.True(headers.All(
-                    item =>
-                        req.Headers.Contains(item.Key) &&
-                        req.Headers.GetValues(item.Key).Contains(item.Value)
-                ));
-            }            
+                using (var es = MakeEventSource(server.Uri, builder => builder.RequestHeaders(headers)))
+                {
+                    _ = Task.Run(es.StartAsync);
+
+                    var req = server.Recorder.RequireRequest();
+                    Assert.True(headers.All(
+                        item => req.Headers.Get(item.Key) == item.Value
+                    ));
+                }
+            }
         }
 
         [Fact]
+        public void ReceiveEventStreamInChunks()
+        {
+            // This simply verifies that chunked streaming works as expected and that events are being
+            // parsed correctly regardless of how the chunks line up with the events.
+
+            var eventData = new List<string>();
+            for (var i = 0; i < 200; i++)
+            {
+                eventData.Add(string.Format("data{0}", i) + new string('x', i % 7));
+            }
+            var allBody = string.Concat(eventData.Select(data => "data:" + data + "\n\n"));
+            var allEventsReceived = new TaskCompletionSource<bool>();
+
+            IEnumerable<string> MakeChunks()
+            {
+                var i = 0;
+                for (var pos = 0; ;)
+                {
+                    int chunkSize = i % 20 + 1;
+                    if (pos + chunkSize >= allBody.Length)
+                    {
+                        yield return allBody.Substring(pos);
+                        break;
+                    }
+                    yield return allBody.Substring(pos, chunkSize);
+                    pos += chunkSize;
+                    i++;
+                }
+            }
+
+            try
+            {
+                Handler streamHandler = Handlers.StartChunks("text/event-stream")
+                    .Then(async ctx =>
+                    {
+                        foreach (var s in MakeChunks())
+                        {
+                            await Handlers.WriteChunkString(s)(ctx);
+                        }
+                        await allEventsReceived.Task;
+                    });
+                using (var server = HttpServer.Start(streamHandler))
+                {
+                    var expectedActions = new List<EventSink.Action>();
+                    expectedActions.Add(EventSink.OpenedAction());
+                    foreach (var data in eventData)
+                    {
+                        expectedActions.Add(EventSink.MessageReceivedAction(new MessageEvent(MessageEvent.DefaultName, data, server.Uri)));
+                    }
+
+                    var config = Configuration.Builder(server.Uri).LogAdapter(_testLogging).Build();
+                    using (var es = new EventSource(config))
+                    {
+                        var sink = new EventSink(es);
+                        _ = es.StartAsync();
+                        sink.ExpectActions(expectedActions.ToArray());
+                    }
+                }
+            }
+            finally
+            {
+                allEventsReceived.SetResult(true);
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ReadTimeoutIsDetected(bool utf8Mode)
+        {
+            TimeSpan readTimeout = TimeSpan.FromMilliseconds(200);
+            var streamHandler = Handlers.StartChunks("text/event-stream")
+                .Then(Handlers.WriteChunkString("data: event1\n\ndata: e"))
+                .Then(Handlers.Delay(readTimeout + readTimeout))
+                .Then(Handlers.WriteChunkString("vent2\n\n"));
+            using (var server = HttpServer.Start(streamHandler))
+            {
+                var config = Configuration.Builder(server.Uri)
+                    .LogAdapter(_testLogging)
+                    .ReadTimeout(readTimeout)
+                    .PreferDataAsUtf8Bytes(utf8Mode)
+                    .Build();
+                using (var es = new EventSource(config))
+                {
+                    var sink = new EventSink(es) { Output = _testLogger.Debug };
+                    _ = es.StartAsync();
+                    sink.ExpectActions(
+                        EventSink.OpenedAction(),
+                        EventSink.MessageReceivedAction(new MessageEvent(MessageEvent.DefaultName, "event1", server.Uri)),
+                        EventSink.ErrorAction(new ReadTimeoutException()),
+                        EventSink.ClosedAction()
+                        );
+                }
+            }
+        }
+        [Fact]
         public void ErrorForIncorrectContentType()
         {
-            var handler = new StubMessageHandler();
-
-            var response =
-                new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent("testing", System.Text.Encoding.UTF8)
-                };
-            response.Content.Headers.ContentType = new MediaTypeHeaderValue("text/html");
-
-            handler.QueueResponse(StubResponse.WithResponse(response));
-
-            using (var es = MakeEventSource(handler))
+            var response = Handlers.Status(200).Then(Handlers.BodyString("text/html", "testing"));
+            using (var server = HttpServer.Start(response))
             {
-                var eventSink = new EventSink(es, _testLogging);
-                _ = Task.Run(es.StartAsync);
+                using (var es = MakeEventSource(server.Uri))
+                {
+                    var eventSink = new EventSink(es, _testLogging);
+                    _ = Task.Run(es.StartAsync);
 
-                var errorAction = eventSink.ExpectAction();
-                var ex = Assert.IsType<EventSourceServiceCancelledException>(errorAction.Exception);
-                Assert.Matches(".*content type.*text/html", ex.Message);
+                    var errorAction = eventSink.ExpectAction();
+                    var ex = Assert.IsType<EventSourceServiceCancelledException>(errorAction.Exception);
+                    Assert.Matches(".*content type.*text/html", ex.Message);
+                }
             }
         }
 
@@ -175,18 +266,17 @@ namespace LaunchDarkly.EventSource.Tests
         [InlineData(HttpStatusCode.Unauthorized)]
         public void ErrorForInvalidHttpStatus(HttpStatusCode statusCode)
         {
-            var handler = new StubMessageHandler();
-            var response = new HttpResponseMessage(statusCode);
-            handler.QueueResponse(StubResponse.WithResponse(response));
-
-            using (var es = MakeEventSource(handler))
+            using (var server = HttpServer.Start(Handlers.Status(statusCode)))
             {
-                var eventSink = new EventSink(es, _testLogging);
-                _ = Task.Run(es.StartAsync);
+                using (var es = MakeEventSource(server.Uri))
+                {
+                    var eventSink = new EventSink(es, _testLogging);
+                    _ = Task.Run(es.StartAsync);
 
-                var errorAction = eventSink.ExpectAction();
-                var ex = Assert.IsType<EventSourceServiceUnsuccessfulResponseException>(errorAction.Exception);
-                Assert.Equal((int)statusCode, ex.StatusCode);
+                    var errorAction = eventSink.ExpectAction();
+                    var ex = Assert.IsType<EventSourceServiceUnsuccessfulResponseException>(errorAction.Exception);
+                    Assert.Equal((int)statusCode, ex.StatusCode);
+                }
             }
         }
     }

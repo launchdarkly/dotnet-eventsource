@@ -1,8 +1,11 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using LaunchDarkly.Logging;
+using LaunchDarkly.TestHelpers.HttpTest;
 using Xunit;
 using Xunit.Abstractions;
+
+using static LaunchDarkly.EventSource.Tests.TestHelpers;
 
 namespace LaunchDarkly.EventSource.Tests
 {
@@ -10,20 +13,15 @@ namespace LaunchDarkly.EventSource.Tests
     {
         private static readonly MessageEvent BasicEvent = new MessageEvent("thing", "test", _uri);
 
-        private static StubMessageHandler HandlerWithBasicEvent() =>
-            new StubMessageHandler(StubResponse.StartStream(StreamAction.Write(BasicEvent)));
+        private static Handler HandlerWithBasicEvent() =>
+            StartStream().Then(WriteEvent(BasicEvent)).Then(LeaveStreamOpen());
 
         public EventSourceLoggingTest(ITestOutputHelper testOutput) : base(testOutput) { }
 
         [Fact]
         public void UsesDefaultLoggerNameWhenLogAdapterIsSpecified()
         {
-            var config = new ConfigurationBuilder(_uri)
-                .HttpMessageHandler(HandlerWithBasicEvent())
-                .LogAdapter(_logCapture)
-                .Build();
-
-            using (var es = new EventSource(config))
+            WithServerAndEventSource(HandlerWithBasicEvent(), (server, es) =>
             {
                 var eventSink = new EventSink(es);
                 _ = Task.Run(es.StartAsync);
@@ -33,18 +31,13 @@ namespace LaunchDarkly.EventSource.Tests
                 Assert.NotEmpty(_logCapture.GetMessages());
                 Assert.True(_logCapture.GetMessages().All(m => m.LoggerName == Configuration.DefaultLoggerName),
                     _logCapture.ToString());
-            }
+            });
         }
 
         [Fact]
         public void CanSpecifyLoggerInstance()
         {
-            var config = new ConfigurationBuilder(_uri)
-                .HttpMessageHandler(HandlerWithBasicEvent())
-                .Logger(_logCapture.Logger("special"))
-                .Build();
-
-            using (var es = new EventSource(config))
+            WithServerAndEventSource(HandlerWithBasicEvent(), c => c.Logger(_logCapture.Logger("special")), (server, es) =>
             {
                 var eventSink = new EventSink(es);
                 _ = Task.Run(es.StartAsync);
@@ -53,18 +46,13 @@ namespace LaunchDarkly.EventSource.Tests
 
                 Assert.NotEmpty(_logCapture.GetMessages());
                 Assert.True(_logCapture.GetMessages().All(m => m.LoggerName == "special"), _logCapture.ToString());
-            }
+            });
         }
 
         [Fact]
         public void ConnectingLogMessage()
         {
-            var config = new ConfigurationBuilder(_uri)
-                .HttpMessageHandler(HandlerWithBasicEvent())
-                .LogAdapter(_logCapture)
-                .Build();
-
-            using (var es = new EventSource(config))
+            WithServerAndEventSource(HandlerWithBasicEvent(), (server, es) =>
             {
                 var eventSink = new EventSink(es);
                 _ = Task.Run(es.StartAsync);
@@ -72,20 +60,15 @@ namespace LaunchDarkly.EventSource.Tests
                 eventSink.ExpectActions(EventSink.OpenedAction());
 
                 Assert.True(_logCapture.HasMessageWithText(LogLevel.Debug,
-                    "Making GET request to EventSource URI " + _uri),
+                    "Making GET request to EventSource URI " + server.Uri),
                     _logCapture.ToString());
-            }
+            });
         }
 
         [Fact]
         public void EventReceivedLogMessage()
         {
-            var config = new ConfigurationBuilder(_uri)
-                .HttpMessageHandler(HandlerWithBasicEvent())
-                .LogAdapter(_logCapture)
-                .Build();
-
-            using (var es = new EventSource(config))
+            WithServerAndEventSource(HandlerWithBasicEvent(), (server, es) =>
             {
                 var eventSink = new EventSink(es, _testLogging);
                 _ = Task.Run(es.StartAsync);
@@ -97,7 +80,7 @@ namespace LaunchDarkly.EventSource.Tests
 
                 Assert.True(_logCapture.HasMessageWithText(LogLevel.Debug,
                     string.Format(@"Received event ""{0}""", BasicEvent.Name)));
-            }
+            });
         }
     }
 }

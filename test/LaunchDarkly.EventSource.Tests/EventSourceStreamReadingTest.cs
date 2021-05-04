@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
+using LaunchDarkly.TestHelpers.HttpTest;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -25,13 +25,20 @@ namespace LaunchDarkly.EventSource.Tests
             builder.PreferDataAsUtf8Bytes(IsRawUtf8Mode);
         }
 
-        protected EventSource StartEventSource(HttpMessageHandler handler, out EventSink sink,
-            Action<ConfigurationBuilder> modConfig = null)
+        protected void WithServerAndStartedEventSource(Handler handler, Action<EventSource, EventSink> action) =>
+            WithServerAndStartedEventSource(handler, null, action);
+
+        protected void WithServerAndStartedEventSource(Handler handler, Action<ConfigurationBuilder> modConfig, Action<EventSource, EventSink> action)
         {
-            var es = MakeEventSource(handler, modConfig);
-            sink = new EventSink(es, _testLogging) { ExpectUtf8Data = IsRawUtf8Mode };
-            _ = Task.Run(es.StartAsync);
-            return es;
+            using (var server = HttpServer.Start(handler))
+            {
+                using (var es = MakeEventSource(server.Uri, modConfig))
+                {
+                    var eventSink = new EventSink(es, _testLogging) { ExpectUtf8Data = IsRawUtf8Mode };
+                    _ = Task.Run(es.StartAsync);
+                    action(es, eventSink);
+                }
+            }
         }
 
         [Fact]
@@ -39,16 +46,16 @@ namespace LaunchDarkly.EventSource.Tests
         {
             var commentSent = ": hello";
 
-            var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(commentSent + "\n\n")));
+            var handler = StartStream().Then(Handlers.WriteChunkString(commentSent + "\n"))
+                .Then(LeaveStreamOpen());
 
-            using (var es = StartEventSource(handler, out var eventSink))
+            WithServerAndStartedEventSource(handler, (_, eventSink) =>
             {
                 eventSink.ExpectActions(
-                    EventSink.OpenedAction(),
-                    EventSink.CommentReceivedAction(commentSent)
-                    ); ;
-            }
+                        EventSink.OpenedAction(),
+                        EventSink.CommentReceivedAction(commentSent)
+                        );
+            });
         }
 
         [Fact]
@@ -57,16 +64,16 @@ namespace LaunchDarkly.EventSource.Tests
             var eventData = "this is a test message";
             var sse = "data: " + eventData + "\n\n";
 
-            var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(sse)));
+            var handler = StartStream().Then(Handlers.WriteChunkString(sse))
+                .Then(LeaveStreamOpen());
 
-            using (var es = StartEventSource(handler, out var eventSink))
+            WithServerAndStartedEventSource(handler, (_, eventSink) =>
             {
                 eventSink.ExpectActions(
                     EventSink.OpenedAction(),
                     EventSink.MessageReceivedAction(new MessageEvent(MessageEvent.DefaultName, eventData, _uri))
                     );
-            }
+            });
         }
 
         [Fact]
@@ -76,16 +83,16 @@ namespace LaunchDarkly.EventSource.Tests
             var eventData = "this is a test message";
             var sse = "event: " + eventName + "\ndata: " + eventData + "\n\n";
 
-            var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(sse)));
+            var handler = StartStream().Then(Handlers.WriteChunkString(sse))
+                .Then(LeaveStreamOpen());
 
-            using (var es = StartEventSource(handler, out var eventSink))
+            WithServerAndStartedEventSource(handler, (_, eventSink) =>
             {
                 eventSink.ExpectActions(
                     EventSink.OpenedAction(),
                     EventSink.MessageReceivedAction(new MessageEvent(eventName, eventData, _uri))
                     );
-            }
+            });
         }
 
         [Fact]
@@ -96,16 +103,16 @@ namespace LaunchDarkly.EventSource.Tests
             var eventId = "123abc";
             var sse = "event: " + eventName + "\ndata: " + eventData + "\nid: " + eventId + "\n\n";
 
-            var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.StartStream(StreamAction.Write(sse)));
+            var handler = StartStream().Then(Handlers.WriteChunkString(sse))
+                .Then(LeaveStreamOpen());
 
-            using (var es = StartEventSource(handler, out var eventSink))
+            WithServerAndStartedEventSource(handler, (_, eventSink) =>
             {
                 eventSink.ExpectActions(
                     EventSink.OpenedAction(),
                     EventSink.MessageReceivedAction(new MessageEvent(eventName, eventData, eventId, _uri))
                     );
-            }
+            });
         }
 
         [Fact]
@@ -134,9 +141,13 @@ namespace LaunchDarkly.EventSource.Tests
                 pos += chunkSize;
             }
 
-            var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.StartStream(
-                chunks.Select(StreamAction.Write).ToArray()));
+            var handler = StartStream().Then(async ctx =>
+            {
+                foreach (var s in chunks)
+                {
+                    await Handlers.WriteChunkString(s)(ctx);
+                }
+            }).Then(LeaveStreamOpen());
 
             var expectedActions = new List<EventSink.Action>();
             expectedActions.Add(EventSink.OpenedAction());
@@ -145,10 +156,10 @@ namespace LaunchDarkly.EventSource.Tests
                 expectedActions.Add(EventSink.MessageReceivedAction(new MessageEvent(MessageEvent.DefaultName, data, _uri)));
             }
 
-            using (var es = StartEventSource(handler, out var eventSink))
-            { 
+            WithServerAndStartedEventSource(handler, (_, eventSink) =>
+            {
                 eventSink.ExpectActions(expectedActions.ToArray());
-            }
+            });
         }
 
         [Fact]
@@ -157,15 +168,13 @@ namespace LaunchDarkly.EventSource.Tests
             TimeSpan readTimeout = TimeSpan.FromMilliseconds(300);
             TimeSpan timeToWait = readTimeout + readTimeout;
 
-            var handler = new StubMessageHandler();
-            handler.QueueResponse(StubResponse.StartStream(
-                StreamAction.Write(":comment1\n"),
-                StreamAction.Write(":comment2\n"),
-                StreamAction.Write(":comment3\n").AfterDelay(timeToWait))
-            );
-            handler.QueueResponse(StubResponse.StartStream());
+            var handler = StartStream()
+                .Then(Handlers.WriteChunkString(":comment1\n"))
+                .Then(Handlers.WriteChunkString(":comment2\n"))
+                .Then(Handlers.Delay(timeToWait))
+                .Then(Handlers.WriteChunkString(":comment3\n"));
 
-            using (var es = StartEventSource(handler, out var eventSink, config => config.ReadTimeout(readTimeout)))
+            WithServerAndStartedEventSource(handler, config => config.ReadTimeout(readTimeout), (_, eventSink) =>
             {
                 eventSink.ExpectActions(
                     EventSink.OpenedAction(),
@@ -174,7 +183,7 @@ namespace LaunchDarkly.EventSource.Tests
                     EventSink.ErrorAction(new ReadTimeoutException()),
                     EventSink.ClosedAction()
                     );
-            }
+            });
         }
 
         [Theory]
@@ -188,38 +197,39 @@ namespace LaunchDarkly.EventSource.Tests
             var initialDelay = TimeSpan.FromMilliseconds(50);
 
             var anEvent = new MessageEvent("put", "x", _uri);
-            var stream = StubResponse.StartStream(StreamAction.Write(anEvent));
-            var handler = new StubMessageHandler();
-            for (var i = 0; i <= nAttempts; i++)
-            {
-                handler.QueueResponse(stream);
-            }
+            var handler = Handlers.Sequential(
+                Enumerable.Range(0, nAttempts + 1).Select(_ =>
+                    StartStream().Then(WriteEvent(anEvent)).Then(LeaveStreamOpen())
+                ).ToArray());
 
             var backoffs = new List<TimeSpan>();
 
-            using (var es = MakeEventSource(handler, builder => builder.InitialRetryDelay(initialDelay)))
+            using (var server = HttpServer.Start(handler))
             {
-                var sink = new EventSink(es, _testLogging);
-                es.Closed += (_, ex) =>
+                using (var es = MakeEventSource(server.Uri, config => config.InitialRetryDelay(initialDelay)))
                 {
-                    backoffs.Add(es.BackOffDelay);
-                };
-                _ = Task.Run(es.StartAsync);
-
-                sink.ExpectActions(
-                    EventSink.OpenedAction(),
-                    EventSink.MessageReceivedAction(anEvent)
-                    );
-
-                for (var i = 0; i < nAttempts; i++)
-                {
-                    es.Restart(resetBackoff);
+                    var sink = new EventSink(es, _testLogging);
+                    es.Closed += (_, ex) =>
+                    {
+                        backoffs.Add(es.BackOffDelay);
+                    };
+                    _ = Task.Run(es.StartAsync);
 
                     sink.ExpectActions(
-                        EventSink.ClosedAction(),
                         EventSink.OpenedAction(),
                         EventSink.MessageReceivedAction(anEvent)
                         );
+
+                    for (var i = 0; i < nAttempts; i++)
+                    {
+                        es.Restart(resetBackoff);
+
+                        sink.ExpectActions(
+                            EventSink.ClosedAction(),
+                            EventSink.OpenedAction(),
+                            EventSink.MessageReceivedAction(anEvent)
+                            );
+                    }
                 }
             }
 
