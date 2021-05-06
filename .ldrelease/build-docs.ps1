@@ -15,12 +15,11 @@ if ("$env:LD_RELEASE_DOCS_TITLE" -eq "") {
 $ErrorActionPreference = "Stop"
 set-strictmode -version latest
 
-# Import helper functions and set up paths (helpers.psm1 comes from Releaser's
-# built-in scripts)
+# Import helper functions and set up paths
 $projectDir = get-location
 $tempDir = "$HOME\temp"
 $scriptDir = split-path -parent $MyInvocation.MyCommand.Definition
-import-module "$scriptDir\circleci\template\helpers.psm1" -force
+import-module "$scriptDir\zip-helper.ps1" -force
 
 # Install DocFX
 if (-not (get-Command docfx -errorAction silentlyContinue))
@@ -100,7 +99,7 @@ docfx docfx.json
 
 # Make an archive of the output and store it as a single artifact. The
 # built-in CompressArchive command in PowerShell 5 produces archives that
-# aren't valid on other platforms, so we're using a helper from helpers.psm1
+# aren't valid on other platforms, so we're using the Zip helper from zip-helper.ps1
 Zip -sourcePath "$tempDocsDir/build/html" -zipFile "$projectDir/artifacts/docs.zip"
 
 set-location $projectDir
