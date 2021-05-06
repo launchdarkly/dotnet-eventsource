@@ -4,9 +4,12 @@ if (-not (get-Command docfx -errorAction silentlyContinue))
     choco install docfx
 }
 
+$projectDir = $(get-location)
+$tempDir = "$HOME\temp"
+
 $projectName = dir "${env:LD_RELEASE_PROJECT_DIR}/src" | %{$_.Name}
 
-$tempDocsDir = "${env:LD_RELEASE_TEMP_DIR}/build-docs"
+$tempDocsDir = "$tempDir/build-docs"
 remove-item $tempDocsDir -recurse -force -errorAction ignore
 new-item -path $tempDocsDir -itemType "directory" | out-null
 set-location $tempDocsDir
@@ -32,7 +35,7 @@ $docfxConfig = @{
     @{
       src = ,
         @{
-          src = "${env:LD_RELEASE_PROJECT_DIR}/src"
+          src = "$projectDir/src"
           files = "**/*.csproj"
         }
       dest = "build/api"
@@ -70,6 +73,6 @@ docfx docfx.json
 # Make an archive of the output and store it as a single artifact
 # (currently that's what Releaser expects)
 set-location "$tempDocsDir/build/html"
-tar -cvzf "${env:LD_RELEASE_PROJECT_DIR}/artifacts/docs.zip" *
+tar -cvzf "$projectDir/artifacts/docs.zip" *
 
-set-location $env:LD_RELEASE_PROJECT_DIR
+set-location $projectDir
