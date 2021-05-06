@@ -57,42 +57,43 @@ set-content -path ./toc.yml @"
 "@
 
 # Create the docfx.json config file
-$docfxConfig = @{
-  metadata = ,
-    @{
-      src = ,
-        @{
-          src = "$projectDir/src"
-          files = "**/*.csproj"
+$jsonEscapedSrcPath = convertTo-json -inputObject "$projectDir/src"
+set-content -path docfx.json @"
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": $jsonEscapedSrcPath,
+          "files": "**/*.csproj"
         }
-      dest = "build/api"
-      disableGitFeatures = $false
-      disableDefaultFilter = $false
+      ],
+      "dest": "build/api",
+      "disableGitFeatures": true,
+      "disableDefaultFilter": false
     }
-  build = @{
-    content = @{
-        src = "build/api"
-        files = , "**.yml"
-        dest = "api"
+  ],
+  "build": {
+    "content": [
+      {
+        "src": "build/api",
+        "files": [ "**.yml" ],
+        "dest": "api"
       },
-      @{
-        src = "."
-        files = "toc.yml", "*.md"
+      {
+        "src": ".",
+        "files": [ "toc.yml", "*.md" ]
       }
-    overwrite = ,
-      @{
-        files = , "apidoc/**.md"
-        exclude = "obj/**", "html/**"
-      }
-    dest = "build/html"
-    globalMetadata = @{
-      _disableContribution = $true
-    }
-    template = , "default"
-    disableGitFeatures = $true
+    ],
+    "dest": "build/html",
+    "globalMetadata": {
+      "_disableContribution": true
+    },
+    "template": [ "default" ],
+    "disableGitFeatures": true
   }
 }
-convertTo-json -inputObject $docfxConfig -depth 10 | set-content -path docfx.json 
+"@
 
 # Run the documentation generator
 docfx docfx.json
