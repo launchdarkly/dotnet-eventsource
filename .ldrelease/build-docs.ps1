@@ -7,7 +7,7 @@ if (-not (get-Command docfx -errorAction silentlyContinue))
 $projectDir = $(get-location)
 $tempDir = "$HOME\temp"
 
-$projectName = dir "${env:LD_RELEASE_PROJECT_DIR}/src" | %{$_.Name}
+$projectName = dir "$projectDir/src" | %{$_.Name}
 
 $tempDocsDir = "$tempDir/build-docs"
 remove-item $tempDocsDir -recurse -force -errorAction ignore
