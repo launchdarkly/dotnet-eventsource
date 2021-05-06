@@ -18,7 +18,7 @@ set-location $tempDocsDir
 set-content -path ./index.md @"
 # ${env:LD_RELEASE_DOCS_TITLE}
 
-This site contains the full [API documentation](./api) for `$projectName` (version ${env:LD_RELEASE_VERSION}).
+This site contains the full [API documentation](./api) for ``$projectName`` (version ${env:LD_RELEASE_VERSION}).
 
 For source code, see the [GitHub repository](https://github.com/launchdarkly/${env:LD_RELEASE_PROJECT}).
 "@
