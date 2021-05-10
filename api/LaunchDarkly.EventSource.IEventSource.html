@@ -1,0 +1,356 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Interface IEventSource
+   </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Interface IEventSource
+   ">
+    <meta name="generator" content="docfx 2.57.2.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="LaunchDarkly.EventSource.IEventSource">
+  
+  
+  <h1 id="LaunchDarkly_EventSource_IEventSource" data-uid="LaunchDarkly.EventSource.IEventSource" class="text-break">Interface IEventSource
+  </h1>
+  <div class="markdown level0 summary"><p>This interface defines the public members of <a class="xref" href="LaunchDarkly.EventSource.EventSource.html">EventSource</a>.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="LaunchDarkly.EventSource.html">LaunchDarkly.EventSource</a></h6>
+  <h6><strong>Assembly</strong>: LaunchDarkly.EventSource.dll</h6>
+  <h5 id="LaunchDarkly_EventSource_IEventSource_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public interface IEventSource</code></pre>
+  </div>
+  <h3 id="properties">Properties
+  </h3>
+  <a id="LaunchDarkly_EventSource_IEventSource_ReadyState_" data-uid="LaunchDarkly.EventSource.IEventSource.ReadyState*"></a>
+  <h4 id="LaunchDarkly_EventSource_IEventSource_ReadyState" data-uid="LaunchDarkly.EventSource.IEventSource.ReadyState">ReadyState</h4>
+  <div class="markdown level1 summary"><p>Gets the state of the EventSource connection.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">ReadyState ReadyState { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="LaunchDarkly.EventSource.ReadyState.html">ReadyState</a></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <a id="LaunchDarkly_EventSource_IEventSource_Close_" data-uid="LaunchDarkly.EventSource.IEventSource.Close*"></a>
+  <h4 id="LaunchDarkly_EventSource_IEventSource_Close" data-uid="LaunchDarkly.EventSource.IEventSource.Close">Close()</h4>
+  <div class="markdown level1 summary"><p>Closes the connection to the SSE server. The <code>EventSource</code> cannot be reopened after this.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void Close()</code></pre>
+  </div>
+  <a id="LaunchDarkly_EventSource_IEventSource_Restart_" data-uid="LaunchDarkly.EventSource.IEventSource.Restart*"></a>
+  <h4 id="LaunchDarkly_EventSource_IEventSource_Restart_System_Boolean_" data-uid="LaunchDarkly.EventSource.IEventSource.Restart(System.Boolean)">Restart(Boolean)</h4>
+  <div class="markdown level1 summary"><p>Triggers the same &quot;close and retry&quot; behavior as if an error had been encountered on the stream.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void Restart(bool resetBackoffDelay)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><span class="parametername">resetBackoffDelay</span></td>
+        <td><p>true if the delay before reconnection should be reset to
+the lowest level (<a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_InitialRetryDelay_System_TimeSpan_">InitialRetryDelay(TimeSpan)</a>); false if it
+should increase according to the usual exponential backoff logic</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_IEventSource_Restart_System_Boolean__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>
+If the stream is currently active, this closes the connection, waits for some amount of time
+as determined by the usual backoff behavior (and <code data-dev-comment-type="paramref" class="paramref">resetBackoffDelay</code>), and
+then attempts to reconnect. If the stream is not yet connected, is already waiting to
+reconnect, or has been permanently shut down, this has no effect.
+</p>
+<p>
+The method returns immediately without waiting for the reconnection to happen. You will
+receive <a class="xref" href="LaunchDarkly.EventSource.IEventSource.html#LaunchDarkly_EventSource_IEventSource_Closed">Closed</a> and <a class="xref" href="LaunchDarkly.EventSource.IEventSource.html#LaunchDarkly_EventSource_IEventSource_Opened">Opened</a> events when it does happen (or an
+<a class="xref" href="LaunchDarkly.EventSource.IEventSource.html#LaunchDarkly_EventSource_IEventSource_Error">Error</a> event if the new connection attempt fails).
+</p>
+</div>
+  <a id="LaunchDarkly_EventSource_IEventSource_StartAsync_" data-uid="LaunchDarkly.EventSource.IEventSource.StartAsync*"></a>
+  <h4 id="LaunchDarkly_EventSource_IEventSource_StartAsync" data-uid="LaunchDarkly.EventSource.IEventSource.StartAsync">StartAsync()</h4>
+  <div class="markdown level1 summary"><p>Initiates a connection to the SSE server and begins parsing events.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">Task StartAsync()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Threading.Tasks.Task</span></td>
+        <td><p>a <span class="xref">System.Threading.Tasks.Task</span> that will be completed only when the
+<code>EventSource</code> is closed</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="exceptions">Exceptions</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Condition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.InvalidOperationException</span></td>
+        <td><p>if the method was called again after the
+stream connection was already active</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="events">Events
+  </h3>
+  <h4 id="LaunchDarkly_EventSource_IEventSource_Closed" data-uid="LaunchDarkly.EventSource.IEventSource.Closed">Closed</h4>
+  <div class="markdown level1 summary"><p>Occurs when the connection to the EventSource API has been closed.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">event EventHandler&lt;StateChangedEventArgs&gt; Closed</code></pre>
+  </div>
+  <h5 class="eventType">Event Type</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.EventHandler</span>&lt;<a class="xref" href="LaunchDarkly.EventSource.StateChangedEventArgs.html">StateChangedEventArgs</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="LaunchDarkly_EventSource_IEventSource_CommentReceived" data-uid="LaunchDarkly.EventSource.IEventSource.CommentReceived">CommentReceived</h4>
+  <div class="markdown level1 summary"><p>Occurs when a comment has been received from the EventSource API.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">event EventHandler&lt;CommentReceivedEventArgs&gt; CommentReceived</code></pre>
+  </div>
+  <h5 class="eventType">Event Type</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.EventHandler</span>&lt;<a class="xref" href="LaunchDarkly.EventSource.CommentReceivedEventArgs.html">CommentReceivedEventArgs</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="LaunchDarkly_EventSource_IEventSource_Error" data-uid="LaunchDarkly.EventSource.IEventSource.Error">Error</h4>
+  <div class="markdown level1 summary"><p>Occurs when an error has happened when the EventSource is open and processing Server Sent Events.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">event EventHandler&lt;ExceptionEventArgs&gt; Error</code></pre>
+  </div>
+  <h5 class="eventType">Event Type</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.EventHandler</span>&lt;<a class="xref" href="LaunchDarkly.EventSource.ExceptionEventArgs.html">ExceptionEventArgs</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="LaunchDarkly_EventSource_IEventSource_MessageReceived" data-uid="LaunchDarkly.EventSource.IEventSource.MessageReceived">MessageReceived</h4>
+  <div class="markdown level1 summary"><p>Occurs when a Server Sent Event from the EventSource API has been received.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">event EventHandler&lt;MessageReceivedEventArgs&gt; MessageReceived</code></pre>
+  </div>
+  <h5 class="eventType">Event Type</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.EventHandler</span>&lt;<a class="xref" href="LaunchDarkly.EventSource.MessageReceivedEventArgs.html">MessageReceivedEventArgs</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="LaunchDarkly_EventSource_IEventSource_Opened" data-uid="LaunchDarkly.EventSource.IEventSource.Opened">Opened</h4>
+  <div class="markdown level1 summary"><p>Occurs when the connection to the EventSource API has been opened.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">event EventHandler&lt;StateChangedEventArgs&gt; Opened</code></pre>
+  </div>
+  <h5 class="eventType">Event Type</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.EventHandler</span>&lt;<a class="xref" href="LaunchDarkly.EventSource.StateChangedEventArgs.html">StateChangedEventArgs</a>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

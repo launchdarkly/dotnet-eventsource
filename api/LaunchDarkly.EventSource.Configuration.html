@@ -1,0 +1,837 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class Configuration
+   </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class Configuration
+   ">
+    <meta name="generator" content="docfx 2.57.2.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="LaunchDarkly.EventSource.Configuration">
+  
+  
+  <h1 id="LaunchDarkly_EventSource_Configuration" data-uid="LaunchDarkly.EventSource.Configuration" class="text-break">Class Configuration
+  </h1>
+  <div class="markdown level0 summary"><p>An immutable class containing configuration properties for <a class="xref" href="LaunchDarkly.EventSource.EventSource.html">EventSource</a>.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><span class="xref">Configuration</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="LaunchDarkly.EventSource.html">LaunchDarkly.EventSource</a></h6>
+  <h6><strong>Assembly</strong>: LaunchDarkly.EventSource.dll</h6>
+  <h5 id="LaunchDarkly_EventSource_Configuration_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class Configuration</code></pre>
+  </div>
+  <h3 id="fields">Fields
+  </h3>
+  <h4 id="LaunchDarkly_EventSource_Configuration_DefaultBackoffResetThreshold" data-uid="LaunchDarkly.EventSource.Configuration.DefaultBackoffResetThreshold">DefaultBackoffResetThreshold</h4>
+  <div class="markdown level1 summary"><p>The default value for <a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_BackoffResetThreshold_System_TimeSpan_">BackoffResetThreshold(TimeSpan)</a>:
+one minute.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static readonly TimeSpan DefaultBackoffResetThreshold</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.TimeSpan</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="LaunchDarkly_EventSource_Configuration_DefaultConnectionTimeout" data-uid="LaunchDarkly.EventSource.Configuration.DefaultConnectionTimeout">DefaultConnectionTimeout</h4>
+  <div class="markdown level1 summary"><p>Obsolete name for <a class="xref" href="LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_DefaultResponseStartTimeout">DefaultResponseStartTimeout</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[Obsolete(&quot;Use DefaultResponseStartTimeout&quot;)]
+public static readonly TimeSpan DefaultConnectionTimeout</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.TimeSpan</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="LaunchDarkly_EventSource_Configuration_DefaultInitialRetryDelay" data-uid="LaunchDarkly.EventSource.Configuration.DefaultInitialRetryDelay">DefaultInitialRetryDelay</h4>
+  <div class="markdown level1 summary"><p>The default value for <a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_InitialRetryDelay_System_TimeSpan_">InitialRetryDelay(TimeSpan)</a>:
+one second.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static readonly TimeSpan DefaultInitialRetryDelay</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.TimeSpan</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="LaunchDarkly_EventSource_Configuration_DefaultLoggerName" data-uid="LaunchDarkly.EventSource.Configuration.DefaultLoggerName">DefaultLoggerName</h4>
+  <div class="markdown level1 summary"><p>The logger name that will be used if you specified a logging implementation but did not
+provide a specific logger instance.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string DefaultLoggerName = &quot;EventSource&quot;</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Configuration_DefaultLoggerName_seealso">See Also</h5>
+  <div class="seealso">
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_LogAdapter_LaunchDarkly_Logging_ILogAdapter_">LogAdapter(ILogAdapter)</a></div>
+  </div>
+  <h4 id="LaunchDarkly_EventSource_Configuration_DefaultMaxRetryDelay" data-uid="LaunchDarkly.EventSource.Configuration.DefaultMaxRetryDelay">DefaultMaxRetryDelay</h4>
+  <div class="markdown level1 summary"><p>The default value for <a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_MaxRetryDelay_System_TimeSpan_">MaxRetryDelay(TimeSpan)</a>:
+30 seconds.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static readonly TimeSpan DefaultMaxRetryDelay</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.TimeSpan</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="LaunchDarkly_EventSource_Configuration_DefaultReadTimeout" data-uid="LaunchDarkly.EventSource.Configuration.DefaultReadTimeout">DefaultReadTimeout</h4>
+  <div class="markdown level1 summary"><p>The default value for <a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_ReadTimeout_System_TimeSpan_">ReadTimeout(TimeSpan)</a>:
+5 minutes.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static readonly TimeSpan DefaultReadTimeout</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.TimeSpan</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h4 id="LaunchDarkly_EventSource_Configuration_DefaultResponseStartTimeout" data-uid="LaunchDarkly.EventSource.Configuration.DefaultResponseStartTimeout">DefaultResponseStartTimeout</h4>
+  <div class="markdown level1 summary"><p>The default value for <a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_ResponseStartTimeout_System_TimeSpan_">ResponseStartTimeout(TimeSpan)</a>:
+10 seconds.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static readonly TimeSpan DefaultResponseStartTimeout</code></pre>
+  </div>
+  <h5 class="fieldValue">Field Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.TimeSpan</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="properties">Properties
+  </h3>
+  <a id="LaunchDarkly_EventSource_Configuration_BackoffResetThreshold_" data-uid="LaunchDarkly.EventSource.Configuration.BackoffResetThreshold*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_BackoffResetThreshold" data-uid="LaunchDarkly.EventSource.Configuration.BackoffResetThreshold">BackoffResetThreshold</h4>
+  <div class="markdown level1 summary"><p>The amount of time a connection must stay open before the EventSource resets its backoff delay.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public TimeSpan BackoffResetThreshold { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.TimeSpan</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Configuration_BackoffResetThreshold_seealso">See Also</h5>
+  <div class="seealso">
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_BackoffResetThreshold_System_TimeSpan_">BackoffResetThreshold(TimeSpan)</a></div>
+  </div>
+  <a id="LaunchDarkly_EventSource_Configuration_ConnectionTimeout_" data-uid="LaunchDarkly.EventSource.Configuration.ConnectionTimeout*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_ConnectionTimeout" data-uid="LaunchDarkly.EventSource.Configuration.ConnectionTimeout">ConnectionTimeout</h4>
+  <div class="markdown level1 summary"><p>Obsolete name for <a class="xref" href="LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_ResponseStartTimeout">ResponseStartTimeout</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[Obsolete(&quot;Use ResponseStartTimeout&quot;)]
+public TimeSpan ConnectionTimeout { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.TimeSpan</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="LaunchDarkly_EventSource_Configuration_DefaultEncoding_" data-uid="LaunchDarkly.EventSource.Configuration.DefaultEncoding*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_DefaultEncoding" data-uid="LaunchDarkly.EventSource.Configuration.DefaultEncoding">DefaultEncoding</h4>
+  <div class="markdown level1 summary"><p>The character encoding to use when reading the stream if the server did not specify
+an encoding in a <code>Content-Type</code> header.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Encoding DefaultEncoding { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Text.Encoding</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Configuration_DefaultEncoding_seealso">See Also</h5>
+  <div class="seealso">
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_DefaultEncoding_System_Text_Encoding_">DefaultEncoding(Encoding)</a></div>
+  </div>
+  <a id="LaunchDarkly_EventSource_Configuration_HttpClient_" data-uid="LaunchDarkly.EventSource.Configuration.HttpClient*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_HttpClient" data-uid="LaunchDarkly.EventSource.Configuration.HttpClient">HttpClient</h4>
+  <div class="markdown level1 summary"><p>The HttpClient that will be used as the HTTP client, or null for a new HttpClient.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public HttpClient HttpClient { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Net.Http.HttpClient</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Configuration_HttpClient_seealso">See Also</h5>
+  <div class="seealso">
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_HttpClient_System_Net_Http_HttpClient_">HttpClient(HttpClient)</a></div>
+  </div>
+  <a id="LaunchDarkly_EventSource_Configuration_HttpMessageHandler_" data-uid="LaunchDarkly.EventSource.Configuration.HttpMessageHandler*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_HttpMessageHandler" data-uid="LaunchDarkly.EventSource.Configuration.HttpMessageHandler">HttpMessageHandler</h4>
+  <div class="markdown level1 summary"><p>The HttpMessageHandler that will be used for the HTTP client, or null for the default handler.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public HttpMessageHandler HttpMessageHandler { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Net.Http.HttpMessageHandler</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Configuration_HttpMessageHandler_seealso">See Also</h5>
+  <div class="seealso">
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_HttpMessageHandler_System_Net_Http_HttpMessageHandler_">HttpMessageHandler(HttpMessageHandler)</a></div>
+  </div>
+  <a id="LaunchDarkly_EventSource_Configuration_InitialRetryDelay_" data-uid="LaunchDarkly.EventSource.Configuration.InitialRetryDelay*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_InitialRetryDelay" data-uid="LaunchDarkly.EventSource.Configuration.InitialRetryDelay">InitialRetryDelay</h4>
+  <div class="markdown level1 summary"><p>The initial amount of time to wait before attempting to reconnect to the EventSource API.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public TimeSpan InitialRetryDelay { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.TimeSpan</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Configuration_InitialRetryDelay_seealso">See Also</h5>
+  <div class="seealso">
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_InitialRetryDelay_System_TimeSpan_">InitialRetryDelay(TimeSpan)</a></div>
+  </div>
+  <a id="LaunchDarkly_EventSource_Configuration_LastEventId_" data-uid="LaunchDarkly.EventSource.Configuration.LastEventId*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_LastEventId" data-uid="LaunchDarkly.EventSource.Configuration.LastEventId">LastEventId</h4>
+  <div class="markdown level1 summary"><p>Gets the last event identifier.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string LastEventId { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Configuration_LastEventId_seealso">See Also</h5>
+  <div class="seealso">
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_LastEventId_System_String_">LastEventId(String)</a></div>
+  </div>
+  <a id="LaunchDarkly_EventSource_Configuration_Logger_" data-uid="LaunchDarkly.EventSource.Configuration.Logger*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_Logger" data-uid="LaunchDarkly.EventSource.Configuration.Logger">Logger</h4>
+  <div class="markdown level1 summary"><p>The logger to be used for all EventSource log output.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Logger Logger { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">LaunchDarkly.Logging.Logger</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Configuration_Logger_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>This is never null; if logging is not configured, it will be <code>LaunchDarkly.Logging.Logs.None</code>.</p>
+</div>
+  <h5 id="LaunchDarkly_EventSource_Configuration_Logger_seealso">See Also</h5>
+  <div class="seealso">
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_Logger_LaunchDarkly_Logging_Logger_">Logger(Logger)</a></div>
+  </div>
+  <a id="LaunchDarkly_EventSource_Configuration_MaxRetryDelay_" data-uid="LaunchDarkly.EventSource.Configuration.MaxRetryDelay*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_MaxRetryDelay" data-uid="LaunchDarkly.EventSource.Configuration.MaxRetryDelay">MaxRetryDelay</h4>
+  <div class="markdown level1 summary"><p>The maximum amount of time to wait before attempting to reconnect.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public TimeSpan MaxRetryDelay { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.TimeSpan</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Configuration_MaxRetryDelay_seealso">See Also</h5>
+  <div class="seealso">
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_MaxRetryDelay_System_TimeSpan_">MaxRetryDelay(TimeSpan)</a></div>
+  </div>
+  <a id="LaunchDarkly_EventSource_Configuration_Method_" data-uid="LaunchDarkly.EventSource.Configuration.Method*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_Method" data-uid="LaunchDarkly.EventSource.Configuration.Method">Method</h4>
+  <div class="markdown level1 summary"><p>The HTTP method that will be used when connecting to the EventSource API.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public HttpMethod Method { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Net.Http.HttpMethod</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Configuration_Method_seealso">See Also</h5>
+  <div class="seealso">
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_Method_System_Net_Http_HttpMethod_">Method(HttpMethod)</a></div>
+  </div>
+  <a id="LaunchDarkly_EventSource_Configuration_PreferDataAsUtf8Bytes_" data-uid="LaunchDarkly.EventSource.Configuration.PreferDataAsUtf8Bytes*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_PreferDataAsUtf8Bytes" data-uid="LaunchDarkly.EventSource.Configuration.PreferDataAsUtf8Bytes">PreferDataAsUtf8Bytes</h4>
+  <div class="markdown level1 summary"><p>Whether to use UTF-8 byte arrays internally if possible when reading the stream.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool PreferDataAsUtf8Bytes { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Configuration_PreferDataAsUtf8Bytes_seealso">See Also</h5>
+  <div class="seealso">
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_PreferDataAsUtf8Bytes_System_Boolean_">PreferDataAsUtf8Bytes(Boolean)</a></div>
+  </div>
+  <a id="LaunchDarkly_EventSource_Configuration_ReadTimeout_" data-uid="LaunchDarkly.EventSource.Configuration.ReadTimeout*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_ReadTimeout" data-uid="LaunchDarkly.EventSource.Configuration.ReadTimeout">ReadTimeout</h4>
+  <div class="markdown level1 summary"><p>The timeout when reading from the EventSource API.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public TimeSpan ReadTimeout { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.TimeSpan</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Configuration_ReadTimeout_seealso">See Also</h5>
+  <div class="seealso">
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_ReadTimeout_System_TimeSpan_">ReadTimeout(TimeSpan)</a></div>
+  </div>
+  <a id="LaunchDarkly_EventSource_Configuration_RequestBodyFactory_" data-uid="LaunchDarkly.EventSource.Configuration.RequestBodyFactory*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_RequestBodyFactory" data-uid="LaunchDarkly.EventSource.Configuration.RequestBodyFactory">RequestBodyFactory</h4>
+  <div class="markdown level1 summary"><p>A factory for HTTP request body content, if the HTTP method is one that allows a request body.
+is one that allows a request body. This is in the form of a factory function because the request
+may need to be sent more than once.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Func&lt;HttpContent&gt; RequestBodyFactory { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Func</span>&lt;<span class="xref">System.Net.Http.HttpContent</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Configuration_RequestBodyFactory_seealso">See Also</h5>
+  <div class="seealso">
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_RequestBodyFactory_System_Func_System_Net_Http_HttpContent__">RequestBodyFactory(Func&lt;HttpContent&gt;)</a></div>
+  </div>
+  <a id="LaunchDarkly_EventSource_Configuration_RequestHeaders_" data-uid="LaunchDarkly.EventSource.Configuration.RequestHeaders*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_RequestHeaders" data-uid="LaunchDarkly.EventSource.Configuration.RequestHeaders">RequestHeaders</h4>
+  <div class="markdown level1 summary"><p>The request headers to be sent with each EventSource HTTP request.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IDictionary&lt;string, string&gt; RequestHeaders { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Collections.Generic.IDictionary</span>&lt;<span class="xref">System.String</span>, <span class="xref">System.String</span>&gt;</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Configuration_RequestHeaders_seealso">See Also</h5>
+  <div class="seealso">
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_RequestHeader_System_String_System_String_">RequestHeader(String, String)</a></div>
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_RequestHeaders_System_Collections_Generic_IDictionary_System_String_System_String__">RequestHeaders(IDictionary&lt;String, String&gt;)</a></div>
+  </div>
+  <a id="LaunchDarkly_EventSource_Configuration_ResponseStartTimeout_" data-uid="LaunchDarkly.EventSource.Configuration.ResponseStartTimeout*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_ResponseStartTimeout" data-uid="LaunchDarkly.EventSource.Configuration.ResponseStartTimeout">ResponseStartTimeout</h4>
+  <div class="markdown level1 summary"><p>The maximum amount of time to wait between starting an HTTP request and receiving the response
+headers.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public TimeSpan ResponseStartTimeout { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.TimeSpan</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Configuration_ResponseStartTimeout_seealso">See Also</h5>
+  <div class="seealso">
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_ResponseStartTimeout_System_TimeSpan_">ResponseStartTimeout(TimeSpan)</a></div>
+  </div>
+  <a id="LaunchDarkly_EventSource_Configuration_Uri_" data-uid="LaunchDarkly.EventSource.Configuration.Uri*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_Uri" data-uid="LaunchDarkly.EventSource.Configuration.Uri">Uri</h4>
+  <div class="markdown level1 summary"><p>Gets the <span class="xref">System.Uri</span> used when connecting to an EventSource API.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Uri Uri { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Uri</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <a id="LaunchDarkly_EventSource_Configuration_Builder_" data-uid="LaunchDarkly.EventSource.Configuration.Builder*"></a>
+  <h4 id="LaunchDarkly_EventSource_Configuration_Builder_System_Uri_" data-uid="LaunchDarkly.EventSource.Configuration.Builder(System.Uri)">Builder(Uri)</h4>
+  <div class="markdown level1 summary"><p>Provides a new <a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html">ConfigurationBuilder</a> for constructing a configuration.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static ConfigurationBuilder Builder(Uri uri)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Uri</span></td>
+        <td><span class="parametername">uri</span></td>
+        <td><p>the EventSource URI</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html">ConfigurationBuilder</a></td>
+        <td><p>a new builder instance</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="exceptions">Exceptions</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Condition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.ArgumentNullException</span></td>
+        <td><p>if the URI is null</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="seealso">See Also</h3>
+  <div class="seealso">
+      <div><a class="xref" href="LaunchDarkly.EventSource.EventSource.html#LaunchDarkly_EventSource_EventSource__ctor_LaunchDarkly_EventSource_Configuration_">EventSource(Configuration)</a></div>
+      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html">ConfigurationBuilder</a></div>
+  </div>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

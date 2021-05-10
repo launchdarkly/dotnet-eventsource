@@ -1,0 +1,272 @@
+{
+  "homepages": [],
+  "source_base_path": "C:/Users/circleci/temp/build-docs",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "build/api/LaunchDarkly.EventSource.CommentReceivedEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/LaunchDarkly.EventSource.CommentReceivedEventArgs.html",
+          "hash": "2DPVOE6Ifg9Nw4dxbHcW+PW8JKtAUS6bj9gYfco3U1A="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "build/api/LaunchDarkly.EventSource.Configuration.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/LaunchDarkly.EventSource.Configuration.html",
+          "hash": "AVBL61FuQMxYFteN0Ixb+GMQo6errXmvyVzn1Zz7wyc="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "build/api/LaunchDarkly.EventSource.ConfigurationBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/LaunchDarkly.EventSource.ConfigurationBuilder.html",
+          "hash": "AOYYhSoIFQ+rrCkwqJTgN0SP2smaHD4K6Wg4x/r6F9c="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "build/api/LaunchDarkly.EventSource.EventSource.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/LaunchDarkly.EventSource.EventSource.html",
+          "hash": "bj77z3cNxabUI/siViz0t2aNSw9kDfLCp2eIKKM7Q+Y="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "build/api/LaunchDarkly.EventSource.EventSourceServiceCancelledException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/LaunchDarkly.EventSource.EventSourceServiceCancelledException.html",
+          "hash": "HhPKpd1TqRzbuH8T/qE58slpkFMcoYFLSqTaMkrwf1U="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "build/api/LaunchDarkly.EventSource.EventSourceServiceUnsuccessfulResponseException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/LaunchDarkly.EventSource.EventSourceServiceUnsuccessfulResponseException.html",
+          "hash": "bck3z0cPiVczDMRZMWdXhuDgmrI+Eldd8PP3hbg3xt4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "build/api/LaunchDarkly.EventSource.ExceptionEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/LaunchDarkly.EventSource.ExceptionEventArgs.html",
+          "hash": "VZVGSia7gH+DTK6ueB7LhGlxciVcRqdPhki0aJikbv0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "build/api/LaunchDarkly.EventSource.IEventSource.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/LaunchDarkly.EventSource.IEventSource.html",
+          "hash": "PfEDTRVGi5qJYV+77jxvvza4Je+FsCTy/q16PYSdtno="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "build/api/LaunchDarkly.EventSource.MessageEvent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/LaunchDarkly.EventSource.MessageEvent.html",
+          "hash": "BRj8wx5qJqB++gOfvWgN+QKl/g8n3DRY2ZmyjFtzgF8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "build/api/LaunchDarkly.EventSource.MessageReceivedEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/LaunchDarkly.EventSource.MessageReceivedEventArgs.html",
+          "hash": "vvBUx2RgTVdNMoEYnl9ODYaIYX6yb+Sm7C+sJFYKK2s="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "build/api/LaunchDarkly.EventSource.ReadTimeoutException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/LaunchDarkly.EventSource.ReadTimeoutException.html",
+          "hash": "1CCHJJXDmhVebJHvkRaMKuMBbB3/rkcBdQDV4Ed8Z+Q="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "build/api/LaunchDarkly.EventSource.ReadyState.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/LaunchDarkly.EventSource.ReadyState.html",
+          "hash": "Htn2Oq7kCsizq797mD7/yug3Ay02weJISO3HQVspj3o="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "build/api/LaunchDarkly.EventSource.StateChangedEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/LaunchDarkly.EventSource.StateChangedEventArgs.html",
+          "hash": "NHuaJbBi+ESki4BOXI0SXzO2dzNylqUlwGjU3Kisr7w="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "build/api/LaunchDarkly.EventSource.Utf8ByteSpan.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/LaunchDarkly.EventSource.Utf8ByteSpan.html",
+          "hash": "zRPMMKn1JxWLT5MfbTUgaEVlScuExQI5vYt9MF2/ZgA="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "build/api/LaunchDarkly.EventSource.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/LaunchDarkly.EventSource.html",
+          "hash": "hCmJ64JUmNdpePYz0OoxF8r6MRxDUOhbNQc93g4hBcQ="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "build/api/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/toc.html",
+          "hash": "e1x220SiB2dx1ldBHokAns/vriGJAJC6Rv502svDdyU="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html",
+          "hash": "kur1vKr1A8r78iHSnukGimEAj2odNOfaUfUOLxFpVMI="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html",
+          "hash": "+PLYTk9x9wbJXqTU5ijCPtQy1w9oE0o+lQzoT/d/YB4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    }
+  ],
+  "incremental_info": [
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot build incrementally because last build info is missing.",
+        "incrementalPhase": "build",
+        "total_file_count": 0,
+        "skipped_file_count": 0,
+        "full_build_reason_code": "NoAvailableBuildCache"
+      },
+      "processors": {
+        "ConceptualDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build",
+          "total_file_count": 1,
+          "skipped_file_count": 0
+        },
+        "ManagedReferenceDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build",
+          "total_file_count": 15,
+          "skipped_file_count": 0
+        },
+        "TocDocumentProcessor": {
+          "can_incremental": false,
+          "details": "Processor TocDocumentProcessor cannot support incremental build because the processor doesn't implement ISupportIncrementalDocumentProcessor interface.",
+          "incrementalPhase": "build",
+          "total_file_count": 0,
+          "skipped_file_count": 0
+        }
+      }
+    },
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot support incremental post processing, the reason is: last post processor info is null.",
+        "incrementalPhase": "postProcessing",
+        "total_file_count": 0,
+        "skipped_file_count": 0
+      },
+      "processors": {}
+    }
+  ],
+  "version_info": {},
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}

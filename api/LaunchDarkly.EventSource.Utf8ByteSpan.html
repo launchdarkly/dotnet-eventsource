@@ -1,0 +1,409 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Struct Utf8ByteSpan
+   </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Struct Utf8ByteSpan
+   ">
+    <meta name="generator" content="docfx 2.57.2.0">
+    
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan">
+  
+  
+  <h1 id="LaunchDarkly_EventSource_Utf8ByteSpan" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan" class="text-break">Struct Utf8ByteSpan
+  </h1>
+  <div class="markdown level0 summary"><p>Points to a span of UTF-8-encoded text in a buffer.</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.ValueType.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.ValueType.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.ValueType.ToString()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="LaunchDarkly.EventSource.html">LaunchDarkly.EventSource</a></h6>
+  <h6><strong>Assembly</strong>: LaunchDarkly.EventSource.dll</h6>
+  <h5 id="LaunchDarkly_EventSource_Utf8ByteSpan_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public struct Utf8ByteSpan</code></pre>
+  </div>
+  <h5 id="LaunchDarkly_EventSource_Utf8ByteSpan_remarks"><strong>Remarks</strong></h5>
+  <div class="markdown level0 remarks"><p>This is similar to the <code>Span</code> type in .NET 5. It is used internally by
+<code>EventSource</code> to store event data if the stream is using UTF-8 encoding.
+If so, reading <a class="xref" href="LaunchDarkly.EventSource.MessageEvent.html#LaunchDarkly_EventSource_MessageEvent_DataUtf8Bytes">DataUtf8Bytes</a> will return the same
+byte array, to avoid unnecessary copying.</p>
+</div>
+  <h3 id="constructors">Constructors
+  </h3>
+  <a id="LaunchDarkly_EventSource_Utf8ByteSpan__ctor_" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan.#ctor*"></a>
+  <h4 id="LaunchDarkly_EventSource_Utf8ByteSpan__ctor_System_Byte___System_Int32_System_Int32_" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan.#ctor(System.Byte[],System.Int32,System.Int32)">Utf8ByteSpan(Byte[], Int32, Int32)</h4>
+  <div class="markdown level1 summary"><p>Constructs a new instance.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Utf8ByteSpan(byte[] data, int offset, int length)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Byte</span>[]</td>
+        <td><span class="parametername">data</span></td>
+        <td><p>The byte array containing the data.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">offset</span></td>
+        <td><p>The offset of the first relevant byte of data within the array.</p>
+</td>
+      </tr>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td><span class="parametername">length</span></td>
+        <td><p>The number of bytes of relevant data within the array.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="LaunchDarkly_EventSource_Utf8ByteSpan__ctor_" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan.#ctor*"></a>
+  <h4 id="LaunchDarkly_EventSource_Utf8ByteSpan__ctor_System_String_" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan.#ctor(System.String)">Utf8ByteSpan(String)</h4>
+  <div class="markdown level1 summary"><p>Constructs a new instance by copying a string.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Utf8ByteSpan(string s)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">s</span></td>
+        <td><p>A string to convert to UTF-8 bytes.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="properties">Properties
+  </h3>
+  <a id="LaunchDarkly_EventSource_Utf8ByteSpan_Data_" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan.Data*"></a>
+  <h4 id="LaunchDarkly_EventSource_Utf8ByteSpan_Data" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan.Data">Data</h4>
+  <div class="markdown level1 summary"><p>The byte array containing the data. May be null if <a class="xref" href="LaunchDarkly.EventSource.Utf8ByteSpan.html#LaunchDarkly_EventSource_Utf8ByteSpan_Length">Length</a> is zero.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public byte[] Data { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Byte</span>[]</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Utf8ByteSpan_Data_remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>It is the caller&apos;s responsibility not to modify the array.</p>
+</div>
+  <a id="LaunchDarkly_EventSource_Utf8ByteSpan_Length_" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan.Length*"></a>
+  <h4 id="LaunchDarkly_EventSource_Utf8ByteSpan_Length" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan.Length">Length</h4>
+  <div class="markdown level1 summary"><p>The number of bytes of relevant data within the array. This may be less than
+<code>Data.Length</code> if the span represents a subset of a larger buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int Length { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="LaunchDarkly_EventSource_Utf8ByteSpan_Offset_" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan.Offset*"></a>
+  <h4 id="LaunchDarkly_EventSource_Utf8ByteSpan_Offset" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan.Offset">Offset</h4>
+  <div class="markdown level1 summary"><p>The offset of the first relevant byte of data within the array. This may be
+greater than zero if the span represents a subset of a larger buffer.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int Offset { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Int32</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <a id="LaunchDarkly_EventSource_Utf8ByteSpan_Equals_" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan.Equals*"></a>
+  <h4 id="LaunchDarkly_EventSource_Utf8ByteSpan_Equals_LaunchDarkly_EventSource_Utf8ByteSpan_" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan.Equals(LaunchDarkly.EventSource.Utf8ByteSpan)">Equals(Utf8ByteSpan)</h4>
+  <div class="markdown level1 summary"><p>Tests whether the bytes in this span are the same as another span.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Equals(Utf8ByteSpan other)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="LaunchDarkly.EventSource.Utf8ByteSpan.html">Utf8ByteSpan</a></td>
+        <td><span class="parametername">other</span></td>
+        <td><p>Another <code>Utf8ByteSpan</code>.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>True if the two spans have the same length and the same
+data, starting from each one&apos;s <code>Offset</code>.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <a id="LaunchDarkly_EventSource_Utf8ByteSpan_Equals_" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan.Equals*"></a>
+  <h4 id="LaunchDarkly_EventSource_Utf8ByteSpan_Equals_System_String_" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan.Equals(System.String)">Equals(String)</h4>
+  <div class="markdown level1 summary"><p>Tests whether the bytes in this span are the same as the UTF-8 encoding
+of the specified string.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Equals(string s)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">s</span></td>
+        <td><p>A string.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td><p>True if the bytes are equivalent.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 id="LaunchDarkly_EventSource_Utf8ByteSpan_Equals_System_String__remarks">Remarks</h5>
+  <div class="markdown level1 remarks"><p>This method is potentially inefficient and should be used only in testing.</p>
+</div>
+  <a id="LaunchDarkly_EventSource_Utf8ByteSpan_GetString_" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan.GetString*"></a>
+  <h4 id="LaunchDarkly_EventSource_Utf8ByteSpan_GetString" data-uid="LaunchDarkly.EventSource.Utf8ByteSpan.GetString">GetString()</h4>
+  <div class="markdown level1 summary"><p>Converts the UTF-8 byte data to a string.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string GetString()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><p>A new string.</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            
+            <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>
