@@ -2,6 +2,10 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [4.1.2] - 2021-05-17
+### Fixed:
+- Fixed a memory leak in which a `CancellationTokenSource` instance was not disposed of after reading from the stream. This bug was introduced in the 4.0.0 release. ([#77](https://github.com/launchdarkly/dotnet-eventsource/issues/77))
+
 ## [4.1.1] - 2021-05-04
 (The 4.1.0 release was an accidental duplicate of 4.0.0 and did not include these changes.)
 
