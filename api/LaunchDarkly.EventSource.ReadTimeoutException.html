@@ -80,72 +80,13 @@ any new data from the server.</p>
   <div class="inheritance">
     <h5>Inheritance</h5>
     <div class="level0"><span class="xref">System.Object</span></div>
-    <div class="level1"><span class="xref">System.Exception</span></div>
-    <div class="level2"><span class="xref">ReadTimeoutException</span></div>
-  </div>
-  <div classs="implements">
-    <h5>Implements</h5>
-    <div><span class="xref">System.Runtime.Serialization.ISerializable</span></div>
-  </div>
-  <div class="inheritedMembers">
-    <h5>Inherited Members</h5>
-    <div>
-      <span class="xref">System.Exception.GetBaseException()</span>
-    </div>
-    <div>
-      <span class="xref">System.Exception.GetObjectData(System.Runtime.Serialization.SerializationInfo, System.Runtime.Serialization.StreamingContext)</span>
-    </div>
-    <div>
-      <span class="xref">System.Exception.GetType()</span>
-    </div>
-    <div>
-      <span class="xref">System.Exception.ToString()</span>
-    </div>
-    <div>
-      <span class="xref">System.Exception.Data</span>
-    </div>
-    <div>
-      <span class="xref">System.Exception.HelpLink</span>
-    </div>
-    <div>
-      <span class="xref">System.Exception.HResult</span>
-    </div>
-    <div>
-      <span class="xref">System.Exception.InnerException</span>
-    </div>
-    <div>
-      <span class="xref">System.Exception.Source</span>
-    </div>
-    <div>
-      <span class="xref">System.Exception.StackTrace</span>
-    </div>
-    <div>
-      <span class="xref">System.Exception.TargetSite</span>
-    </div>
-    <div>
-      <span class="xref">System.Exception.SerializeObjectState</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.Equals(System.Object)</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.GetHashCode()</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.MemberwiseClone()</span>
-    </div>
-    <div>
-      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
-    </div>
+    <div class="level1"><span class="xref">ReadTimeoutException</span></div>
   </div>
   <h6><strong>Namespace</strong>: <a class="xref" href="LaunchDarkly.EventSource.html">LaunchDarkly.EventSource</a></h6>
   <h6><strong>Assembly</strong>: LaunchDarkly.EventSource.dll</h6>
   <h5 id="LaunchDarkly_EventSource_ReadTimeoutException_syntax">Syntax</h5>
   <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public class ReadTimeoutException : Exception, ISerializable</code></pre>
+    <pre><code class="lang-csharp hljs">public class ReadTimeoutException : Exception</code></pre>
   </div>
   <h5 id="LaunchDarkly_EventSource_ReadTimeoutException_remarks"><strong>Remarks</strong></h5>
   <div class="markdown level0 remarks"><p>Socket connections can fail silently, in which case an EventSource client without a read
@@ -153,6 +94,16 @@ timeout would hang forever waiting for new data. A read timeout allows you to ma
 stream connection in this case. The server can send periodic comment lines (&quot;:\n&quot;) to
 keep the client from timing out if the connection is still working.</p>
 </div>
+  <h3 id="constructors">Constructors
+  </h3>
+  <a id="LaunchDarkly_EventSource_ReadTimeoutException__ctor_" data-uid="LaunchDarkly.EventSource.ReadTimeoutException.#ctor*"></a>
+  <h4 id="LaunchDarkly_EventSource_ReadTimeoutException__ctor" data-uid="LaunchDarkly.EventSource.ReadTimeoutException.#ctor">ReadTimeoutException()</h4>
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ReadTimeoutException()</code></pre>
+  </div>
   <h3 id="properties">Properties
   </h3>
   <a id="LaunchDarkly_EventSource_ReadTimeoutException_Message_" data-uid="LaunchDarkly.EventSource.ReadTimeoutException.Message*"></a>
@@ -178,12 +129,6 @@ keep the client from timing out if the connection is still working.</p>
       </tr>
     </tbody>
   </table>
-  <h5 class="overrides">Overrides</h5>
-  <div><span class="xref">System.Exception.Message</span></div>
-  <h3 id="implements">Implements</h3>
-  <div>
-      <span class="xref">System.Runtime.Serialization.ISerializable</span>
-  </div>
 </article>
           </div>
           

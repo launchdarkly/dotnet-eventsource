@@ -1,6 +1,6 @@
 {
   "homepages": [],
-  "source_base_path": "C:/Users/circleci/temp/build-docs",
+  "source_base_path": "C:/Users/circleci/AppData/Local/Temp/project-releaser-temp/build-docs",
   "xrefmap": "xrefmap.yml",
   "files": [
     {
@@ -9,7 +9,7 @@
       "output": {
         ".html": {
           "relative_path": "api/LaunchDarkly.EventSource.CommentReceivedEventArgs.html",
-          "hash": "2DPVOE6Ifg9Nw4dxbHcW+PW8JKtAUS6bj9gYfco3U1A="
+          "hash": "iCmhfqmIZDWbhyXQgAfvNq8/jgFX4DmAW0rSNMM5Vbg="
         }
       },
       "is_incremental": false,
@@ -21,7 +21,7 @@
       "output": {
         ".html": {
           "relative_path": "api/LaunchDarkly.EventSource.Configuration.html",
-          "hash": "AVBL61FuQMxYFteN0Ixb+GMQo6errXmvyVzn1Zz7wyc="
+          "hash": "hU/B0klgBgcF6LNnVGJJsm6YzAR47XDNEEWE80VdBX4="
         }
       },
       "is_incremental": false,
@@ -33,7 +33,7 @@
       "output": {
         ".html": {
           "relative_path": "api/LaunchDarkly.EventSource.ConfigurationBuilder.html",
-          "hash": "AOYYhSoIFQ+rrCkwqJTgN0SP2smaHD4K6Wg4x/r6F9c="
+          "hash": "fuEhE4LV+M3G9f7KySY+3cVdB1oTGjnIC+4UwscLCEw="
         }
       },
       "is_incremental": false,
@@ -45,7 +45,7 @@
       "output": {
         ".html": {
           "relative_path": "api/LaunchDarkly.EventSource.EventSource.html",
-          "hash": "bj77z3cNxabUI/siViz0t2aNSw9kDfLCp2eIKKM7Q+Y="
+          "hash": "2dcOBjPNhWXtH+cJLvBIdafVnaXJ0+AiJXHdZRHgWuU="
         }
       },
       "is_incremental": false,
@@ -57,7 +57,7 @@
       "output": {
         ".html": {
           "relative_path": "api/LaunchDarkly.EventSource.EventSourceServiceCancelledException.html",
-          "hash": "HhPKpd1TqRzbuH8T/qE58slpkFMcoYFLSqTaMkrwf1U="
+          "hash": "urt8ELzC+BK9A28fpWECk6bajwkkullmaF1yXLvL0tA="
         }
       },
       "is_incremental": false,
@@ -69,7 +69,7 @@
       "output": {
         ".html": {
           "relative_path": "api/LaunchDarkly.EventSource.EventSourceServiceUnsuccessfulResponseException.html",
-          "hash": "bck3z0cPiVczDMRZMWdXhuDgmrI+Eldd8PP3hbg3xt4="
+          "hash": "fnZ6UNwmq958vgl/4JXzNX9iarZ/gNeHN5Uv9Zv4mDI="
         }
       },
       "is_incremental": false,
@@ -81,7 +81,7 @@
       "output": {
         ".html": {
           "relative_path": "api/LaunchDarkly.EventSource.ExceptionEventArgs.html",
-          "hash": "VZVGSia7gH+DTK6ueB7LhGlxciVcRqdPhki0aJikbv0="
+          "hash": "Wm7GSftp66VYmDYaL/EA+2kHZl7hxUing0OWUAlmc/E="
         }
       },
       "is_incremental": false,
@@ -105,7 +105,7 @@
       "output": {
         ".html": {
           "relative_path": "api/LaunchDarkly.EventSource.MessageEvent.html",
-          "hash": "BRj8wx5qJqB++gOfvWgN+QKl/g8n3DRY2ZmyjFtzgF8="
+          "hash": "PV08YS0aGp1ZpYChuD0UbqW6jwmFrEc5GzgeKmg7YPg="
         }
       },
       "is_incremental": false,
@@ -117,7 +117,7 @@
       "output": {
         ".html": {
           "relative_path": "api/LaunchDarkly.EventSource.MessageReceivedEventArgs.html",
-          "hash": "vvBUx2RgTVdNMoEYnl9ODYaIYX6yb+Sm7C+sJFYKK2s="
+          "hash": "xJrBQLdvs7puXxE+eXegyD6ay3VZIdRA4+o5ygIdqYs="
         }
       },
       "is_incremental": false,
@@ -129,7 +129,7 @@
       "output": {
         ".html": {
           "relative_path": "api/LaunchDarkly.EventSource.ReadTimeoutException.html",
-          "hash": "1CCHJJXDmhVebJHvkRaMKuMBbB3/rkcBdQDV4Ed8Z+Q="
+          "hash": "/JZ1P+Hp/rumpAiJ7Q4ZrlY8GajOAmsdCYW4BkmbscI="
         }
       },
       "is_incremental": false,
@@ -141,7 +141,7 @@
       "output": {
         ".html": {
           "relative_path": "api/LaunchDarkly.EventSource.ReadyState.html",
-          "hash": "Htn2Oq7kCsizq797mD7/yug3Ay02weJISO3HQVspj3o="
+          "hash": "g+CYLlfJb+4sH4f+4X+JC6BFJJ2kWIvlWNOV/bOv/ck="
         }
       },
       "is_incremental": false,
@@ -153,7 +153,7 @@
       "output": {
         ".html": {
           "relative_path": "api/LaunchDarkly.EventSource.StateChangedEventArgs.html",
-          "hash": "NHuaJbBi+ESki4BOXI0SXzO2dzNylqUlwGjU3Kisr7w="
+          "hash": "87pat2p8FIuFAf/vvikIGJd2yGndd1zqZed0+m3wG0A="
         }
       },
       "is_incremental": false,
@@ -165,7 +165,7 @@
       "output": {
         ".html": {
           "relative_path": "api/LaunchDarkly.EventSource.Utf8ByteSpan.html",
-          "hash": "zRPMMKn1JxWLT5MfbTUgaEVlScuExQI5vYt9MF2/ZgA="
+          "hash": "9Om6ChVwWiXoREoSy2wVx6MLckttVeyCToOrm94IXLQ="
         }
       },
       "is_incremental": false,
@@ -177,7 +177,7 @@
       "output": {
         ".html": {
           "relative_path": "api/LaunchDarkly.EventSource.html",
-          "hash": "hCmJ64JUmNdpePYz0OoxF8r6MRxDUOhbNQc93g4hBcQ="
+          "hash": "DkHkuXiU9WbimDwo7Ov7tee5gAicZdNYSOiC3vwKJ0w="
         }
       },
       "is_incremental": false,
@@ -201,7 +201,7 @@
       "output": {
         ".html": {
           "relative_path": "index.html",
-          "hash": "kur1vKr1A8r78iHSnukGimEAj2odNOfaUfUOLxFpVMI="
+          "hash": "W3phyozFaplD4fb7/M+fwsBVmKYIJUSWO+LiKH973WI="
         }
       },
       "is_incremental": false,
@@ -240,7 +240,7 @@
         "ManagedReferenceDocumentProcessor": {
           "can_incremental": false,
           "incrementalPhase": "build",
-          "total_file_count": 15,
+          "total_file_count": 16,
           "skipped_file_count": 0
         },
         "TocDocumentProcessor": {

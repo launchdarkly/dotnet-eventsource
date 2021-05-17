@@ -23,7 +23,6 @@ references:
   name: CommentReceivedEventArgs
   href: api/LaunchDarkly.EventSource.CommentReceivedEventArgs.html#LaunchDarkly_EventSource_CommentReceivedEventArgs__ctor_
   commentId: Overload:LaunchDarkly.EventSource.CommentReceivedEventArgs.#ctor
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.CommentReceivedEventArgs.CommentReceivedEventArgs
   nameWithType: CommentReceivedEventArgs.CommentReceivedEventArgs
 - uid: LaunchDarkly.EventSource.CommentReceivedEventArgs.Comment
@@ -36,7 +35,6 @@ references:
   name: Comment
   href: api/LaunchDarkly.EventSource.CommentReceivedEventArgs.html#LaunchDarkly_EventSource_CommentReceivedEventArgs_Comment_
   commentId: Overload:LaunchDarkly.EventSource.CommentReceivedEventArgs.Comment
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.CommentReceivedEventArgs.Comment
   nameWithType: CommentReceivedEventArgs.Comment
 - uid: LaunchDarkly.EventSource.Configuration
@@ -55,7 +53,6 @@ references:
   name: BackoffResetThreshold
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_BackoffResetThreshold_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.BackoffResetThreshold
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.BackoffResetThreshold
   nameWithType: Configuration.BackoffResetThreshold
 - uid: LaunchDarkly.EventSource.Configuration.Builder(System.Uri)
@@ -68,7 +65,6 @@ references:
   name: Builder
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_Builder_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.Builder
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.Builder
   nameWithType: Configuration.Builder
 - uid: LaunchDarkly.EventSource.Configuration.ConnectionTimeout
@@ -81,7 +77,6 @@ references:
   name: ConnectionTimeout
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_ConnectionTimeout_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.ConnectionTimeout
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.ConnectionTimeout
   nameWithType: Configuration.ConnectionTimeout
 - uid: LaunchDarkly.EventSource.Configuration.DefaultBackoffResetThreshold
@@ -106,7 +101,6 @@ references:
   name: DefaultEncoding
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_DefaultEncoding_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.DefaultEncoding
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.DefaultEncoding
   nameWithType: Configuration.DefaultEncoding
 - uid: LaunchDarkly.EventSource.Configuration.DefaultInitialRetryDelay
@@ -149,7 +143,6 @@ references:
   name: HttpClient
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_HttpClient_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.HttpClient
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.HttpClient
   nameWithType: Configuration.HttpClient
 - uid: LaunchDarkly.EventSource.Configuration.HttpMessageHandler
@@ -162,7 +155,6 @@ references:
   name: HttpMessageHandler
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_HttpMessageHandler_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.HttpMessageHandler
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.HttpMessageHandler
   nameWithType: Configuration.HttpMessageHandler
 - uid: LaunchDarkly.EventSource.Configuration.InitialRetryDelay
@@ -175,7 +167,6 @@ references:
   name: InitialRetryDelay
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_InitialRetryDelay_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.InitialRetryDelay
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.InitialRetryDelay
   nameWithType: Configuration.InitialRetryDelay
 - uid: LaunchDarkly.EventSource.Configuration.LastEventId
@@ -188,7 +179,6 @@ references:
   name: LastEventId
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_LastEventId_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.LastEventId
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.LastEventId
   nameWithType: Configuration.LastEventId
 - uid: LaunchDarkly.EventSource.Configuration.Logger
@@ -201,7 +191,6 @@ references:
   name: Logger
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_Logger_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.Logger
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.Logger
   nameWithType: Configuration.Logger
 - uid: LaunchDarkly.EventSource.Configuration.MaxRetryDelay
@@ -214,7 +203,6 @@ references:
   name: MaxRetryDelay
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_MaxRetryDelay_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.MaxRetryDelay
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.MaxRetryDelay
   nameWithType: Configuration.MaxRetryDelay
 - uid: LaunchDarkly.EventSource.Configuration.Method
@@ -227,7 +215,6 @@ references:
   name: Method
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_Method_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.Method
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.Method
   nameWithType: Configuration.Method
 - uid: LaunchDarkly.EventSource.Configuration.PreferDataAsUtf8Bytes
@@ -240,7 +227,6 @@ references:
   name: PreferDataAsUtf8Bytes
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_PreferDataAsUtf8Bytes_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.PreferDataAsUtf8Bytes
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.PreferDataAsUtf8Bytes
   nameWithType: Configuration.PreferDataAsUtf8Bytes
 - uid: LaunchDarkly.EventSource.Configuration.ReadTimeout
@@ -253,7 +239,6 @@ references:
   name: ReadTimeout
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_ReadTimeout_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.ReadTimeout
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.ReadTimeout
   nameWithType: Configuration.ReadTimeout
 - uid: LaunchDarkly.EventSource.Configuration.RequestBodyFactory
@@ -266,7 +251,6 @@ references:
   name: RequestBodyFactory
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_RequestBodyFactory_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.RequestBodyFactory
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.RequestBodyFactory
   nameWithType: Configuration.RequestBodyFactory
 - uid: LaunchDarkly.EventSource.Configuration.RequestHeaders
@@ -279,7 +263,6 @@ references:
   name: RequestHeaders
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_RequestHeaders_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.RequestHeaders
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.RequestHeaders
   nameWithType: Configuration.RequestHeaders
 - uid: LaunchDarkly.EventSource.Configuration.ResponseStartTimeout
@@ -292,7 +275,6 @@ references:
   name: ResponseStartTimeout
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_ResponseStartTimeout_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.ResponseStartTimeout
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.ResponseStartTimeout
   nameWithType: Configuration.ResponseStartTimeout
 - uid: LaunchDarkly.EventSource.Configuration.Uri
@@ -305,7 +287,6 @@ references:
   name: Uri
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_Uri_
   commentId: Overload:LaunchDarkly.EventSource.Configuration.Uri
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Configuration.Uri
   nameWithType: Configuration.Uri
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder
@@ -324,7 +305,6 @@ references:
   name: BackoffResetThreshold
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_BackoffResetThreshold_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.BackoffResetThreshold
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.BackoffResetThreshold
   nameWithType: ConfigurationBuilder.BackoffResetThreshold
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.Build
@@ -337,7 +317,6 @@ references:
   name: Build
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_Build_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.Build
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.Build
   nameWithType: ConfigurationBuilder.Build
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.ConnectionTimeout(System.TimeSpan)
@@ -350,7 +329,6 @@ references:
   name: ConnectionTimeout
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_ConnectionTimeout_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.ConnectionTimeout
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.ConnectionTimeout
   nameWithType: ConfigurationBuilder.ConnectionTimeout
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.DefaultEncoding(System.Text.Encoding)
@@ -363,7 +341,6 @@ references:
   name: DefaultEncoding
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_DefaultEncoding_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.DefaultEncoding
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.DefaultEncoding
   nameWithType: ConfigurationBuilder.DefaultEncoding
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.HttpClient(System.Net.Http.HttpClient)
@@ -376,7 +353,6 @@ references:
   name: HttpClient
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_HttpClient_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.HttpClient
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.HttpClient
   nameWithType: ConfigurationBuilder.HttpClient
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.HttpMessageHandler(System.Net.Http.HttpMessageHandler)
@@ -389,7 +365,6 @@ references:
   name: HttpMessageHandler
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_HttpMessageHandler_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.HttpMessageHandler
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.HttpMessageHandler
   nameWithType: ConfigurationBuilder.HttpMessageHandler
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.InitialRetryDelay(System.TimeSpan)
@@ -402,7 +377,6 @@ references:
   name: InitialRetryDelay
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_InitialRetryDelay_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.InitialRetryDelay
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.InitialRetryDelay
   nameWithType: ConfigurationBuilder.InitialRetryDelay
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.LastEventId(System.String)
@@ -415,7 +389,6 @@ references:
   name: LastEventId
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_LastEventId_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.LastEventId
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.LastEventId
   nameWithType: ConfigurationBuilder.LastEventId
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.LogAdapter(LaunchDarkly.Logging.ILogAdapter)
@@ -428,7 +401,6 @@ references:
   name: LogAdapter
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_LogAdapter_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.LogAdapter
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.LogAdapter
   nameWithType: ConfigurationBuilder.LogAdapter
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.Logger(LaunchDarkly.Logging.Logger)
@@ -441,7 +413,6 @@ references:
   name: Logger
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_Logger_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.Logger
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.Logger
   nameWithType: ConfigurationBuilder.Logger
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.MaxRetryDelay(System.TimeSpan)
@@ -454,7 +425,6 @@ references:
   name: MaxRetryDelay
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_MaxRetryDelay_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.MaxRetryDelay
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.MaxRetryDelay
   nameWithType: ConfigurationBuilder.MaxRetryDelay
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.Method(System.Net.Http.HttpMethod)
@@ -467,7 +437,6 @@ references:
   name: Method
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_Method_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.Method
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.Method
   nameWithType: ConfigurationBuilder.Method
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.PreferDataAsUtf8Bytes(System.Boolean)
@@ -480,7 +449,6 @@ references:
   name: PreferDataAsUtf8Bytes
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_PreferDataAsUtf8Bytes_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.PreferDataAsUtf8Bytes
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.PreferDataAsUtf8Bytes
   nameWithType: ConfigurationBuilder.PreferDataAsUtf8Bytes
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.ReadTimeout(System.TimeSpan)
@@ -493,7 +461,6 @@ references:
   name: ReadTimeout
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_ReadTimeout_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.ReadTimeout
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.ReadTimeout
   nameWithType: ConfigurationBuilder.ReadTimeout
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.RequestBody(System.String,System.String)
@@ -506,7 +473,6 @@ references:
   name: RequestBody
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_RequestBody_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.RequestBody
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.RequestBody
   nameWithType: ConfigurationBuilder.RequestBody
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.RequestBodyFactory(System.Func{System.Net.Http.HttpContent})
@@ -522,7 +488,6 @@ references:
   name: RequestBodyFactory
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_RequestBodyFactory_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.RequestBodyFactory
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.RequestBodyFactory
   nameWithType: ConfigurationBuilder.RequestBodyFactory
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.RequestHeader(System.String,System.String)
@@ -535,7 +500,6 @@ references:
   name: RequestHeader
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_RequestHeader_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.RequestHeader
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.RequestHeader
   nameWithType: ConfigurationBuilder.RequestHeader
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.RequestHeaders(System.Collections.Generic.IDictionary{System.String,System.String})
@@ -551,7 +515,6 @@ references:
   name: RequestHeaders
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_RequestHeaders_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.RequestHeaders
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.RequestHeaders
   nameWithType: ConfigurationBuilder.RequestHeaders
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.ResponseStartTimeout(System.TimeSpan)
@@ -564,7 +527,6 @@ references:
   name: ResponseStartTimeout
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_ResponseStartTimeout_
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.ResponseStartTimeout
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.ResponseStartTimeout
   nameWithType: ConfigurationBuilder.ResponseStartTimeout
 - uid: LaunchDarkly.EventSource.EventSource
@@ -589,7 +551,6 @@ references:
   name: EventSource
   href: api/LaunchDarkly.EventSource.EventSource.html#LaunchDarkly_EventSource_EventSource__ctor_
   commentId: Overload:LaunchDarkly.EventSource.EventSource.#ctor
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.EventSource.EventSource
   nameWithType: EventSource.EventSource
 - uid: LaunchDarkly.EventSource.EventSource.Close
@@ -602,7 +563,6 @@ references:
   name: Close
   href: api/LaunchDarkly.EventSource.EventSource.html#LaunchDarkly_EventSource_EventSource_Close_
   commentId: Overload:LaunchDarkly.EventSource.EventSource.Close
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.EventSource.Close
   nameWithType: EventSource.Close
 - uid: LaunchDarkly.EventSource.EventSource.Closed
@@ -627,7 +587,6 @@ references:
   name: Dispose
   href: api/LaunchDarkly.EventSource.EventSource.html#LaunchDarkly_EventSource_EventSource_Dispose_
   commentId: Overload:LaunchDarkly.EventSource.EventSource.Dispose
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.EventSource.Dispose
   nameWithType: EventSource.Dispose
 - uid: LaunchDarkly.EventSource.EventSource.Error
@@ -658,7 +617,6 @@ references:
   name: ReadyState
   href: api/LaunchDarkly.EventSource.EventSource.html#LaunchDarkly_EventSource_EventSource_ReadyState_
   commentId: Overload:LaunchDarkly.EventSource.EventSource.ReadyState
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.EventSource.ReadyState
   nameWithType: EventSource.ReadyState
 - uid: LaunchDarkly.EventSource.EventSource.Restart(System.Boolean)
@@ -671,7 +629,6 @@ references:
   name: Restart
   href: api/LaunchDarkly.EventSource.EventSource.html#LaunchDarkly_EventSource_EventSource_Restart_
   commentId: Overload:LaunchDarkly.EventSource.EventSource.Restart
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.EventSource.Restart
   nameWithType: EventSource.Restart
 - uid: LaunchDarkly.EventSource.EventSource.StartAsync
@@ -684,7 +641,6 @@ references:
   name: StartAsync
   href: api/LaunchDarkly.EventSource.EventSource.html#LaunchDarkly_EventSource_EventSource_StartAsync_
   commentId: Overload:LaunchDarkly.EventSource.EventSource.StartAsync
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.EventSource.StartAsync
   nameWithType: EventSource.StartAsync
 - uid: LaunchDarkly.EventSource.EventSourceServiceCancelledException
@@ -709,7 +665,6 @@ references:
   name: EventSourceServiceCancelledException
   href: api/LaunchDarkly.EventSource.EventSourceServiceCancelledException.html#LaunchDarkly_EventSource_EventSourceServiceCancelledException__ctor_
   commentId: Overload:LaunchDarkly.EventSource.EventSourceServiceCancelledException.#ctor
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.EventSourceServiceCancelledException.EventSourceServiceCancelledException
   nameWithType: EventSourceServiceCancelledException.EventSourceServiceCancelledException
 - uid: LaunchDarkly.EventSource.EventSourceServiceUnsuccessfulResponseException
@@ -728,7 +683,6 @@ references:
   name: EventSourceServiceUnsuccessfulResponseException
   href: api/LaunchDarkly.EventSource.EventSourceServiceUnsuccessfulResponseException.html#LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException__ctor_
   commentId: Overload:LaunchDarkly.EventSource.EventSourceServiceUnsuccessfulResponseException.#ctor
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.EventSourceServiceUnsuccessfulResponseException.EventSourceServiceUnsuccessfulResponseException
   nameWithType: EventSourceServiceUnsuccessfulResponseException.EventSourceServiceUnsuccessfulResponseException
 - uid: LaunchDarkly.EventSource.EventSourceServiceUnsuccessfulResponseException.StatusCode
@@ -741,7 +695,6 @@ references:
   name: StatusCode
   href: api/LaunchDarkly.EventSource.EventSourceServiceUnsuccessfulResponseException.html#LaunchDarkly_EventSource_EventSourceServiceUnsuccessfulResponseException_StatusCode_
   commentId: Overload:LaunchDarkly.EventSource.EventSourceServiceUnsuccessfulResponseException.StatusCode
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.EventSourceServiceUnsuccessfulResponseException.StatusCode
   nameWithType: EventSourceServiceUnsuccessfulResponseException.StatusCode
 - uid: LaunchDarkly.EventSource.ExceptionEventArgs
@@ -760,7 +713,6 @@ references:
   name: ExceptionEventArgs
   href: api/LaunchDarkly.EventSource.ExceptionEventArgs.html#LaunchDarkly_EventSource_ExceptionEventArgs__ctor_
   commentId: Overload:LaunchDarkly.EventSource.ExceptionEventArgs.#ctor
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ExceptionEventArgs.ExceptionEventArgs
   nameWithType: ExceptionEventArgs.ExceptionEventArgs
 - uid: LaunchDarkly.EventSource.ExceptionEventArgs.Exception
@@ -773,7 +725,6 @@ references:
   name: Exception
   href: api/LaunchDarkly.EventSource.ExceptionEventArgs.html#LaunchDarkly_EventSource_ExceptionEventArgs_Exception_
   commentId: Overload:LaunchDarkly.EventSource.ExceptionEventArgs.Exception
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ExceptionEventArgs.Exception
   nameWithType: ExceptionEventArgs.Exception
 - uid: LaunchDarkly.EventSource.IEventSource
@@ -792,7 +743,6 @@ references:
   name: Close
   href: api/LaunchDarkly.EventSource.IEventSource.html#LaunchDarkly_EventSource_IEventSource_Close_
   commentId: Overload:LaunchDarkly.EventSource.IEventSource.Close
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.IEventSource.Close
   nameWithType: IEventSource.Close
 - uid: LaunchDarkly.EventSource.IEventSource.Closed
@@ -835,7 +785,6 @@ references:
   name: ReadyState
   href: api/LaunchDarkly.EventSource.IEventSource.html#LaunchDarkly_EventSource_IEventSource_ReadyState_
   commentId: Overload:LaunchDarkly.EventSource.IEventSource.ReadyState
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.IEventSource.ReadyState
   nameWithType: IEventSource.ReadyState
 - uid: LaunchDarkly.EventSource.IEventSource.Restart(System.Boolean)
@@ -848,7 +797,6 @@ references:
   name: Restart
   href: api/LaunchDarkly.EventSource.IEventSource.html#LaunchDarkly_EventSource_IEventSource_Restart_
   commentId: Overload:LaunchDarkly.EventSource.IEventSource.Restart
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.IEventSource.Restart
   nameWithType: IEventSource.Restart
 - uid: LaunchDarkly.EventSource.IEventSource.StartAsync
@@ -861,7 +809,6 @@ references:
   name: StartAsync
   href: api/LaunchDarkly.EventSource.IEventSource.html#LaunchDarkly_EventSource_IEventSource_StartAsync_
   commentId: Overload:LaunchDarkly.EventSource.IEventSource.StartAsync
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.IEventSource.StartAsync
   nameWithType: IEventSource.StartAsync
 - uid: LaunchDarkly.EventSource.MessageEvent
@@ -892,7 +839,6 @@ references:
   name: MessageEvent
   href: api/LaunchDarkly.EventSource.MessageEvent.html#LaunchDarkly_EventSource_MessageEvent__ctor_
   commentId: Overload:LaunchDarkly.EventSource.MessageEvent.#ctor
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.MessageEvent.MessageEvent
   nameWithType: MessageEvent.MessageEvent
 - uid: LaunchDarkly.EventSource.MessageEvent.Data
@@ -905,7 +851,6 @@ references:
   name: Data
   href: api/LaunchDarkly.EventSource.MessageEvent.html#LaunchDarkly_EventSource_MessageEvent_Data_
   commentId: Overload:LaunchDarkly.EventSource.MessageEvent.Data
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.MessageEvent.Data
   nameWithType: MessageEvent.Data
 - uid: LaunchDarkly.EventSource.MessageEvent.DataUtf8Bytes
@@ -918,7 +863,6 @@ references:
   name: DataUtf8Bytes
   href: api/LaunchDarkly.EventSource.MessageEvent.html#LaunchDarkly_EventSource_MessageEvent_DataUtf8Bytes_
   commentId: Overload:LaunchDarkly.EventSource.MessageEvent.DataUtf8Bytes
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.MessageEvent.DataUtf8Bytes
   nameWithType: MessageEvent.DataUtf8Bytes
 - uid: LaunchDarkly.EventSource.MessageEvent.DefaultName
@@ -937,7 +881,6 @@ references:
   name: Equals
   href: api/LaunchDarkly.EventSource.MessageEvent.html#LaunchDarkly_EventSource_MessageEvent_Equals_
   commentId: Overload:LaunchDarkly.EventSource.MessageEvent.Equals
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.MessageEvent.Equals
   nameWithType: MessageEvent.Equals
 - uid: LaunchDarkly.EventSource.MessageEvent.GetHashCode
@@ -950,7 +893,6 @@ references:
   name: GetHashCode
   href: api/LaunchDarkly.EventSource.MessageEvent.html#LaunchDarkly_EventSource_MessageEvent_GetHashCode_
   commentId: Overload:LaunchDarkly.EventSource.MessageEvent.GetHashCode
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.MessageEvent.GetHashCode
   nameWithType: MessageEvent.GetHashCode
 - uid: LaunchDarkly.EventSource.MessageEvent.IsDataUtf8Bytes
@@ -963,7 +905,6 @@ references:
   name: IsDataUtf8Bytes
   href: api/LaunchDarkly.EventSource.MessageEvent.html#LaunchDarkly_EventSource_MessageEvent_IsDataUtf8Bytes_
   commentId: Overload:LaunchDarkly.EventSource.MessageEvent.IsDataUtf8Bytes
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.MessageEvent.IsDataUtf8Bytes
   nameWithType: MessageEvent.IsDataUtf8Bytes
 - uid: LaunchDarkly.EventSource.MessageEvent.LastEventId
@@ -976,7 +917,6 @@ references:
   name: LastEventId
   href: api/LaunchDarkly.EventSource.MessageEvent.html#LaunchDarkly_EventSource_MessageEvent_LastEventId_
   commentId: Overload:LaunchDarkly.EventSource.MessageEvent.LastEventId
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.MessageEvent.LastEventId
   nameWithType: MessageEvent.LastEventId
 - uid: LaunchDarkly.EventSource.MessageEvent.Name
@@ -989,7 +929,6 @@ references:
   name: Name
   href: api/LaunchDarkly.EventSource.MessageEvent.html#LaunchDarkly_EventSource_MessageEvent_Name_
   commentId: Overload:LaunchDarkly.EventSource.MessageEvent.Name
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.MessageEvent.Name
   nameWithType: MessageEvent.Name
 - uid: LaunchDarkly.EventSource.MessageEvent.Origin
@@ -1002,7 +941,6 @@ references:
   name: Origin
   href: api/LaunchDarkly.EventSource.MessageEvent.html#LaunchDarkly_EventSource_MessageEvent_Origin_
   commentId: Overload:LaunchDarkly.EventSource.MessageEvent.Origin
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.MessageEvent.Origin
   nameWithType: MessageEvent.Origin
 - uid: LaunchDarkly.EventSource.MessageReceivedEventArgs
@@ -1021,7 +959,6 @@ references:
   name: MessageReceivedEventArgs
   href: api/LaunchDarkly.EventSource.MessageReceivedEventArgs.html#LaunchDarkly_EventSource_MessageReceivedEventArgs__ctor_
   commentId: Overload:LaunchDarkly.EventSource.MessageReceivedEventArgs.#ctor
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.MessageReceivedEventArgs.MessageReceivedEventArgs
   nameWithType: MessageReceivedEventArgs.MessageReceivedEventArgs
 - uid: LaunchDarkly.EventSource.MessageReceivedEventArgs.EventName
@@ -1034,7 +971,6 @@ references:
   name: EventName
   href: api/LaunchDarkly.EventSource.MessageReceivedEventArgs.html#LaunchDarkly_EventSource_MessageReceivedEventArgs_EventName_
   commentId: Overload:LaunchDarkly.EventSource.MessageReceivedEventArgs.EventName
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.MessageReceivedEventArgs.EventName
   nameWithType: MessageReceivedEventArgs.EventName
 - uid: LaunchDarkly.EventSource.MessageReceivedEventArgs.Message
@@ -1047,7 +983,6 @@ references:
   name: Message
   href: api/LaunchDarkly.EventSource.MessageReceivedEventArgs.html#LaunchDarkly_EventSource_MessageReceivedEventArgs_Message_
   commentId: Overload:LaunchDarkly.EventSource.MessageReceivedEventArgs.Message
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.MessageReceivedEventArgs.Message
   nameWithType: MessageReceivedEventArgs.Message
 - uid: LaunchDarkly.EventSource.ReadTimeoutException
@@ -1056,6 +991,18 @@ references:
   commentId: T:LaunchDarkly.EventSource.ReadTimeoutException
   fullName: LaunchDarkly.EventSource.ReadTimeoutException
   nameWithType: ReadTimeoutException
+- uid: LaunchDarkly.EventSource.ReadTimeoutException.#ctor
+  name: ReadTimeoutException()
+  href: api/LaunchDarkly.EventSource.ReadTimeoutException.html#LaunchDarkly_EventSource_ReadTimeoutException__ctor
+  commentId: M:LaunchDarkly.EventSource.ReadTimeoutException.#ctor
+  fullName: LaunchDarkly.EventSource.ReadTimeoutException.ReadTimeoutException()
+  nameWithType: ReadTimeoutException.ReadTimeoutException()
+- uid: LaunchDarkly.EventSource.ReadTimeoutException.#ctor*
+  name: ReadTimeoutException
+  href: api/LaunchDarkly.EventSource.ReadTimeoutException.html#LaunchDarkly_EventSource_ReadTimeoutException__ctor_
+  commentId: Overload:LaunchDarkly.EventSource.ReadTimeoutException.#ctor
+  fullName: LaunchDarkly.EventSource.ReadTimeoutException.ReadTimeoutException
+  nameWithType: ReadTimeoutException.ReadTimeoutException
 - uid: LaunchDarkly.EventSource.ReadTimeoutException.Message
   name: Message
   href: api/LaunchDarkly.EventSource.ReadTimeoutException.html#LaunchDarkly_EventSource_ReadTimeoutException_Message
@@ -1066,7 +1013,6 @@ references:
   name: Message
   href: api/LaunchDarkly.EventSource.ReadTimeoutException.html#LaunchDarkly_EventSource_ReadTimeoutException_Message_
   commentId: Overload:LaunchDarkly.EventSource.ReadTimeoutException.Message
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.ReadTimeoutException.Message
   nameWithType: ReadTimeoutException.Message
 - uid: LaunchDarkly.EventSource.ReadyState
@@ -1105,6 +1051,12 @@ references:
   commentId: F:LaunchDarkly.EventSource.ReadyState.Shutdown
   fullName: LaunchDarkly.EventSource.ReadyState.Shutdown
   nameWithType: ReadyState.Shutdown
+- uid: LaunchDarkly.EventSource.ReadyState.value__
+  name: value__
+  href: api/LaunchDarkly.EventSource.ReadyState.html#LaunchDarkly_EventSource_ReadyState_value__
+  commentId: F:LaunchDarkly.EventSource.ReadyState.value__
+  fullName: LaunchDarkly.EventSource.ReadyState.value__
+  nameWithType: ReadyState.value__
 - uid: LaunchDarkly.EventSource.StateChangedEventArgs
   name: StateChangedEventArgs
   href: api/LaunchDarkly.EventSource.StateChangedEventArgs.html
@@ -1121,7 +1073,6 @@ references:
   name: StateChangedEventArgs
   href: api/LaunchDarkly.EventSource.StateChangedEventArgs.html#LaunchDarkly_EventSource_StateChangedEventArgs__ctor_
   commentId: Overload:LaunchDarkly.EventSource.StateChangedEventArgs.#ctor
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.StateChangedEventArgs.StateChangedEventArgs
   nameWithType: StateChangedEventArgs.StateChangedEventArgs
 - uid: LaunchDarkly.EventSource.StateChangedEventArgs.ReadyState
@@ -1134,7 +1085,6 @@ references:
   name: ReadyState
   href: api/LaunchDarkly.EventSource.StateChangedEventArgs.html#LaunchDarkly_EventSource_StateChangedEventArgs_ReadyState_
   commentId: Overload:LaunchDarkly.EventSource.StateChangedEventArgs.ReadyState
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.StateChangedEventArgs.ReadyState
   nameWithType: StateChangedEventArgs.ReadyState
 - uid: LaunchDarkly.EventSource.Utf8ByteSpan
@@ -1162,7 +1112,6 @@ references:
   name: Utf8ByteSpan
   href: api/LaunchDarkly.EventSource.Utf8ByteSpan.html#LaunchDarkly_EventSource_Utf8ByteSpan__ctor_
   commentId: Overload:LaunchDarkly.EventSource.Utf8ByteSpan.#ctor
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Utf8ByteSpan.Utf8ByteSpan
   nameWithType: Utf8ByteSpan.Utf8ByteSpan
 - uid: LaunchDarkly.EventSource.Utf8ByteSpan.Data
@@ -1175,7 +1124,6 @@ references:
   name: Data
   href: api/LaunchDarkly.EventSource.Utf8ByteSpan.html#LaunchDarkly_EventSource_Utf8ByteSpan_Data_
   commentId: Overload:LaunchDarkly.EventSource.Utf8ByteSpan.Data
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Utf8ByteSpan.Data
   nameWithType: Utf8ByteSpan.Data
 - uid: LaunchDarkly.EventSource.Utf8ByteSpan.Equals(LaunchDarkly.EventSource.Utf8ByteSpan)
@@ -1194,7 +1142,6 @@ references:
   name: Equals
   href: api/LaunchDarkly.EventSource.Utf8ByteSpan.html#LaunchDarkly_EventSource_Utf8ByteSpan_Equals_
   commentId: Overload:LaunchDarkly.EventSource.Utf8ByteSpan.Equals
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Utf8ByteSpan.Equals
   nameWithType: Utf8ByteSpan.Equals
 - uid: LaunchDarkly.EventSource.Utf8ByteSpan.GetString
@@ -1207,7 +1154,6 @@ references:
   name: GetString
   href: api/LaunchDarkly.EventSource.Utf8ByteSpan.html#LaunchDarkly_EventSource_Utf8ByteSpan_GetString_
   commentId: Overload:LaunchDarkly.EventSource.Utf8ByteSpan.GetString
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Utf8ByteSpan.GetString
   nameWithType: Utf8ByteSpan.GetString
 - uid: LaunchDarkly.EventSource.Utf8ByteSpan.Length
@@ -1220,7 +1166,6 @@ references:
   name: Length
   href: api/LaunchDarkly.EventSource.Utf8ByteSpan.html#LaunchDarkly_EventSource_Utf8ByteSpan_Length_
   commentId: Overload:LaunchDarkly.EventSource.Utf8ByteSpan.Length
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Utf8ByteSpan.Length
   nameWithType: Utf8ByteSpan.Length
 - uid: LaunchDarkly.EventSource.Utf8ByteSpan.Offset
@@ -1233,6 +1178,5 @@ references:
   name: Offset
   href: api/LaunchDarkly.EventSource.Utf8ByteSpan.html#LaunchDarkly_EventSource_Utf8ByteSpan_Offset_
   commentId: Overload:LaunchDarkly.EventSource.Utf8ByteSpan.Offset
-  isSpec: "True"
   fullName: LaunchDarkly.EventSource.Utf8ByteSpan.Offset
   nameWithType: Utf8ByteSpan.Offset
