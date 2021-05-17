@@ -20,31 +20,35 @@ namespace LaunchDarkly.EventSource
             Func<CancellationToken, Task<T>> taskFn
             )
         {
-            var timeoutCancellation = new CancellationTokenSource(timeout);
-            var combinedCancellation = CancellationTokenSource.CreateLinkedTokenSource(
-                cancellationToken, timeoutCancellation.Token);
-            Task<T> task = null;
-            try
+            using (var timeoutCancellation = new CancellationTokenSource(timeout))
             {
-                task = taskFn(combinedCancellation.Token);
-                var result = await task;
-                return result;
-            }
-            catch (AggregateException e) when (e.InnerException is OperationCanceledException)
-            {
-                if (cancellationToken.IsCancellationRequested)
+                using (var combinedCancellation = CancellationTokenSource.CreateLinkedTokenSource(
+                    cancellationToken, timeoutCancellation.Token))
                 {
-                    throw e.InnerException;
+                    Task<T> task = null;
+                    try
+                    {
+                        task = taskFn(combinedCancellation.Token);
+                        var result = await task;
+                        return result;
+                    }
+                    catch (AggregateException e) when (e.InnerException is OperationCanceledException)
+                    {
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            throw e.InnerException;
+                        }
+                        throw new ReadTimeoutException();
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            throw;
+                        }
+                        throw new ReadTimeoutException();
+                    }
                 }
-                throw new ReadTimeoutException();
-            }
-            catch (OperationCanceledException)
-            {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    throw;
-                }
-                throw new ReadTimeoutException();
             }
             // We never need to call SuppressExceptions(task) in this method, because the act
             // of awaiting the task - whether it completes normally or throws an exception -
