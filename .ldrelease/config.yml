@@ -1,22 +1,21 @@
+version: 2
 
 publications:
   - url: https://nuget.org/packages/LaunchDarkly.EventSource
     description: NuGet
 
-releasableBranches:
+branches:
   - name: master
     description: 4.x - for .NET SDK 6.0+ and Xamarin SDK 2.0+
   - name: 3.x
     description: for earlier .NET and Xamarin SDKs
 
-circleci:
-  windows:
-    context: org-global
-
-template:
-  name: dotnet-windows
-  env:
-    LD_RELEASE_TEST_TARGET_FRAMEWORK: net461
+jobs:
+  - template:
+      name: dotnet-linux
+    env:
+      LD_RELEASE_DOCS_TARGET_FRAMEWORK: netstandard2.0
+      LD_RELEASE_TEST_TARGET_FRAMEWORK: net5.0
 
 documentation:
   githubPages: true
