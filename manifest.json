@@ -1,6 +1,6 @@
 {
   "homepages": [],
-  "source_base_path": "C:/Users/circleci/AppData/Local/Temp/project-releaser-temp/build-docs",
+  "source_base_path": "/tmp/project-releaser/temp/build-docs",
   "xrefmap": "xrefmap.yml",
   "files": [
     {
@@ -201,7 +201,7 @@
       "output": {
         ".html": {
           "relative_path": "index.html",
-          "hash": "W3phyozFaplD4fb7/M+fwsBVmKYIJUSWO+LiKH973WI="
+          "hash": "njQip1ckzZmPArVC3hZBSuZvf17sWmvjm6xEOaRJ0P4="
         }
       },
       "is_incremental": false,
