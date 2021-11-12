@@ -42,7 +42,7 @@ jobs:
     steps:
       - run:
           name: install packages
-          command: apt-get -q update && apt-get install -qy awscli
+          command: apt-get -q update && apt-get install -qy awscli jq
       - checkout
       - run: dotnet build src/LaunchDarkly.EventSource -f netstandard2.0
       - run: dotnet test test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj
