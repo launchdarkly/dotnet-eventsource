@@ -2,7 +2,11 @@
 # This needs to be built from the parent directory rather than from
 
 ARG DOCKER_IMAGE
+
 FROM $DOCKER_IMAGE
+
+ARG DOCKER_IMAGE
+ARG TESTFRAMEWORK
 
 COPY . .
 
@@ -12,4 +16,6 @@ WORKDIR ./contract-tests
 
 RUN dotnet build
 
-ENTRYPOINT dotnet bin/Debug/$TESTFRAMEWORK/ContractTestService.dll
+RUN mkdir app && mv bin/Debug/$TESTFRAMEWORK/* app
+
+CMD dotnet app/ContractTestService.dll
