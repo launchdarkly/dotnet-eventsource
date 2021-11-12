@@ -51,7 +51,7 @@ jobs:
       - docker/install-docker-tools  # needed for contract tests
       - run:
           name: run contract tests
-          command: ./contract-tests/run.sh
+          command: DOCKER_IMAGE=<<parameters.docker-image>> ./contract-tests/run.sh
 
   test-windows-netframework:
     parameters:
