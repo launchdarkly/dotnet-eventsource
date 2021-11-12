@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   win: circleci/windows@1.0.0
+  docker: circleci/docker@2.0.1
 
 workflows:
   version: 2
@@ -45,6 +46,8 @@ jobs:
       - checkout
       - run: dotnet build src/LaunchDarkly.EventSource -f netstandard2.0
       - run: dotnet test test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj
+
+      - docker/install-docker-tools  # needed for contract tests
       - run:
           name: run contract tests
           command: ./contract-tests/run.sh
