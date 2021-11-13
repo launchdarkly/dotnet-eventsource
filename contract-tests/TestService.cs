@@ -43,6 +43,7 @@ namespace TestService
             var routeBuilder = new RouteBuilder(app);
 
             routeBuilder.MapGet("", GetStatus);
+            routeBuilder.MapDelete("", ForceQuit);
             routeBuilder.MapPost("", PostCreateStream);
             routeBuilder.MapPost("/streams/{id}", PostStreamCommand);
             routeBuilder.MapDelete("/streams/{id}", DeleteStream);
@@ -83,7 +84,17 @@ namespace TestService
             await WriteJson(context.Response, status);
         }
 
-        async Task PostCreateStream(HttpContext context)
+        Task ForceQuit(HttpContext context)
+        {
+            _logging.Logger("").Info("Test harness has told us to exit");
+            context.Response.StatusCode = StatusCodes.Status204NoContent;
+
+            System.Environment.Exit(0);
+
+            return Task.CompletedTask; // never reached
+        }
+
+        Task PostCreateStream(HttpContext context)
         {
             var options = ReadJson<StreamOptions>(context.Request);
 
@@ -96,16 +107,16 @@ namespace TestService
             context.Response.Headers["Location"] = resourceUrl;
             context.Response.StatusCode = StatusCodes.Status201Created;
 
-            await Task.Yield();
+            return Task.CompletedTask;
         }
 
-        async Task PostStreamCommand(HttpContext context)
+        Task PostStreamCommand(HttpContext context)
         {
             var id = context.GetRouteValue("id").ToString();
             if (!_streams.TryGetValue(id, out var stream))
             {
                 context.Response.StatusCode = StatusCodes.Status404NotFound;
-                return;
+                return Task.CompletedTask;
             }
 
             var command = ReadJson<CommandParams>(context.Request);
@@ -118,23 +129,23 @@ namespace TestService
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
             }
 
-            await Task.Yield();
+            return Task.CompletedTask;
         }
 
-        async Task DeleteStream(HttpContext context)
+        Task DeleteStream(HttpContext context)
         {
             var id = context.GetRouteValue("id").ToString();
             if (!_streams.TryGetValue(id, out var stream))
             {
                 context.Response.StatusCode = StatusCodes.Status404NotFound;
-                return;
+                return Task.CompletedTask;
             }
             stream.Close();
             _streams.TryRemove(id, out _);
 
             context.Response.StatusCode = StatusCodes.Status204NoContent;
 
-            await Task.Yield();
+            return Task.CompletedTask;
         }
     }
 }

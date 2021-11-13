@@ -1,15 +1,14 @@
 #!/bin/bash
 
-set -ex
+set -e
 
-DOCKER_IMAGE=${DOCKER_IMAGE:-mcr.microsoft.com/dotnet/core/sdk:2.1-focal}
 TESTFRAMEWORK=${TESTFRAMEWORK:-netcoreapp2.1}
+TEMP_TEST_OUTPUT=/tmp/sse-contract-test-service.log
 
 cd $(dirname $0)
-cd ..  # must build Docker container from project root
 
-echo "Building contract test service..."
-docker build --tag testservice -f contract-tests/Dockerfile \
-  --build-arg DOCKER_IMAGE=${DOCKER_IMAGE} --build-arg TESTFRAMEWORK=${TESTFRAMEWORK} .
-docker run ldcircleci/sse-contract-tests:1 --output-docker-script 1 --url http://testservice:8000 \
-  | bash
+BUILDFRAMEWORK=netstandard2.0 dotnet build TestService.csproj
+dotnet bin/Debug/${TESTFRAMEWORK}/ContractTestService.dll >${TEMP_TEST_OUTPUT} &
+curl -s https://raw.githubusercontent.com/launchdarkly/sse-contract-tests/v0.0.3/downloader/run.sh \
+  | VERSION=v0 PARAMS="-url http://localhost:8000 -debug -stop-service-at-end" sh || \
+  (echo "Tests failed; see ${TEMP_TEST_OUTPUT} for test service log"; exit 1)

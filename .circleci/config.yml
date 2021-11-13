@@ -2,7 +2,6 @@ version: 2.1
 
 orbs:
   win: circleci/windows@1.0.0
-  docker: circleci/docker@2.0.1
 
 workflows:
   version: 2
@@ -47,11 +46,11 @@ jobs:
       - run: dotnet build src/LaunchDarkly.EventSource -f netstandard2.0
       - run: dotnet test test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj
 
-      - setup_remote_docker
-      - docker/install-docker-tools  # needed for contract tests
+      - run: make build-contract-tests
       - run:
-          name: run contract tests
-          command: DOCKER_IMAGE=<<parameters.docker-image>> ./contract-tests/run.sh
+          command: make start-contract-test-service
+          background: true
+      - run: make run-contract-tests
 
   test-windows-netframework:
     parameters:
