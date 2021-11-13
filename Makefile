@@ -19,7 +19,7 @@ start-contract-test-service:
 
 start-contract-test-service-bg:
 	@echo "Test service output will be captured in $(TEMP_TEST_OUTPUT)"
-	@cd contract-tests && dotnet bin/Debug/${TESTFRAMEWORK}/ContractTestService.dll >$(TEMP_TEST_OUTPUT) &
+	@make start-contract-test-service >$(TEMP_TEST_OUTPUT) 2>&1 &
 
 run-contract-tests:
 	@curl -s https://raw.githubusercontent.com/launchdarkly/sse-contract-tests/v0.0.3/downloader/run.sh \
