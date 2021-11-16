@@ -2,6 +2,7 @@ using System;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using LaunchDarkly.EventSource;
 using LaunchDarkly.Logging;
@@ -15,6 +16,7 @@ namespace TestService
         private readonly EventSource _stream;
         private readonly StreamOptions _options;
         private readonly Logger _log;
+        private volatile int _callbackMessageCounter;
         private volatile bool _closed;
 
         public StreamEntity(
@@ -75,8 +77,9 @@ namespace TestService
             _stream = new EventSource(builder.Build());
             _stream.MessageReceived += (sender, args) =>
             {
-                _log.Info("Received event from stream ({0})", args.EventName);
-                Task.Run(() => SendMessage(new Message
+                _log.Info("Received event from stream (type: {0}, data: {1})",
+                    args.EventName, args.Message.Data);
+                SendMessage(new Message
                 {
                     Kind = "event",
                     Event = new EventMessage
@@ -85,7 +88,7 @@ namespace TestService
                         Data = args.Message.Data,
                         Id = args.Message.LastEventId
                     }
-                }));
+                });
             };
             _stream.CommentReceived += (sender, args) =>
             {
@@ -95,11 +98,11 @@ namespace TestService
                     comment = comment.Substring(1); // this SSE client includes the colon in the comment
                 }
                 _log.Info("Received comment from stream: {0}", comment);
-                Task.Run(() => SendMessage(new Message
+                SendMessage(new Message
                 {
                     Kind = "comment",
                     Comment = comment
-                }));
+                });
             };
             _stream.Error += (sender, args) =>
             {
@@ -124,6 +127,7 @@ namespace TestService
 
         public bool DoCommand(string command)
         {
+            _log.Info("Test harness sent command: {0}", command);
             if (command == "restart")
             {
                 _stream.Restart(false);
@@ -132,32 +136,37 @@ namespace TestService
             return false;
         }
 
-        private async Task SendMessage(object message)
+        private void SendMessage(object message)
         {
             if (_closed)
             {
                 return;
             }
             var json = JsonSerializer.Serialize(message);
-            using (var request = new HttpRequestMessage(HttpMethod.Post, new Uri(_options.CallbackUrl)))
-            using (var stringContent = new StringContent(json, Encoding.UTF8, "application/json"))
+            var counter = Interlocked.Increment(ref _callbackMessageCounter);
+            var uri = new Uri(_options.CallbackUrl + "/" + counter);
+            Task.Run(async () =>
             {
-                request.Content = stringContent;
-                try
+                using (var request = new HttpRequestMessage(HttpMethod.Post, uri))
+                using (var stringContent = new StringContent(json, Encoding.UTF8, "application/json"))
                 {
-                    using (var response = await _httpClient.SendAsync(request))
+                    request.Content = stringContent;
+                    try
                     {
-                        if (!response.IsSuccessStatusCode)
+                        using (var response = await _httpClient.SendAsync(request))
                         {
-                            _log.Error("Callback to {0} returned HTTP {1}", _options.CallbackUrl, response.StatusCode);
+                            if (!response.IsSuccessStatusCode)
+                            {
+                                _log.Error("Callback to {0} returned HTTP {1}", uri, response.StatusCode);
+                            }
                         }
                     }
+                    catch (Exception e)
+                    {
+                        _log.Error("Callback to {0} failed: {1}", uri, e.GetType());
+                    }
                 }
-                catch (Exception e)
-                {
-                    _log.Error("Callback to {0} failed: {1}", _options.CallbackUrl, e.GetType());
-                }
-            }
+            });
         }
     }
 }
