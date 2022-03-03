@@ -49,6 +49,9 @@ namespace LaunchDarkly.EventSource
         /// <inheritdoc/>
         public event EventHandler<ExceptionEventArgs> Error;
 
+        /// <inheritdoc/>
+        public event EventHandler<HttpRequestEventArgs> OnHttpRequest;
+
         #endregion Public Events
 
         #region Public Properties
@@ -302,6 +305,10 @@ namespace LaunchDarkly.EventSource
 
             var svc = GetEventSourceService(_configuration);
 
+            
+            svc.OnHttpRequest += (o, e) => {
+                RaiseOnHttpRequest(e);
+            };
             svc.ConnectionOpened += (o, e) => {
                 _lastSuccessfulConnectionTime = DateTime.Now;
                 SetReadyState(ReadyState.Open, OnOpened);
@@ -451,6 +458,9 @@ namespace LaunchDarkly.EventSource
             _logger.Debug("Received event \"{0}\"", name);
             OnMessageReceived(new MessageReceivedEventArgs(message));
         }
+
+        private void RaiseOnHttpRequest(HttpRequestEventArgs e) =>
+            OnHttpRequest?.Invoke(this, e);
 
         private void OnOpened(StateChangedEventArgs e) =>
             Opened?.Invoke(this, e);
