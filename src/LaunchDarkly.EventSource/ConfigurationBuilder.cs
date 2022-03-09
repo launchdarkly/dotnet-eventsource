@@ -43,7 +43,7 @@ namespace LaunchDarkly.EventSource
         internal TimeSpan _readTimeout = Configuration.DefaultReadTimeout;
         internal Func<HttpContent> _requestBodyFactory;
         internal TimeSpan _responseStartTimeout = Configuration.DefaultResponseStartTimeout;
-
+        internal Action<HttpRequestMessage> _httpRequestModifier;
         #endregion
 
         #region Constructor
@@ -76,6 +76,18 @@ namespace LaunchDarkly.EventSource
         [Obsolete("Use ResponseStartTimeout")]
         public ConfigurationBuilder ConnectionTimeout(TimeSpan responseStartTimeout) =>
             ResponseStartTimeout(responseStartTimeout);
+
+
+        /// <summary>
+        /// Sets a delegate hook invoked before an http request has been performed.
+        /// </summary>
+        /// <param name="httpRequestModifier">The hook delegate</param>
+        /// <returns>the builder</returns>
+        public ConfigurationBuilder HttpRequestModifier(Action<HttpRequestMessage> httpRequestModifier)
+        {
+            this._httpRequestModifier = httpRequestModifier;
+            return this;
+        }
 
         /// <summary>
         /// Sets the character encoding to use when reading the stream if the server did not specify

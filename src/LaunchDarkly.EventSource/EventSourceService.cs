@@ -42,10 +42,6 @@ namespace LaunchDarkly.EventSource
         /// Occurs when the connection to the EventSource API has been closed.
         /// </summary>
         public event EventHandler<EventArgs> ConnectionClosed;
-        /// <summary>
-        /// Occurs before the http request has been made to the server.
-        /// </summary>
-        public event EventHandler<HttpRequestEventArgs> OnHttpRequest;
 
         #endregion
 
@@ -95,7 +91,7 @@ namespace LaunchDarkly.EventSource
 
             var request = CreateHttpRequestMessage(_configuration.Uri, lastEventId);
 
-            OnHttpRequest?.Invoke(this, new HttpRequestEventArgs(request));
+            this._configuration.HttpRequestModifier?.Invoke(request);
 
             using (var response = await _httpClient.SendAsync(request,
                 HttpCompletionOption.ResponseHeadersRead,
