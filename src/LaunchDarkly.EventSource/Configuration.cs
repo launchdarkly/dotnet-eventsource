@@ -94,7 +94,7 @@ namespace LaunchDarkly.EventSource
         public HttpMessageHandler HttpMessageHandler { get; }
 
         /// <summary>
-        /// Delegate hook invoked before an http request has been performed.
+        /// Delegate hook invoked before an HTTP request has been performed.
         /// </summary>
         /// <seealso cref="ConfigurationBuilder.HttpRequestModifier(Action{HttpRequestMessage})"/>
         public Action<HttpRequestMessage> HttpRequestModifier { get; }
