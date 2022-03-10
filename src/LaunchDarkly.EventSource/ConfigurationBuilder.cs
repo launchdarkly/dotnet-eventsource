@@ -77,9 +77,8 @@ namespace LaunchDarkly.EventSource
         public ConfigurationBuilder ConnectionTimeout(TimeSpan responseStartTimeout) =>
             ResponseStartTimeout(responseStartTimeout);
 
-
         /// <summary>
-        /// Sets a delegate hook invoked before an http request has been performed.
+        /// Sets a delegate hook invoked before an HTTP request has been performed.
         /// </summary>
         /// <param name="httpRequestModifier">The hook delegate</param>
         /// <returns>the builder</returns>

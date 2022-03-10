@@ -49,6 +49,5 @@
 
   <PropertyGroup>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\LaunchDarkly.EventSource.xml</DocumentationFile>
-    <AssemblyOriginatorKeyFile>../../LaunchDarkly.EventSource.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 </Project>
