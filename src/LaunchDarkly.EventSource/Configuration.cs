@@ -197,7 +197,6 @@ namespace LaunchDarkly.EventSource
             ResponseStartTimeout = builder._responseStartTimeout;
             RequestBodyFactory = builder._requestBodyFactory;
             HttpRequestModifier = builder._httpRequestModifier; 
-
              
         }
 
