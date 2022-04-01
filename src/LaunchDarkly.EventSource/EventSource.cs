@@ -301,7 +301,7 @@ namespace LaunchDarkly.EventSource
             _eventDataUtf8ByteBuffer = null;
 
             var svc = GetEventSourceService(_configuration);
-
+            
             svc.ConnectionOpened += (o, e) => {
                 _lastSuccessfulConnectionTime = DateTime.Now;
                 SetReadyState(ReadyState.Open, OnOpened);

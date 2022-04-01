@@ -94,6 +94,12 @@ namespace LaunchDarkly.EventSource
         public HttpMessageHandler HttpMessageHandler { get; }
 
         /// <summary>
+        /// Delegate hook invoked before an HTTP request has been performed.
+        /// </summary>
+        /// <seealso cref="ConfigurationBuilder.HttpRequestModifier(Action{HttpRequestMessage})"/>
+        public Action<HttpRequestMessage> HttpRequestModifier { get; }
+        
+        /// <summary>
         /// The initial amount of time to wait before attempting to reconnect to the EventSource API.
         /// </summary>
         /// <seealso cref="ConfigurationBuilder.InitialRetryDelay(TimeSpan)"/>
@@ -190,6 +196,8 @@ namespace LaunchDarkly.EventSource
             RequestHeaders = new Dictionary<string, string>(builder._requestHeaders);
             ResponseStartTimeout = builder._responseStartTimeout;
             RequestBodyFactory = builder._requestBodyFactory;
+            HttpRequestModifier = builder._httpRequestModifier; 
+             
         }
 
         #endregion

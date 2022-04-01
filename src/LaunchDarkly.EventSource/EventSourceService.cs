@@ -89,7 +89,11 @@ namespace LaunchDarkly.EventSource
                 _configuration.Method ?? HttpMethod.Get,
                 _configuration.Uri);
 
-            using (var response = await _httpClient.SendAsync(CreateHttpRequestMessage(_configuration.Uri, lastEventId),
+            var request = CreateHttpRequestMessage(_configuration.Uri, lastEventId);
+
+            this._configuration.HttpRequestModifier?.Invoke(request);
+
+            using (var response = await _httpClient.SendAsync(request,
                 HttpCompletionOption.ResponseHeadersRead,
                 cancellationToken).ConfigureAwait(false))
             {
