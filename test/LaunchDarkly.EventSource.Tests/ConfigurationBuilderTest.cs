@@ -301,5 +301,13 @@ namespace LaunchDarkly.EventSource.Tests
             var c = b.Build().RequestBodyFactory();
             Assert.IsType<StringContent>(c);
         }
+
+        [Fact]
+        public void BuilderSetsHttpRequestModifier()
+        {
+            Action<HttpRequestMessage> action = request => { };
+            var b = Configuration.Builder(uri).HttpRequestModifier(action);
+            Assert.Equal(action, b.Build().HttpRequestModifier);
+        }
     }
 }

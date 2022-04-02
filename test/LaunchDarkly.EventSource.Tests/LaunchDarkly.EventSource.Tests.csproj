@@ -25,7 +25,6 @@
 
 	<ItemGroup>
     <ProjectReference Include="..\..\src\LaunchDarkly.EventSource\LaunchDarkly.EventSource.csproj" />
-    <ProjectReference Include="..\..\..\dotnet-test-helpers\src\LaunchDarkly.TestHelpers\LaunchDarkly.TestHelpers.csproj" />
   </ItemGroup>
 
   <ItemGroup>
