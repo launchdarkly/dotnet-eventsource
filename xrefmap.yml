@@ -157,6 +157,18 @@ references:
   commentId: Overload:LaunchDarkly.EventSource.Configuration.HttpMessageHandler
   fullName: LaunchDarkly.EventSource.Configuration.HttpMessageHandler
   nameWithType: Configuration.HttpMessageHandler
+- uid: LaunchDarkly.EventSource.Configuration.HttpRequestModifier
+  name: HttpRequestModifier
+  href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_HttpRequestModifier
+  commentId: P:LaunchDarkly.EventSource.Configuration.HttpRequestModifier
+  fullName: LaunchDarkly.EventSource.Configuration.HttpRequestModifier
+  nameWithType: Configuration.HttpRequestModifier
+- uid: LaunchDarkly.EventSource.Configuration.HttpRequestModifier*
+  name: HttpRequestModifier
+  href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_HttpRequestModifier_
+  commentId: Overload:LaunchDarkly.EventSource.Configuration.HttpRequestModifier
+  fullName: LaunchDarkly.EventSource.Configuration.HttpRequestModifier
+  nameWithType: Configuration.HttpRequestModifier
 - uid: LaunchDarkly.EventSource.Configuration.InitialRetryDelay
   name: InitialRetryDelay
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_InitialRetryDelay
@@ -367,6 +379,21 @@ references:
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.HttpMessageHandler
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.HttpMessageHandler
   nameWithType: ConfigurationBuilder.HttpMessageHandler
+- uid: LaunchDarkly.EventSource.ConfigurationBuilder.HttpRequestModifier(System.Action{System.Net.Http.HttpRequestMessage})
+  name: HttpRequestModifier(Action<HttpRequestMessage>)
+  href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_HttpRequestModifier_System_Action_System_Net_Http_HttpRequestMessage__
+  commentId: M:LaunchDarkly.EventSource.ConfigurationBuilder.HttpRequestModifier(System.Action{System.Net.Http.HttpRequestMessage})
+  name.vb: HttpRequestModifier(Action(Of HttpRequestMessage))
+  fullName: LaunchDarkly.EventSource.ConfigurationBuilder.HttpRequestModifier(System.Action<System.Net.Http.HttpRequestMessage>)
+  fullName.vb: LaunchDarkly.EventSource.ConfigurationBuilder.HttpRequestModifier(System.Action(Of System.Net.Http.HttpRequestMessage))
+  nameWithType: ConfigurationBuilder.HttpRequestModifier(Action<HttpRequestMessage>)
+  nameWithType.vb: ConfigurationBuilder.HttpRequestModifier(Action(Of HttpRequestMessage))
+- uid: LaunchDarkly.EventSource.ConfigurationBuilder.HttpRequestModifier*
+  name: HttpRequestModifier
+  href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_HttpRequestModifier_
+  commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.HttpRequestModifier
+  fullName: LaunchDarkly.EventSource.ConfigurationBuilder.HttpRequestModifier
+  nameWithType: ConfigurationBuilder.HttpRequestModifier
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.InitialRetryDelay(System.TimeSpan)
   name: InitialRetryDelay(TimeSpan)
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_InitialRetryDelay_System_TimeSpan_

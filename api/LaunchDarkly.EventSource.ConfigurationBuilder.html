@@ -375,6 +375,50 @@ or <a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#Laun
   <div class="markdown level1 remarks"><p>If you have specified a custom HTTP client instance with <a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_HttpClient_System_Net_Http_HttpClient_">HttpClient(HttpClient)</a>, then
 <a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_HttpMessageHandler_System_Net_Http_HttpMessageHandler_">HttpMessageHandler(HttpMessageHandler)</a> is ignored.</p>
 </div>
+  <a id="LaunchDarkly_EventSource_ConfigurationBuilder_HttpRequestModifier_" data-uid="LaunchDarkly.EventSource.ConfigurationBuilder.HttpRequestModifier*"></a>
+  <h4 id="LaunchDarkly_EventSource_ConfigurationBuilder_HttpRequestModifier_System_Action_System_Net_Http_HttpRequestMessage__" data-uid="LaunchDarkly.EventSource.ConfigurationBuilder.HttpRequestModifier(System.Action{System.Net.Http.HttpRequestMessage})">HttpRequestModifier(Action&lt;HttpRequestMessage&gt;)</h4>
+  <div class="markdown level1 summary"><p>Sets a delegate hook invoked before an HTTP request is performed. This may be useful if you
+want to modify some properties of the request that EventSource doesn&apos;t already have an option for.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ConfigurationBuilder HttpRequestModifier(Action&lt;HttpRequestMessage&gt; httpRequestModifier)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Action</span>&lt;<span class="xref">System.Net.Http.HttpRequestMessage</span>&gt;</td>
+        <td><span class="parametername">httpRequestModifier</span></td>
+        <td><p>code that will be called with the request before it is sent</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html">ConfigurationBuilder</a></td>
+        <td><p>the builder</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
   <a id="LaunchDarkly_EventSource_ConfigurationBuilder_InitialRetryDelay_" data-uid="LaunchDarkly.EventSource.ConfigurationBuilder.InitialRetryDelay*"></a>
   <h4 id="LaunchDarkly_EventSource_ConfigurationBuilder_InitialRetryDelay_System_TimeSpan_" data-uid="LaunchDarkly.EventSource.ConfigurationBuilder.InitialRetryDelay(System.TimeSpan)">InitialRetryDelay(TimeSpan)</h4>
   <div class="markdown level1 summary"><p>Sets the initial amount of time to wait before attempting to reconnect to the EventSource API.</p>
