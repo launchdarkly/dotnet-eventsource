@@ -2,6 +2,10 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [4.2.0] - 2022-04-19
+### Added:
+- `ConfigurationBuilder. HttpRequestModifier`, for making custom modifications to outgoing HTTP requests. (Thanks, [acquleo](https://github.com/launchdarkly/dotnet-eventsource/pull/85)!)
+
 ## [4.1.3] - 2021-10-04
 ### Changed:
 - Updated `LaunchDarkly.Logging` dependency to 1.0.1, to match the version used in the latest server-side .NET SDK release. Since .NET Framework is stricter about dependency versions than .NET Core, it is desirable to keep transitive dependency versions in sync in all packages used by the SDK.
