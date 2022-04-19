@@ -145,6 +145,27 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
+        public void HttpRequestModifier()
+        {
+            using (var server = HttpServer.Start(EmptyStreamThatStaysOpen))
+            {
+                var headers = new Dictionary<string, string> { { "User-Agent", "mozilla" }, { "Authorization", "testing" } };
+
+                Action<HttpRequestMessage> modifier = request =>
+                {
+                    request.RequestUri = new Uri(request.RequestUri.ToString() + "-modified");
+                };
+                using (var es = MakeEventSource(server.Uri, builder => builder.HttpRequestModifier(modifier)))
+                {
+                    _ = Task.Run(es.StartAsync);
+
+                    var req = server.Recorder.RequireRequest();
+                    Assert.EndsWith("-modified", req.Path);
+                }
+            }
+        }
+
+        [Fact]
         public void ReceiveEventStreamInChunks()
         {
             // This simply verifies that chunked streaming works as expected and that events are being

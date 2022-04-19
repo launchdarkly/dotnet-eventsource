@@ -78,9 +78,10 @@ namespace LaunchDarkly.EventSource
             ResponseStartTimeout(responseStartTimeout);
 
         /// <summary>
-        /// Sets a delegate hook invoked before an HTTP request has been performed.
+        /// Sets a delegate hook invoked before an HTTP request is performed. This may be useful if you
+        /// want to modify some properties of the request that EventSource doesn't already have an option for.
         /// </summary>
-        /// <param name="httpRequestModifier">The hook delegate</param>
+        /// <param name="httpRequestModifier">code that will be called with the request before it is sent</param>
         /// <returns>the builder</returns>
         public ConfigurationBuilder HttpRequestModifier(Action<HttpRequestMessage> httpRequestModifier)
         {
