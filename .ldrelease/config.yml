@@ -5,7 +5,7 @@ publications:
     description: NuGet
 
 branches:
-  - name: master
+  - name: main
     description: 4.x - for .NET SDK 6.0+ and Xamarin SDK 2.0+
   - name: 3.x
     description: for earlier .NET and Xamarin SDKs
