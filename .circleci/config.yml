@@ -7,27 +7,20 @@ workflows:
   version: 2
   test:
     jobs:
-      - test-netcore:
-          name: .NET Core 2.1
-          docker-image: mcr.microsoft.com/dotnet/core/sdk:2.1-focal
-          test-target-framework: netcoreapp2.1
-      - test-netcore:
+      - test_linux:
           name: .NET Core 3.1
           docker-image: mcr.microsoft.com/dotnet/core/sdk:3.1-focal
           test-target-framework: netcoreapp3.1
-      - test-netcore:
-          name: .NET 5.0
-          docker-image: mcr.microsoft.com/dotnet/sdk:5.0-focal
-          test-target-framework: net5.0
-      - test-windows-netframework:
-          name: .NET Framework 4.5.2
-          test-target-framework: net452
-      - test-windows-netframework:
-          name: .NET Framework 4.6.1
-          test-target-framework: net461
+      - test_linux:
+          name: .NET 6.0
+          docker-image: mcr.microsoft.com/dotnet/sdk:6.0-focal
+          test-target-framework: net6.0
+      - test_windows:
+          name: .NET Framework 4.6.2
+          test-target-framework: net462
 
 jobs:
-  test-netcore:
+  test_linux:
     parameters:
       docker-image:
         type: string
@@ -43,10 +36,19 @@ jobs:
           name: install packages
           command: apt-get -q update && apt-get install -qy awscli
       - checkout
-      - run: dotnet build src/LaunchDarkly.EventSource -f netstandard2.0
-      - run: dotnet test test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj
+      - run:
+          name: build
+          command: dotnet build src/LaunchDarkly.EventSource -f netstandard2.0
+      - run:
+          name: run tests
+          command: |
+              dotnet test \
+              -l "junit;LogFilePath=/tmp/circle-reports/unit-tests-commonsdk.xml" \
+              test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj
+      - store_test_results:
+          path: /tmp/circle-reports
 
-  test-windows-netframework:
+  test_windows:
     parameters:
       test-target-framework:
         type: string
@@ -57,5 +59,14 @@ jobs:
       TESTFRAMEWORK: <<parameters.test-target-framework>>
     steps:
       - checkout
-      - run: dotnet build src/LaunchDarkly.EventSource
-      - run: dotnet test test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj
+      - run:
+          name: build
+          command: dotnet build src/LaunchDarkly.EventSource
+      - run:
+          name: run tests
+          command: |
+              dotnet test \
+              -l "junit;LogFilePath=/tmp/circle-reports/unit-tests-commonsdk.xml" \
+              test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj
+      - store_test_results:
+          path: /tmp/circle-reports

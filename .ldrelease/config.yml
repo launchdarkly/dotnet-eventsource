@@ -6,16 +6,18 @@ publications:
 
 branches:
   - name: main
-    description: 4.x - for .NET SDK 6.0+ and Xamarin SDK 2.0+
+    description: 5.x - for server-side .NET SDK 7.0+ and client-side .NET SDK 3.0+
+  - name: 4.x
+    description: for .NET SDK 6.0+ and Xamarin SDK 2.0+
   - name: 3.x
     description: for earlier .NET and Xamarin SDKs
 
 jobs:
   - template:
-      name: dotnet-linux
+      name: dotnet6-linux
     env:
       LD_RELEASE_DOCS_TARGET_FRAMEWORK: netstandard2.0
-      LD_RELEASE_TEST_TARGET_FRAMEWORK: net5.0
+      LD_RELEASE_TEST_TARGET_FRAMEWORK: net6.0
 
 documentation:
   gitHubPages: true
