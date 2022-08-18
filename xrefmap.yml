@@ -91,18 +91,6 @@ references:
   commentId: F:LaunchDarkly.EventSource.Configuration.DefaultConnectionTimeout
   fullName: LaunchDarkly.EventSource.Configuration.DefaultConnectionTimeout
   nameWithType: Configuration.DefaultConnectionTimeout
-- uid: LaunchDarkly.EventSource.Configuration.DefaultEncoding
-  name: DefaultEncoding
-  href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_DefaultEncoding
-  commentId: P:LaunchDarkly.EventSource.Configuration.DefaultEncoding
-  fullName: LaunchDarkly.EventSource.Configuration.DefaultEncoding
-  nameWithType: Configuration.DefaultEncoding
-- uid: LaunchDarkly.EventSource.Configuration.DefaultEncoding*
-  name: DefaultEncoding
-  href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_DefaultEncoding_
-  commentId: Overload:LaunchDarkly.EventSource.Configuration.DefaultEncoding
-  fullName: LaunchDarkly.EventSource.Configuration.DefaultEncoding
-  nameWithType: Configuration.DefaultEncoding
 - uid: LaunchDarkly.EventSource.Configuration.DefaultInitialRetryDelay
   name: DefaultInitialRetryDelay
   href: api/LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_DefaultInitialRetryDelay
@@ -343,18 +331,6 @@ references:
   commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.ConnectionTimeout
   fullName: LaunchDarkly.EventSource.ConfigurationBuilder.ConnectionTimeout
   nameWithType: ConfigurationBuilder.ConnectionTimeout
-- uid: LaunchDarkly.EventSource.ConfigurationBuilder.DefaultEncoding(System.Text.Encoding)
-  name: DefaultEncoding(Encoding)
-  href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_DefaultEncoding_System_Text_Encoding_
-  commentId: M:LaunchDarkly.EventSource.ConfigurationBuilder.DefaultEncoding(System.Text.Encoding)
-  fullName: LaunchDarkly.EventSource.ConfigurationBuilder.DefaultEncoding(System.Text.Encoding)
-  nameWithType: ConfigurationBuilder.DefaultEncoding(Encoding)
-- uid: LaunchDarkly.EventSource.ConfigurationBuilder.DefaultEncoding*
-  name: DefaultEncoding
-  href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_DefaultEncoding_
-  commentId: Overload:LaunchDarkly.EventSource.ConfigurationBuilder.DefaultEncoding
-  fullName: LaunchDarkly.EventSource.ConfigurationBuilder.DefaultEncoding
-  nameWithType: ConfigurationBuilder.DefaultEncoding
 - uid: LaunchDarkly.EventSource.ConfigurationBuilder.HttpClient(System.Net.Http.HttpClient)
   name: HttpClient(HttpClient)
   href: api/LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_HttpClient_System_Net_Http_HttpClient_

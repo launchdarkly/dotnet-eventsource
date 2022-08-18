@@ -88,7 +88,7 @@
     <pre><code class="lang-csharp hljs">public sealed class MessageEvent : ValueType</code></pre>
   </div>
   <h5 id="LaunchDarkly_EventSource_MessageEvent_remarks"><strong>Remarks</strong></h5>
-  <div class="markdown level0 remarks"><p><p>
+  <div class="markdown level0 remarks"><p>
 An SSE event consists of an event name (defaulting to &quot;message&quot; if not specified),
 a data string, and an optional &quot;ID&quot; string that the server may provide.
 </p>
@@ -101,15 +101,12 @@ using the <code>System.Text.Json</code> API to parse JSON data).
 <p>
 Since strings in .NET use two-byte UTF-16 characters, if you have a large block of
 UTF-8 data it is considerably more efficient to process it in its original form
-rather than converting it to or from a string. <code>MessageEvent</code> converts
-transparently between these types depending on the original character encoding of
-the stream; the <a class="xref" href="LaunchDarkly.EventSource.Configuration.html">Configuration</a> properties <a class="xref" href="LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_DefaultEncoding">DefaultEncoding</a>
-and <a class="xref" href="LaunchDarkly.EventSource.Configuration.html#LaunchDarkly_EventSource_Configuration_PreferDataAsUtf8Bytes">PreferDataAsUtf8Bytes</a>; and whether the caller reads
-from the property <a class="xref" href="LaunchDarkly.EventSource.MessageEvent.html#LaunchDarkly_EventSource_MessageEvent_Data">Data</a> or <a class="xref" href="LaunchDarkly.EventSource.MessageEvent.html#LaunchDarkly_EventSource_MessageEvent_DataUtf8Bytes">DataUtf8Bytes</a>.
-If you intend to process the data as UTF-8 bytes, and if you expect that the server
-will provide UTF-8, you should set 
+rather than converting it to or from a string. <a class="xref" href="LaunchDarkly.EventSource.EventSource.html">EventSource</a> stores
+data as strings by default, but you set <a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_PreferDataAsUtf8Bytes_System_Boolean_">PreferDataAsUtf8Bytes(Boolean)</a>
+it can store the raw UTF-8 data instead. In either case, <code>MessageEvent</code> will
+convert types transparently so that you can read either <a class="xref" href="LaunchDarkly.EventSource.MessageEvent.html#LaunchDarkly_EventSource_MessageEvent_Data">Data</a>
+or <a class="xref" href="LaunchDarkly.EventSource.MessageEvent.html#LaunchDarkly_EventSource_MessageEvent_DataUtf8Bytes">DataUtf8Bytes</a>.
 </p>
-<ul><li></li><li></li><li></li></ul></p>
 </div>
   <h3 id="constructors">Constructors
   </h3>

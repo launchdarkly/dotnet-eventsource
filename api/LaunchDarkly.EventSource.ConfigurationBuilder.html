@@ -224,56 +224,6 @@ values are changed to zero.
       </tr>
     </tbody>
   </table>
-  <a id="LaunchDarkly_EventSource_ConfigurationBuilder_DefaultEncoding_" data-uid="LaunchDarkly.EventSource.ConfigurationBuilder.DefaultEncoding*"></a>
-  <h4 id="LaunchDarkly_EventSource_ConfigurationBuilder_DefaultEncoding_System_Text_Encoding_" data-uid="LaunchDarkly.EventSource.ConfigurationBuilder.DefaultEncoding(System.Text.Encoding)">DefaultEncoding(Encoding)</h4>
-  <div class="markdown level1 summary"><p>Sets the character encoding to use when reading the stream if the server did not specify
-an encoding in a <code>Content-Type</code> header.</p>
-</div>
-  <div class="markdown level1 conceptual"></div>
-  <h5 class="decalaration">Declaration</h5>
-  <div class="codewrapper">
-    <pre><code class="lang-csharp hljs">public ConfigurationBuilder DefaultEncoding(Encoding defaultEncoding)</code></pre>
-  </div>
-  <h5 class="parameters">Parameters</h5>
-  <table class="table table-bordered table-striped table-condensed">
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Name</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><span class="xref">System.Text.Encoding</span></td>
-        <td><span class="parametername">defaultEncoding</span></td>
-        <td><p>A <code>System.Text.Encoding</code>; if null, the default
-is <span class="xref">System.Text.Encoding.UTF8</span></p>
-</td>
-      </tr>
-    </tbody>
-  </table>
-  <h5 class="returns">Returns</h5>
-  <table class="table table-bordered table-striped table-condensed">
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html">ConfigurationBuilder</a></td>
-        <td><p>the builder</p>
-</td>
-      </tr>
-    </tbody>
-  </table>
-  <h5 id="LaunchDarkly_EventSource_ConfigurationBuilder_DefaultEncoding_System_Text_Encoding__seealso">See Also</h5>
-  <div class="seealso">
-      <div><a class="xref" href="LaunchDarkly.EventSource.MessageEvent.html">MessageEvent</a></div>
-      <div><a class="xref" href="LaunchDarkly.EventSource.ConfigurationBuilder.html#LaunchDarkly_EventSource_ConfigurationBuilder_PreferDataAsUtf8Bytes_System_Boolean_">PreferDataAsUtf8Bytes(Boolean)</a></div>
-  </div>
   <a id="LaunchDarkly_EventSource_ConfigurationBuilder_HttpClient_" data-uid="LaunchDarkly.EventSource.ConfigurationBuilder.HttpClient*"></a>
   <h4 id="LaunchDarkly_EventSource_ConfigurationBuilder_HttpClient_System_Net_Http_HttpClient_" data-uid="LaunchDarkly.EventSource.ConfigurationBuilder.HttpClient(System.Net.Http.HttpClient)">HttpClient(HttpClient)</h4>
   <div class="markdown level1 summary"><p>Specifies that EventSource should use a specific HttpClient instance for HTTP requests.</p>
@@ -817,17 +767,14 @@ data as UTF-8 bytes</p>
 preferable to store and process event data as UTF-8 byte arrays rather than
 strings. By default, <code>EventSource</code> will use the <code>string</code> type when
 processing the event stream; if you then use <a class="xref" href="LaunchDarkly.EventSource.MessageEvent.html#LaunchDarkly_EventSource_MessageEvent_DataUtf8Bytes">DataUtf8Bytes</a>
-to get the data, it will be converted to a byte array as needed. It will also
-always use the <code>string</code> type internally if the stream&apos;s encoding is not
-UTF-8. However, if the stream&apos;s encoding is UTF-8 <code>and</code> you have set
-<code>PreferDataAsUtf8Bytes</code> to <span class="xref">true</span>, the event data will
-be stored internally as a UTF-8 byte array so that if you read
+to get the data, it will be converted to a byte array as needed. However, if
+you set <code>PreferDataAsUtf8Bytes</code> to <span class="xref">true</span>, the event data
+will be stored internally as a UTF-8 byte array so that if you read
 <a class="xref" href="LaunchDarkly.EventSource.MessageEvent.html#LaunchDarkly_EventSource_MessageEvent_DataUtf8Bytes">DataUtf8Bytes</a>, you will get the same array with no
 extra copying or conversion. Therefore, for greatest efficiency you should set
-this to <span class="xref">true</span> if you intend to process the data as UTF-8 and
-if you expect that the server will provide it in that encoding. If the server
-turns out not to use that encoding, everything will still work the same except
-that there will be more overhead from string conversion.</p>
+this to <span class="xref">true</span> if you intend to process the data as UTF-8. Note
+that Server-Sent Event streams always use UTF-8 encoding, as required by the
+SSE specification.</p>
 </div>
   <a id="LaunchDarkly_EventSource_ConfigurationBuilder_ReadTimeout_" data-uid="LaunchDarkly.EventSource.ConfigurationBuilder.ReadTimeout*"></a>
   <h4 id="LaunchDarkly_EventSource_ConfigurationBuilder_ReadTimeout_System_TimeSpan_" data-uid="LaunchDarkly.EventSource.ConfigurationBuilder.ReadTimeout(System.TimeSpan)">ReadTimeout(TimeSpan)</h4>
