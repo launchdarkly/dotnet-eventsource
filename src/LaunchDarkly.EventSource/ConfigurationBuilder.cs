@@ -28,7 +28,6 @@ namespace LaunchDarkly.EventSource
         #region Private Fields
 
         internal readonly Uri _uri;
-        internal Encoding _defaultEncoding = Encoding.UTF8;
         internal TimeSpan _initialRetryDelay = Configuration.DefaultInitialRetryDelay;
         internal TimeSpan _backoffResetThreshold = Configuration.DefaultBackoffResetThreshold;
         internal string _lastEventId;
@@ -86,21 +85,6 @@ namespace LaunchDarkly.EventSource
         public ConfigurationBuilder HttpRequestModifier(Action<HttpRequestMessage> httpRequestModifier)
         {
             this._httpRequestModifier = httpRequestModifier;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the character encoding to use when reading the stream if the server did not specify
-        /// an encoding in a <c>Content-Type</c> header.
-        /// </summary>
-        /// <param name="defaultEncoding">A <c>System.Text.Encoding</c>; if null, the default
-        /// is <see cref="Encoding.UTF8"/></param>
-        /// <returns>the builder</returns>
-        /// <seealso cref="MessageEvent"/>
-        /// <seealso cref="PreferDataAsUtf8Bytes"/>
-        public ConfigurationBuilder DefaultEncoding(Encoding defaultEncoding)
-        {
-            _defaultEncoding = defaultEncoding ?? Encoding.UTF8;
             return this;
         }
 
@@ -320,17 +304,14 @@ namespace LaunchDarkly.EventSource
         /// preferable to store and process event data as UTF-8 byte arrays rather than
         /// strings. By default, <c>EventSource</c> will use the <c>string</c> type when
         /// processing the event stream; if you then use <see cref="MessageEvent.DataUtf8Bytes"/>
-        /// to get the data, it will be converted to a byte array as needed. It will also
-        /// always use the <c>string</c> type internally if the stream's encoding is not
-        /// UTF-8. However, if the stream's encoding is UTF-8 <c>and</c> you have set
-        /// <c>PreferDataAsUtf8Bytes</c> to <see langword="true"/>, the event data will
-        /// be stored internally as a UTF-8 byte array so that if you read
+        /// to get the data, it will be converted to a byte array as needed. However, if
+        /// you set <c>PreferDataAsUtf8Bytes</c> to <see langword="true"/>, the event data
+        /// will be stored internally as a UTF-8 byte array so that if you read
         /// <see cref="MessageEvent.DataUtf8Bytes"/>, you will get the same array with no
         /// extra copying or conversion. Therefore, for greatest efficiency you should set
-        /// this to <see langword="true"/> if you intend to process the data as UTF-8 and
-        /// if you expect that the server will provide it in that encoding. If the server
-        /// turns out not to use that encoding, everything will still work the same except
-        /// that there will be more overhead from string conversion.
+        /// this to <see langword="true"/> if you intend to process the data as UTF-8. Note
+        /// that Server-Sent Event streams always use UTF-8 encoding, as required by the
+        /// SSE specification.
         /// </remarks>
         /// <param name="preferDataAsUtf8Bytes">true if you intend to request the event
         /// data as UTF-8 bytes</param>

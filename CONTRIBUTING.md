@@ -44,10 +44,10 @@ To run all unit tests, for all targets:
 dotnet test test/LaunchDarkly.EventSource.Tests
 ```
 
-Or, to run tests only for the .NET Standard 2.0 target (using the .NET Core 2.1 runtime):
+Or, to run tests only for the .NET Standard 2.0 target (using the .NET Core 3.1 runtime):
 
 ```
-dotnet test test/LaunchDarkly.EventSource.Tests -f netcoreapp2.1
+dotnet test test/LaunchDarkly.EventSource.Tests -f netcoreapp3.1
 ```
 
 Note that the unit tests can only be run in Debug configuration. There is an `InternalsVisibleTo` directive that allows the test code to access internal members of the library, and assembly strong-naming in the Release configuration interferes with this.

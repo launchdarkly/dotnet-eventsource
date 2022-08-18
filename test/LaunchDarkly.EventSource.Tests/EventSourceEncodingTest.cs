@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Threading.Tasks;
+using LaunchDarkly.TestHelpers;
 using LaunchDarkly.TestHelpers.HttpTest;
 using Xunit;
 using Xunit.Abstractions;
@@ -97,24 +98,22 @@ namespace LaunchDarkly.EventSource.Tests
             }
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void NonUtf8EncodingIsReadAsStrings(bool preferUtf8Data)
+        [Fact]
+        public void NonUtf8EncodingIsRejected()
         {
             using (var server = HttpServer.Start(MakeStreamHandler(Encoding.GetEncoding("iso-8859-1"))))
             {
                 var config = Configuration.Builder(server.Uri)
                     .LogAdapter(_testLogging)
-                    .PreferDataAsUtf8Bytes(preferUtf8Data)
                     .Build();
                 using (var es = new EventSource(config))
                 {
                     var sink = new EventSink(es, _testLogging) { ExpectUtf8Data = false };
-
                     _ = Task.Run(es.StartAsync);
 
-                    sink.ExpectActions(expectedEventActions);
+                    var errorAction = sink.ExpectAction();
+                    var ex = Assert.IsType<EventSourceServiceCancelledException>(errorAction.Exception);
+                    Assert.Matches(".*encoding.*8859.*", ex.Message);
                 }
             }
         }
