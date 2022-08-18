@@ -2,6 +2,14 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [5.0.0] - 2022-08-18
+### Changed:
+- Removed EOL target framework .NET Framework 4.5.2. Lowest compatible platform versions are now .NET Core 3.1, .NET Framework 4.6.2, .NET 6.0, and .NET Standard 2.0.
+- EventSource now considers any server response with an encoding other than UTF-8 to be invalid. The Server-Sent Events specification states that event streams must always use UTF-8.
+
+### Removed:
+- `ConfigurationBuilder.DefaultEncoding` (no longer relevant since the encoding must be UTF-8).
+
 ## [4.2.0] - 2022-04-19
 ### Added:
 - `ConfigurationBuilder. HttpRequestModifier`, for making custom modifications to outgoing HTTP requests. (Thanks, [acquleo](https://github.com/launchdarkly/dotnet-eventsource/pull/85)!)
