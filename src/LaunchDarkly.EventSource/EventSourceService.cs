@@ -100,20 +100,25 @@ namespace LaunchDarkly.EventSource
                 _logger.Debug("Response status: {0}", (int)response.StatusCode);
                 ValidateResponse(response);
 
-                OnConnectionOpened();
-
                 using (var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
                 {
                     var encoding = DetectEncoding(response);
-                    if (encoding == Encoding.UTF8 && _configuration.PreferDataAsUtf8Bytes)
+                    if (encoding != Encoding.UTF8)
+                    {
+                        throw new EventSourceServiceCancelledException(
+                            string.Format(Resources.ErrorWrongEncoding, encoding.HeaderName));
+                    }
+                    OnConnectionOpened();
+
+                    if (_configuration.PreferDataAsUtf8Bytes)
                     {
                         _logger.Debug("Reading UTF-8 stream without string conversion");
                         await ProcessResponseFromUtf8StreamAsync(processResponseLineUTF8, stream, cancellationToken);
                     }
                     else
                     {
-                        _logger.Debug("Reading stream with {0} encoding and string conversion", encoding.EncodingName);
-                        using (var reader = new StreamReader(stream, encoding))
+                        _logger.Debug("Reading stream with string conversion");
+                        using (var reader = new StreamReader(stream, Encoding.UTF8))
                         {
                             await ProcessResponseFromReaderAsync(processResponseLineString, reader, cancellationToken);
                         }
@@ -135,7 +140,7 @@ namespace LaunchDarkly.EventSource
                 }
                 catch (ArgumentException) { }
             }
-            return _configuration.DefaultEncoding ?? Encoding.UTF8;
+            return Encoding.UTF8;
         }
 
         protected virtual async Task ProcessResponseFromReaderAsync(

@@ -75,13 +75,6 @@ namespace LaunchDarkly.EventSource
         public TimeSpan ConnectionTimeout => ResponseStartTimeout;
 
         /// <summary>
-        /// The character encoding to use when reading the stream if the server did not specify
-        /// an encoding in a <c>Content-Type</c> header.
-        /// </summary>
-        /// <seealso cref="ConfigurationBuilder.DefaultEncoding(Encoding)"/>
-        public Encoding DefaultEncoding { get; }
-
-        /// <summary>
         /// The HttpClient that will be used as the HTTP client, or null for a new HttpClient.
         /// </summary>
         /// <seealso cref="ConfigurationBuilder.HttpClient(HttpClient)"/>
@@ -183,7 +176,6 @@ namespace LaunchDarkly.EventSource
                 (builder._logAdapter is null ? null : builder._logAdapter.Logger(Configuration.DefaultLoggerName));
 
             BackoffResetThreshold = builder._backoffResetThreshold;
-            DefaultEncoding = builder._defaultEncoding ?? Encoding.UTF8;
             HttpClient = builder._httpClient;
             HttpMessageHandler = (builder._httpClient != null) ? null : builder._httpMessageHandler;
             InitialRetryDelay = builder._initialRetryDelay;

@@ -19,27 +19,12 @@ namespace LaunchDarkly.EventSource
     /// <para>
     /// Since strings in .NET use two-byte UTF-16 characters, if you have a large block of
     /// UTF-8 data it is considerably more efficient to process it in its original form
-    /// rather than converting it to or from a string. <c>MessageEvent</c> converts
-    /// transparently between these types depending on the original character encoding of
-    /// the stream; the <see cref="Configuration"/> properties <see cref="Configuration.DefaultEncoding"/>
-    /// and <see cref="Configuration.PreferDataAsUtf8Bytes"/>; and whether the caller reads
-    /// from the property <see cref="MessageEvent.Data"/> or <see cref="MessageEvent.DataUtf8Bytes"/>.
-    /// If you intend to process the data as UTF-8 bytes, and if you expect that the server
-    /// will provide UTF-8, you should set 
+    /// rather than converting it to or from a string. <see cref="EventSource"/> stores
+    /// data as strings by default, but you set <see cref="ConfigurationBuilder.PreferDataAsUtf8Bytes(bool)"/>
+    /// it can store the raw UTF-8 data instead. In either case, <c>MessageEvent</c> will
+    /// convert types transparently so that you can read either <see cref="MessageEvent.Data"/>
+    /// or <see cref="MessageEvent.DataUtf8Bytes"/>.
     /// </para>
-    /// <list type="bullet">
-    /// <item> If the stream encoding is UTF-8, and you read the event data with the
-    /// <see cref="MessageEvent.DataUtf8Bytes"/> property, the event data is stored as a
-    /// UTF-8 byte array when it is first read from the stream and it returns the same
-    /// array, without any further copying and without creating a <c>string</c>. </item>
-    /// <item> If the stream encoding is UTF-8, but you read the event data with the
-    /// <see cref="MessageEvent.Data"/> property, the event data is originally read from
-    /// the stream as a UTF-8 byte array but is then converted to a <c>string</c>. </item>
-    /// <item> If the stream encoding is not UTF-8, the event data is originally read from
-    /// the stream as a <c>string</c>. <see cref="MessageEvent.Data"/> will return the
-    /// same <c>string</c>; <see cref="MessageEvent.DataUtf8Bytes"/> will create a new
-    /// UTF-8 byte array from it.</item>
-    /// </list>
     /// </remarks>
     public struct MessageEvent
     {
