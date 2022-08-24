@@ -2,6 +2,10 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [5.0.1] - 2022-08-24
+### Changed:
+- Relaxed dependency constraint to allow use of `LaunchDarkly.Logging` 1.x or 2.x.
+
 ## [5.0.0] - 2022-08-18
 ### Changed:
 - Removed EOL target framework .NET Framework 4.5.2. Lowest compatible platform versions are now .NET Core 3.1, .NET Framework 4.6.2, .NET 6.0, and .NET Standard 2.0.
