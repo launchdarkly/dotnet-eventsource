@@ -32,7 +32,7 @@ namespace LaunchDarkly.EventSource
     /// </para>
     /// </remarks>
     public abstract class ConnectStrategy
-	{
+    {
         /// <summary>
         /// The origin URI that should be included in every <see cref="MessageEvent"/>.
         /// </summary>
@@ -159,6 +159,5 @@ namespace LaunchDarkly.EventSource
         /// <param name="uri">the stream URI</param>
         /// <returns>a configurable <see cref="HttpConnectStrategy"/></returns>
         public static HttpConnectStrategy Http(Uri uri) => new HttpConnectStrategy(uri);
-	}
+    }
 }
-

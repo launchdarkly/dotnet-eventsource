@@ -38,7 +38,7 @@ namespace LaunchDarkly.EventSource.Background
     /// </code></example>
     /// </remarks>
     public class BackgroundEventSource : IDisposable
-	{
+    {
         #region Private Fields
 
         private readonly IEventSource _eventSource;
@@ -99,13 +99,13 @@ namespace LaunchDarkly.EventSource.Background
         /// <param name="eventSource">the underlying SSE client</param>
         /// <exception cref="ArgumentNullException">if the parameter is null</exception>
         public BackgroundEventSource(IEventSource eventSource)
-		{
+        {
             if (eventSource is null)
             {
                 throw new ArgumentNullException(nameof(eventSource));
             }
             _eventSource = eventSource;
-		}
+        }
 
         /// <summary>
         /// Creates a new instance to wrap a new <see cref="EventSource"/>.
@@ -216,4 +216,3 @@ namespace LaunchDarkly.EventSource.Background
     }
 
 }
-
