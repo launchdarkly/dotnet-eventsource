@@ -50,4 +50,9 @@ Or, to run tests only for the .NET Standard 2.0 target (using the .NET Core 3.1 
 dotnet test test/LaunchDarkly.EventSource.Tests -f netcoreapp3.1
 ```
 
+To run the standardized contract tests that are run against all LaunchDarkly SSE client implementations (this is currently not supported on Windows):
+```
+make contract-tests
+```
+
 Note that the unit tests can only be run in Debug configuration. There is an `InternalsVisibleTo` directive that allows the test code to access internal members of the library, and assembly strong-naming in the Release configuration interferes with this.
