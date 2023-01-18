@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using LaunchDarkly.EventSource.Events;
+using LaunchDarkly.EventSource.Exceptions;
 using LaunchDarkly.Logging;
 
 namespace LaunchDarkly.EventSource.Background
@@ -151,7 +152,6 @@ namespace LaunchDarkly.EventSource.Background
                 }
                 catch (Exception ex)
                 {
-
                     await InvokeErrorHandler(ex);
                 }
             }
@@ -161,22 +161,29 @@ namespace LaunchDarkly.EventSource.Background
         {
             try
             {
-                await handler.Invoke(this, args);
+                await (handler?.Invoke(this, args) ?? Task.CompletedTask);
             }
             catch (Exception ex)
             {
                 _eventSource.Logger.Error(
                     "BackgroundEventSource caught an exception while calling an event handler: {0}",
                     LogValues.ExceptionSummary(ex));
+                _eventSource.Logger.Debug(LogValues.ExceptionTrace(ex));
                 await InvokeErrorHandler(ex);
             }
         }
 
         private async Task InvokeErrorHandler(Exception ex)
         {
+            if (ex is StreamClosedByCallerException)
+            {
+                // This exception isn't very useful in the push event model, and didn't have
+                // an equivalent in the older EventSource API, so we'll swallow it
+                return;
+            }
             try
             {
-                await Error.Invoke(this, new ExceptionEventArgs(ex));
+                await (Error?.Invoke(this, new ExceptionEventArgs(ex)) ?? Task.CompletedTask);
             }
             catch (Exception anotherEx)
             {

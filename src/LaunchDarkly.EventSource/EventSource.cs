@@ -47,14 +47,14 @@ namespace LaunchDarkly.EventSource
         private readonly Uri _origin;
         private readonly object _lock = new object();
 
-        private readonly ValueWithLock<ReadyState> _readyState;
-        private readonly ValueWithLock<TimeSpan> _baseRetryDelay;
-        private readonly ValueWithLock<TimeSpan?> _nextRetryDelay;
-        private readonly ValueWithLock<DateTime?> _connectedTime;
-        private readonly ValueWithLock<DateTime?> _disconnectedTime;
-        private readonly ValueWithLock<CancellationToken?> _cancellationToken;
+        private ReadyState _readyState;
+        private TimeSpan _baseRetryDelay;
+        private TimeSpan? _nextRetryDelay;
+        private DateTime? _connectedTime;
+        private DateTime? _disconnectedTime;
+        private CancellationToken? _cancellationToken;
         private volatile CancellationTokenSource _cancellationTokenSource;
-        private volatile IDisposable _request;
+        private volatile IDisposable _requestCloser;
 
         private EventParser _parser;
         private ErrorStrategy _currentErrorStrategy;
@@ -67,16 +67,16 @@ namespace LaunchDarkly.EventSource
         #region Public Properties
 
         /// <inheritdoc/>
-        public ReadyState ReadyState => _readyState.Get();
+        public ReadyState ReadyState => WithLock(() => _readyState);
 
         /// <inheritdoc/>
-        public TimeSpan BaseRetryDelay => _baseRetryDelay.Get();
+        public TimeSpan BaseRetryDelay => WithLock(() => _baseRetryDelay);
 
         /// <inheritdoc/>
         public string LastEventId => _lastEventId;
 
         /// <inheritdoc/>
-        public TimeSpan? NextRetryDelay => _nextRetryDelay.Get();
+        public TimeSpan? NextRetryDelay => WithLock(() => _nextRetryDelay);
 
         /// <inheritdoc/>
         public Uri Origin => _origin;
@@ -94,25 +94,21 @@ namespace LaunchDarkly.EventSource
         /// <param name="configuration">the configuration</param>
         public EventSource(Configuration configuration)
         {
-            _readyState = new ValueWithLock<ReadyState>(_lock, ReadyState.Raw);
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-
             _logger = _configuration.Logger;
 
             _client = _configuration.ConnectStrategy.CreateClient(_logger);
             _origin = _configuration.ConnectStrategy.Origin;
 
+            _readyState = ReadyState.Raw;
             _baseErrorStrategy = _currentErrorStrategy = _configuration.ErrorStrategy;
             _baseRetryDelayStrategy = _currentRetryDelayStrategy = _configuration.RetryDelayStrategy;
             _retryDelayResetThreshold = _configuration.RetryDelayResetThreshold;
-            _baseRetryDelay = new ValueWithLock<TimeSpan>(_lock, _configuration.InitialRetryDelay);
-            _nextRetryDelay = new ValueWithLock<TimeSpan?>(_lock, null);
+            _baseRetryDelay = _configuration.InitialRetryDelay;
+            _nextRetryDelay = null;
             _lastEventId = _configuration.LastEventId;
-
-            _connectedTime = new ValueWithLock<DateTime?>(_lock, null);
-            _disconnectedTime = new ValueWithLock<DateTime?>(_lock, null);
-
-            _cancellationToken = new ValueWithLock<CancellationToken?>(_lock, null);
+            _connectedTime = _disconnectedTime = null;
+            _cancellationToken = null;
         }
 
         /// <summary>
@@ -149,58 +145,76 @@ namespace LaunchDarkly.EventSource
         /// <inheritdoc/>
         public async Task<IEvent> ReadAnyEventAsync()
         {
-            try
+            while (true)
             {
-                while (true)
+                Exception exception = null;
+
+                // Reading an event implies starting the stream if it isn't already started.
+                // We might also be restarting since we could have been interrupted at any time.
+                if (_parser is null)
                 {
-                    // Reading an event implies starting the stream if it isn't already started.
-                    // We might also be restarting since we could have been interrupted at any time.
-                    if (_parser is null)
+                    try
                     {
                         var fault = await TryStartAsync(true);
                         return (IEvent)fault ?? (IEvent)(new StartedEvent());
                     }
-                    var e = await _parser.NextEventAsync();
-                    if (e is SetRetryDelayEvent srde)
+                    catch (Exception ex)
                     {
-                        // SetRetryDelayEvent means the stream contained a "retry:" line. We don't
-                        // surface this to the caller, we just apply the new delay and move on.
-                        _baseRetryDelay.Set(srde.RetryDelay);
-                        _currentRetryDelayStrategy = _baseRetryDelayStrategy;
-                        continue;
+                        exception = ex;
                     }
-                    if (e is MessageEvent me)
-                    {
-                        if (me.LastEventId != null)
-                        {
-                            _lastEventId = me.LastEventId;
-                        }
-                    }
-                    return e;
                 }
-            }
-            catch (Exception ex)
-            {
+                if (exception is null)
+                {
+                    try
+                    {
+                        var e = await _parser.NextEventAsync();
+
+                        if (e is SetRetryDelayEvent srde)
+                        {
+                            // SetRetryDelayEvent means the stream contained a "retry:" line. We don't
+                            // surface this to the caller, we just apply the new delay and move on.
+                            lock (_lock)
+                            {
+                                _baseRetryDelay = srde.RetryDelay;
+                            }
+                            _currentRetryDelayStrategy = _baseRetryDelayStrategy;
+                            continue;
+                        }
+                        if (e is MessageEvent me)
+                        {
+                            if (me.LastEventId != null)
+                            {
+                                _lastEventId = me.LastEventId;
+                            }
+                        }
+                        return e;
+                    }
+                    catch (Exception ex)
+                    {
+                        exception = ex;
+                        if (!_deliberatelyClosedConnection)
+                        {
+                            _logger.Debug("Encountered exception: {0}", LogValues.ExceptionSummary(ex));
+                        }
+                        // fall through to next block
+                    }
+                }
                 if (_deliberatelyClosedConnection)
                 {
                     // If the stream was explicitly closed from another thread, that'll likely show up as
                     // an I/O error or an OperationCanceledException, but we don't want to report it as one.
-                    ex = new StreamClosedByCallerException();
+                    exception = new StreamClosedByCallerException();
                     _deliberatelyClosedConnection = false;
                 }
-                else
-                {
-                    _logger.Debug("Encountered exception: {0}", LogValues.ExceptionSummary(ex));
-                }
-                _disconnectedTime.Set(DateTime.Now);
+                WithLock(() => _disconnectedTime = DateTime.Now);
                 CloseCurrentStream();
                 _parser = null;
                 ComputeRetryDelay();
-                if (ApplyErrorStrategy(ex) == ErrorStrategy.Action.Continue)
+                if (ApplyErrorStrategy(exception) == ErrorStrategy.Action.Continue)
                 {
-                    return new FaultEvent(ex);
+                    return new FaultEvent(exception);
                 }
-                throw ex;
+                throw exception;
             }
         }
 
@@ -211,9 +225,13 @@ namespace LaunchDarkly.EventSource
         /// <inheritdoc/>
         public void Close()
         {
-            if (_readyState.GetAndSet(ReadyState.Shutdown) == ReadyState.Shutdown)
+            lock (_lock)
             {
-                return;
+                if (_readyState == ReadyState.Shutdown)
+                {
+                    return;
+                }
+                _readyState = ReadyState.Shutdown;
             }
             CloseCurrentStream();
             _client?.Dispose();
@@ -237,57 +255,63 @@ namespace LaunchDarkly.EventSource
             }
         }
 
+        private T WithLock<T>(Func<T> func)
+        {
+            lock (_lock) { return func(); }
+        }
+
         private async Task<FaultEvent> TryStartAsync(bool canReturnFaultEvent)
         {
             if (_parser != null)
             {
                 return null;
             }
-            if (ReadyState == ReadyState.Shutdown)
-            {
-                throw new StreamClosedByCallerException();
-            }
             while (true)
             {
                 StreamException exception = null;
-
-                TimeSpan nextDelay = _nextRetryDelay.Get() ?? TimeSpan.Zero;
-                if (nextDelay > TimeSpan.Zero)
+                TimeSpan delayNow = TimeSpan.Zero;
+                lock (_lock)
                 {
-                    var disconnectedTime = _disconnectedTime.Get();
-                    TimeSpan delayNow = disconnectedTime.HasValue ?
-                        (nextDelay - (DateTime.Now - disconnectedTime.Value)) :
-                        nextDelay;
-                    if (delayNow > TimeSpan.Zero)
+                    if (_readyState == ReadyState.Shutdown)
                     {
-                        _logger.Info("Waiting {0} milliseconds before reconnecting", delayNow.TotalMilliseconds);
-                        await Task.Delay(delayNow);
+                        throw new StreamClosedByCallerException();
+                    }
+                    _readyState = ReadyState.Connecting;
+
+                    var nextDelay = _nextRetryDelay ?? TimeSpan.Zero;
+                    if (nextDelay > TimeSpan.Zero)
+                    {
+                        delayNow = _disconnectedTime.HasValue ?
+                            (nextDelay - (DateTime.Now - _disconnectedTime.Value)) :
+                            nextDelay;
                     }
                 }
+                if (delayNow > TimeSpan.Zero)
+                {
+                    _logger.Info("Waiting {0} milliseconds before reconnecting", delayNow.TotalMilliseconds);
+                    await Task.Delay(delayNow);
+                }
 
-                _readyState.Set(ReadyState.Connecting);
-
-                var connectResult = new ConnectStrategy.Client.Result();
+                ConnectStrategy.Client.Result connectResult = null;
                 CancellationToken newCancellationToken;
                 if (exception is null)
                 {
-                    _connectedTime.Set(null);
-                    _deliberatelyClosedConnection = false;
-
                     CancellationTokenSource newRequestTokenSource = new CancellationTokenSource();
                     lock (_lock)
                     {
-                        if (_readyState.Get() == ReadyState.Shutdown)
+                        if (_readyState == ReadyState.Shutdown)
                         {
-                            // in case Close() was called in between the previous ReadyState check and the creation of the new token
+                            // in case Close() was called since the last time we checked
                             return null;
                         }
+
+                        _connectedTime = null;
+                        _deliberatelyClosedConnection = false;
+
                         _cancellationTokenSource?.Dispose();
                         _cancellationTokenSource = newRequestTokenSource;
-                        _cancellationToken.Set(newRequestTokenSource.Token);
-                        newCancellationToken = newRequestTokenSource.Token;
+                        _cancellationToken = newRequestTokenSource.Token;
                     }
-
                     try
                     {
                         connectResult = await _client.ConnectAsync(
@@ -305,10 +329,17 @@ namespace LaunchDarkly.EventSource
 
                 if (exception != null)
                 {
-                    _readyState.Set(ReadyState.Closed);
+                    lock (_lock)
+                    {
+                        if (_readyState == ReadyState.Shutdown)
+                        {
+                            return null;
+                        }
+                        _readyState = ReadyState.Closed;
+                        _disconnectedTime = DateTime.Now;
+                        ComputeRetryDelay();
+                    }
                     _logger.Debug("Encountered exception: {0}", LogValues.ExceptionSummary(exception));
-                    _disconnectedTime.Set(DateTime.Now);
-                    ComputeRetryDelay();
                     if (ApplyErrorStrategy(exception) == ErrorStrategy.Action.Continue)
                     {
                         // The ErrorStrategy told us to CONTINUE rather than throwing an exception.
@@ -327,9 +358,9 @@ namespace LaunchDarkly.EventSource
 
                 lock (_lock)
                 {
-                    _connectedTime.Set(DateTime.Now);
-                    _readyState.Set(ReadyState.Open);
-                    _request = connectResult.Closer;
+                    _connectedTime = DateTime.Now;
+                    _readyState = ReadyState.Open;
+                    _requestCloser = connectResult;
                 }
                 _logger.Debug("Connected to SSE stream");
 
@@ -355,44 +386,47 @@ namespace LaunchDarkly.EventSource
 
         private void ComputeRetryDelay()
         {
-            var connectedTime = _connectedTime.Get();
-            if (_retryDelayResetThreshold > TimeSpan.Zero && connectedTime.HasValue)
+            lock (_lock)
             {
-                TimeSpan connectionDuration = DateTime.Now.Subtract(connectedTime.Value);
-                if (connectionDuration >= _retryDelayResetThreshold)
+                if (_retryDelayResetThreshold > TimeSpan.Zero && _connectedTime.HasValue)
                 {
-                    _currentRetryDelayStrategy = _baseRetryDelayStrategy;
+                    TimeSpan connectionDuration = DateTime.Now.Subtract(_connectedTime.Value);
+                    if (connectionDuration >= _retryDelayResetThreshold)
+                    {
+                        _currentRetryDelayStrategy = _baseRetryDelayStrategy;
+                    }
+                    var result = _currentRetryDelayStrategy.Apply(_baseRetryDelay);
+                    _nextRetryDelay = result.Delay;
+                    _currentRetryDelayStrategy = result.Next ?? _currentRetryDelayStrategy;
                 }
             }
-            var result = _currentRetryDelayStrategy.Apply(_baseRetryDelay.Get());
-            _nextRetryDelay.Set(result.Delay);
-            _currentRetryDelayStrategy = result.Next ?? _currentRetryDelayStrategy;
         }
 
         private void CloseCurrentStream()
         {
             CancellationTokenSource oldTokenSource;
-            IDisposable oldRequest;
+            IDisposable oldRequestCloser;
             lock (_lock)
             {
                 if (_cancellationTokenSource is null)
                 {
                     return;
                 }
+                _disconnectedTime = DateTime.Now;
                 oldTokenSource = _cancellationTokenSource;
-                oldRequest = _request;
+                oldRequestCloser = _requestCloser;
                 _cancellationTokenSource = null;
-                _request = null;
+                _requestCloser = null;
                 _deliberatelyClosedConnection = true;
-                if (_readyState.Get() != ReadyState.Shutdown)
+                if (_readyState != ReadyState.Shutdown)
                 {
-                    _readyState.Set(ReadyState.Closed);
+                    _readyState = ReadyState.Closed;
                 }
             }
             _logger.Debug("Cancelling current request");
             oldTokenSource.Cancel();
             oldTokenSource.Dispose();
-            oldRequest?.Dispose();
+            oldRequestCloser?.Dispose();
         }
 
         #endregion

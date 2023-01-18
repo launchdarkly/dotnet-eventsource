@@ -41,6 +41,11 @@ namespace LaunchDarkly.EventSource
     ///             .ReadTimeout(TimeSpan.FromMinutes(1))
     ///     );
     /// </code></example>
+    /// <para>
+    /// Following of HTTP redirects is controlled by the standard behavior of the .NET
+    /// HttpClient, which has a default limit on the number of consecutive redirects;
+    /// to change this, you can set a custom <see cref="HttpMessageHandler(HttpMessageHandler)"/>.
+    /// </para>
     /// </remarks>
     public sealed class HttpConnectStrategy : ConnectStrategy
     {
@@ -416,12 +421,11 @@ namespace LaunchDarkly.EventSource
                         response.Dispose();
                     }
                 }
-                return new Result
-                {
-                    Stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false),
-                    ReadTimeout = _config._readTimeout,
-                    Closer = response
-                };
+                return new Result(
+                    await response.Content.ReadAsStreamAsync().ConfigureAwait(false),
+                    _config._readTimeout,
+                    response
+                );
             }
 
             private HttpRequestMessage CreateRequest(Params p)
@@ -453,7 +457,7 @@ namespace LaunchDarkly.EventSource
                 // Any non-2xx response status is an error. A 204 (no content) is also an error.
                 if (!response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NoContent)
                 {
-                    throw new StreamHttpErrorException((int)response.StatusCode);
+                    throw new StreamHttpErrorException(response.StatusCode);
                 }
 
                 if (response.Content is null)

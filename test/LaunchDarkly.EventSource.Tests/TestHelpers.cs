@@ -66,21 +66,17 @@ namespace LaunchDarkly.EventSource
             return sb.ToString();
         }
 
-        // This is defined as a helper extension method for tests only, because the timeout
-        // behavior is not what we would want in a real application: if it times out, the
-        // underlying task is still trying to parse an event so the EventSource is no longer
-        // in a valid state. A real timeout method would require different logic in EventParser,
-        // because currently EventParser is not able to resume reading a partially-read event.
-        public static Task<IEvent> ReadAnyEventWithTimeoutAsync(this EventSource es,
-            TimeSpan timeout) =>
-            AsyncHelpers.DoWithTimeout(timeout, (new CancellationTokenSource()).Token,
-                token => AsyncHelpers.AllowCancellation(es.ReadAnyEventAsync(), token));
+        // The WithTimeout methods are used in tests only, because the timeout behavior is
+        // is not what we would want in a real application: if it times out, the underlying
+        // task is still trying to parse an event so the EventSource is no longer in a valid
+        // state. A real timeout method would require different logic in EventParser, because
+        // currently EventParser is not able to resume reading a partially-read event.
 
-        public static async Task<T> WithTimeout<T>(TimeSpan timeout, Func<Task<T>> action)
+        public static async Task<T> WithTimeout<T>(this Task<T> task, TimeSpan timeout)
         {
             try
             {
-                return await AsyncHelpers.DoWithTimeout(timeout, new CancellationToken(), _ => action());
+                return await AsyncHelpers.DoWithTimeout(timeout, new CancellationToken(), _ => task);
             }
             catch (ReadTimeoutException)
             {
@@ -88,13 +84,13 @@ namespace LaunchDarkly.EventSource
             }
         }
 
-        public static async Task WithTimeout(TimeSpan timeout, Func<Task> action)
+        public static async Task WithTimeout(this Task task, TimeSpan timeout)
         {
             try
             {
                 await AsyncHelpers.DoWithTimeout(timeout, new CancellationToken(), async _ =>
                 {
-                    await action();
+                    await task;
                     return true;
                 });
             }
@@ -103,5 +99,9 @@ namespace LaunchDarkly.EventSource
                 throw new Exception("timed out");
             }
         }
+
+        public static Task<T> WithTimeout<T>(this Task<T> task) => task.WithTimeout(OneSecond);
+
+        public static Task WithTimeout(this Task task) => task.WithTimeout(OneSecond);
     }
 }

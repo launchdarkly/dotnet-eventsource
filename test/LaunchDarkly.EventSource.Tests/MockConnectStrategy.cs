@@ -80,12 +80,8 @@ namespace LaunchDarkly.EventSource
 
 			public StreamRequestHandler(Stream stream) { _stream = stream; }
 
-            public override Task<Client.Result> ConnectAsync(Client.Params p) =>
-                Task.FromResult(new Client.Result
-                {
-                    Stream = _stream,
-                    Closer = this
-                });
+			public override Task<Client.Result> ConnectAsync(Client.Params p) =>
+				Task.FromResult(new Client.Result(_stream, null, this));
         }
 
 		public class PipedStreamRequestHandler : RequestHandler, IDisposable
@@ -113,19 +109,20 @@ namespace LaunchDarkly.EventSource
 							var chunk = _chunks.Take(p.CancellationToken);
 							if (_closed)
 							{
-								return;
+								break;
 							}
 							_writeStream.Write(chunk, 0, chunk.Length);
 						}
+						catch (OperationCanceledException)
+						{
+							break;
+						}
 						catch (Exception) { }
                     }
+                    _writeStream.Close();
                 });
                 thread.Start();
-				return Task.FromResult(new Client.Result
-				{
-					Stream = _readStream,
-					Closer = this
-				});
+				return Task.FromResult(new Client.Result(_readStream, null, this));
 			}
 
             public void ProvideData(params string[] chunks)

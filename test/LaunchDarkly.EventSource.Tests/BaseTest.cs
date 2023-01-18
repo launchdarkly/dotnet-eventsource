@@ -18,8 +18,6 @@ namespace LaunchDarkly.EventSource
     {
         public static readonly Uri _uri = new Uri("http://test-uri");
 
-        public static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(1);
-
         /// <summary>
         /// Tests can use this object wherever an <see cref="ILogAdapter"/> is needed, to
         /// direct log output to both 1. the Xunit test output buffer and 2. <see cref="_logCapture"/>.

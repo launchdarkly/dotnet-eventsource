@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using LaunchDarkly.EventSource.Exceptions;
 using LaunchDarkly.EventSource.Events;
@@ -11,7 +12,8 @@ namespace LaunchDarkly.EventSource
 {
 	public class EventSourceErrorStrategyUsageTest : BaseTest
     {
-        private static readonly Exception FakeHttpError = new StreamHttpErrorException(503);
+        private static readonly Exception FakeHttpError = new StreamHttpErrorException(
+            HttpStatusCode.InternalServerError);
 
         public EventSourceErrorStrategyUsageTest(ITestOutputHelper testOutput) : base(testOutput) { }
 

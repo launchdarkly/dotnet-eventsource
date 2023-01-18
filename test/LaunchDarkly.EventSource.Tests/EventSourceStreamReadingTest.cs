@@ -24,8 +24,8 @@ namespace LaunchDarkly.EventSource
                     ),
                 async (mock, es) =>
                 {
-                    await es.StartAsync();
-                    var e = await es.ReadAnyEventAsync();
+                    await es.StartAsync().WithTimeout();
+                    var e = await es.ReadAnyEventAsync().WithTimeout();
                     Assert.Equal(new CommentEvent("hello"), e);
                 });
         }
@@ -42,8 +42,8 @@ namespace LaunchDarkly.EventSource
                     ),
                 async (mock, es) =>
                 {
-                    await es.StartAsync();
-                    var e = await es.ReadAnyEventAsync();
+                    await es.StartAsync().WithTimeout();
+                    var e = await es.ReadAnyEventAsync().WithTimeout();
                     var m = Assert.IsType<MessageEvent>(e);
                     Assert.Equal(MessageEvent.DefaultName, m.Name);
                     Assert.Equal(eventData, m.Data);
@@ -65,8 +65,8 @@ namespace LaunchDarkly.EventSource
                     ),
                 async (mock, es) =>
                 {
-                    await es.StartAsync();
-                    var e = await WithTimeout(OneSecond, es.ReadAnyEventAsync);
+                    await es.StartAsync().WithTimeout();
+                    var e = await es.ReadAnyEventAsync().WithTimeout();
                     var m = Assert.IsType<MessageEvent>(e);
                     Assert.Equal(eventName, m.Name);
                     Assert.Equal(eventData, m.Data);
@@ -89,8 +89,8 @@ namespace LaunchDarkly.EventSource
                     ),
                 async (mock, es) =>
                 {
-                    await es.StartAsync();
-                    var e = await WithTimeout(OneSecond, es.ReadAnyEventAsync);
+                    await es.StartAsync().WithTimeout();
+                    var e = await es.ReadAnyEventAsync().WithTimeout();
                     var m = Assert.IsType<MessageEvent>(e);
                     Assert.Equal(eventName, m.Name);
                     Assert.Equal(eventData, m.Data);
@@ -131,10 +131,10 @@ namespace LaunchDarkly.EventSource
                     ),
                 async (mock, es) =>
                 {
-                    await es.StartAsync();
+                    await es.StartAsync().WithTimeout();
                     foreach (var data in eventData)
                     {
-                        var e = await es.ReadAnyEventAsync();
+                        var e = await es.ReadAnyEventAsync().WithTimeout();
                         var m = Assert.IsType<MessageEvent>(e);
                         Assert.Equal(MessageEvent.DefaultName, m.Name);
                         Assert.Equal(data, m.Data);
@@ -164,18 +164,18 @@ namespace LaunchDarkly.EventSource
                 c => c.InitialRetryDelay(initialDelay).ErrorStrategy(ErrorStrategy.AlwaysContinue),
                 async (mock, es) =>
                 {
-                    await es.StartAsync();
+                    await es.StartAsync().WithTimeout();
 
-                    Assert.Equal(anEvent, await es.ReadAnyEventAsync());
+                    Assert.Equal(anEvent, await es.ReadAnyEventAsync().WithTimeout());
 
                     for (var i = 0; i < nAttempts; i++)
                     {
                         es.Interrupt();
 
                         Assert.Equal(new FaultEvent(new StreamClosedByCallerException()),
-                            await es.ReadAnyEventAsync());
-                        Assert.Equal(new StartedEvent(), await es.ReadAnyEventAsync());
-                        Assert.Equal(anEvent, await es.ReadAnyEventAsync());
+                            await es.ReadAnyEventAsync().WithTimeout());
+                        Assert.Equal(new StartedEvent(), await es.ReadAnyEventAsync().WithTimeout());
+                        Assert.Equal(anEvent, await es.ReadAnyEventAsync().WithTimeout());
                     }
                 });
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using LaunchDarkly.EventSource.Exceptions;
@@ -44,11 +45,12 @@ namespace LaunchDarkly.EventSource.Exceptions
         [Fact]
         public void TestStreamHttpErrorException()
         {
-            Assert.Equal(400, new StreamHttpErrorException(400).Status);
+            Assert.Equal(HttpStatusCode.BadRequest,
+                new StreamHttpErrorException(HttpStatusCode.BadRequest).Status);
 
             TypeBehavior.CheckEqualsAndHashCode(
-                () => new StreamHttpErrorException(400),
-                () => new StreamHttpErrorException(500)
+                () => new StreamHttpErrorException(HttpStatusCode.BadRequest),
+                () => new StreamHttpErrorException(HttpStatusCode.InternalServerError)
                 );
         }
     }

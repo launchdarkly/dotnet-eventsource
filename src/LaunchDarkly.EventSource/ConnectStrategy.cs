@@ -82,12 +82,12 @@ namespace LaunchDarkly.EventSource
             /// <summary>
             /// The return type of <see cref="ConnectAsync(Params)"/>.
             /// </summary>
-            public struct Result
+            public class Result : IDisposable
             {
                 /// <summary>
                 /// The input stream that EventSource should read from.
                 /// </summary>
-                public Stream Stream { get; set; }
+                public Stream Stream { get; }
 
                 /// <summary>
                 /// If non-null, indicates that EventSource should impose its own
@@ -99,17 +99,35 @@ namespace LaunchDarkly.EventSource
                 /// here tells EventSource to add its own timeout logic using a
                 /// CancellationToken.
                 /// </remarks>
-                public TimeSpan? ReadTimeout { get; set; }
+                public TimeSpan? ReadTimeout { get; }
+
+                private IDisposable _closer;
 
                 /// <summary>
-                /// An object that EventSource can use to close the connection.
+                /// Creates an instance.
                 /// </summary>
-                /// <remarks>
-                /// If this is not null, its <see cref="IDisposable.Dispose"/> method will be
-                /// called whenever the current connection is stopped either due to an
-                /// error or because the caller explicitly closed the stream.
-                /// </remarks>
-                public IDisposable Closer { get; set; }
+                /// <param name="stream">see <see cref="Stream"/></param>
+                /// <param name="readTimeout">see <see cref="ReadTimeout"/></param>
+                /// <param name="closer">if non-null, this object's <see cref="IDisposable.Dispose"/>
+                /// method will be called whenever the current connection is stopped</param>
+                public Result(
+                    Stream stream,
+                    TimeSpan? readTimeout = null,
+                    IDisposable closer = null
+                    )
+                {
+                    Stream = stream;
+                    ReadTimeout = readTimeout;
+                    _closer = closer;
+                }
+
+                /// <summary>
+                /// Releases any resources related to this connection.
+                /// </summary>
+                public void Dispose()
+                {
+                    _closer?.Dispose();
+                }
             }
 
             /// <summary>

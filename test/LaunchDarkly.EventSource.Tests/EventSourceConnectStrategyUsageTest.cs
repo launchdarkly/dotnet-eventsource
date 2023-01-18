@@ -86,10 +86,7 @@ namespace LaunchDarkly.EventSource
                 new ClientFromLambda(_ =>
                 {
                     createdStream = MakeEmptyStream();
-                    return Task.FromResult(new ConnectStrategy.Client.Result
-                    {
-                        Stream = createdStream
-                    });
+                    return Task.FromResult(new ConnectStrategy.Client.Result(createdStream));
                 }));
 
             using (var es = new EventSource(
@@ -108,11 +105,8 @@ namespace LaunchDarkly.EventSource
             var strategy = new ConnectStrategyFromLambda(logger =>
                 new ClientFromLambda(_ =>
                 {
-                    return Task.FromResult(new ConnectStrategy.Client.Result
-                    {
-                        Stream = MakeEmptyStream(),
-                        Closer = closer
-                    });
+                    return Task.FromResult(new ConnectStrategy.Client.Result(
+                        MakeEmptyStream(), null, closer));
                 }));
 
             using (var es = new EventSource(

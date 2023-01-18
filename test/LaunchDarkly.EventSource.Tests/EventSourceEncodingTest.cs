@@ -5,6 +5,8 @@ using LaunchDarkly.EventSource.Events;
 using Xunit;
 using Xunit.Abstractions;
 
+using static LaunchDarkly.EventSource.TestHelpers;
+
 namespace LaunchDarkly.EventSource
 {
     public class EventSourceEncodingTest : BaseTest
@@ -25,9 +27,9 @@ namespace LaunchDarkly.EventSource
 
         private static async Task ExpectEvents(EventSource es, Uri uri)
         {
-            Assert.Equal(new CommentEvent("hello"), await es.ReadAnyEventAsync());
-            Assert.Equal(new MessageEvent("message", "value1", null, uri), await es.ReadAnyEventAsync());
-            Assert.Equal(new MessageEvent("event2", "ça\nqué", null, uri), await es.ReadAnyEventAsync());
+            Assert.Equal(new CommentEvent("hello"), await es.ReadAnyEventAsync().WithTimeout());
+            Assert.Equal(new MessageEvent("message", "value1", null, uri), await es.ReadAnyEventAsync().WithTimeout());
+            Assert.Equal(new MessageEvent("event2", "ça\nqué", null, uri), await es.ReadAnyEventAsync().WithTimeout());
             Assert.Equal(new MessageEvent("message", MakeLongString(0, 500) + MakeLongString(500, 1000), null, uri),
                 await es.ReadAnyEventAsync());
         }
@@ -53,7 +55,7 @@ namespace LaunchDarkly.EventSource
                     ),
                 async (mock, es) =>
                 {
-                    await es.StartAsync();
+                    await es.StartAsync().WithTimeout();
                     await ExpectEvents(es, MockConnectStrategy.MockOrigin);
                 });
         }

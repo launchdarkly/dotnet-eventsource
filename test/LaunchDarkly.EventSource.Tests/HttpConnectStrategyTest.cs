@@ -121,18 +121,13 @@ namespace LaunchDarkly.EventSource
             {
                 using (var client = baseStrategy.Uri(server.Uri).CreateClient(_testLogger))
                 {
-                    var result = await client.ConnectAsync(new ConnectStrategy.Client.Params());
-                    try
+                    using (var result = await client.ConnectAsync(new ConnectStrategy.Client.Params()))
                     {
                         var stream = result.Stream;
                         var b = new byte[100];
                         Assert.Equal(6, await stream.ReadAsync(b, 0, 6));
                         Assert.Equal(5, await stream.ReadAsync(b, 6, 5));
                         Assert.Equal("hello world", Encoding.UTF8.GetString(b, 0, 11));
-                    }
-                    finally
-                    {
-                        result.Closer.Dispose();
                     }
                 }
             }
@@ -153,7 +148,7 @@ namespace LaunchDarkly.EventSource
                 {
                     var ex = await Assert.ThrowsAnyAsync<StreamHttpErrorException>(
                         async () => await client.ConnectAsync(new ConnectStrategy.Client.Params()));
-                    Assert.Equal((int)status, ex.Status);
+                    Assert.Equal(status, ex.Status);
                 }
             }
         }
@@ -190,6 +185,67 @@ namespace LaunchDarkly.EventSource
             }
         }
 
+        [Theory]
+        [InlineData(HttpStatusCode.MovedPermanently)]
+        [InlineData(HttpStatusCode.TemporaryRedirect)]
+        public async Task FollowsRedirects(HttpStatusCode status)
+        {
+            var responses = Handlers.Sequential(
+                Handlers.Status((int)status).Then(Handlers.Header("Location", "/b")),
+                Handlers.Status((int)status).Then(Handlers.Header("Location", "/c")),
+                Handlers.SSE.Start()
+                );
+            using (var server = HttpServer.Start(responses))
+            {
+                using (var client = baseStrategy.Uri(server.Uri).CreateClient(_testLogger))
+                {
+                    using (var result = await client.ConnectAsync(new ConnectStrategy.Client.Params()))
+                    {
+                        var req1 = server.Recorder.RequireRequest();
+                        Assert.Equal("/", req1.Path);
+
+                        var req2 = server.Recorder.RequireRequest();
+                        Assert.Equal("/b", req2.Path);
+
+                        var req3 = server.Recorder.RequireRequest();
+                        Assert.Equal("/c", req3.Path);
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(HttpStatusCode.MovedPermanently)]
+        [InlineData(HttpStatusCode.TemporaryRedirect)]
+        public async Task StopsFollowingRedirectsAtLimit(HttpStatusCode status)
+        {
+            var responses = Handlers.Sequential(
+                Handlers.Status((int)status).Then(Handlers.Header("Location", "/b")),
+                Handlers.Status((int)status).Then(Handlers.Header("Location", "/c")),
+                Handlers.SSE.Start()
+                );
+            using (var server = HttpServer.Start(responses))
+            {
+                var customHttpHandler = new HttpClientHandler
+                {
+                    MaxAutomaticRedirections = 1
+                };
+                using (var client = baseStrategy.Uri(server.Uri)
+                    .HttpMessageHandler(customHttpHandler)
+                    .CreateClient(_testLogger))
+                {
+                    var ex = await Assert.ThrowsAnyAsync<StreamHttpErrorException>(
+                        () => client.ConnectAsync(new ConnectStrategy.Client.Params()));
+
+                    var req1 = server.Recorder.RequireRequest();
+                    Assert.Equal("/", req1.Path);
+
+                    var req2 = server.Recorder.RequireRequest();
+                    Assert.Equal("/b", req2.Path);
+                }
+            }
+        }
+
         private HttpClient MakeClientFrom(HttpConnectStrategy hcs) =>
             ((HttpConnectStrategy.ClientImpl)hcs.CreateClient(_testLogger)).HttpClient;
 
@@ -202,7 +258,7 @@ namespace LaunchDarkly.EventSource
                 {
                     var p = new ConnectStrategy.Client.Params { LastEventId = lastEventId };
                     var result = await client.ConnectAsync(p);
-                    result.Closer.Dispose();
+                    result.Dispose();
                     return server.Recorder.RequireRequest();
                 }
             }

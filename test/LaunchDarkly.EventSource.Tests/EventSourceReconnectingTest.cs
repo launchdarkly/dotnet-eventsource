@@ -32,18 +32,19 @@ namespace LaunchDarkly.EventSource
                     .ErrorStrategy(ErrorStrategy.AlwaysContinue),
                 async (mock, es) =>
                 {
-                    Assert.Equal(new StartedEvent(), await es.ReadAnyEventWithTimeoutAsync(DefaultTimeout));
+                    await es.StartAsync().WithTimeout();
 
                     Assert.Equal(new MessageEvent("put", "hello", eventId1, mock.Origin),
-                        await es.ReadAnyEventWithTimeoutAsync(DefaultTimeout));
+                        await es.ReadAnyEventAsync().WithTimeout());
 
                     var p1 = mock.ReceivedConnections.Take();
                     Assert.Equal(initialEventId, p1.LastEventId);
 
                     Assert.Equal(new FaultEvent(new StreamClosedByServerException()),
-                        await es.ReadAnyEventWithTimeoutAsync(DefaultTimeout));
+                        await es.ReadAnyEventAsync().WithTimeout());
 
-                    Assert.Equal(new StartedEvent(), await es.ReadAnyEventWithTimeoutAsync(DefaultTimeout));
+                    Assert.Equal(new StartedEvent(),
+                        await es.ReadAnyEventAsync().WithTimeout());
 
                     var p2 = mock.ReceivedConnections.Take();
                     Assert.Equal(eventId1, p2.LastEventId);
@@ -72,20 +73,22 @@ namespace LaunchDarkly.EventSource
                     .RetryDelayStrategy(new ArithmeticallyIncreasingDelayStrategy(increment, TimeSpan.Zero)),
                 async (mock, es) =>
                 {
-                    await es.StartAsync();
+                    await es.StartAsync().WithTimeout();
 
-                for (int i = 0; i < nAttempts; i++)
-                {
-                    Assert.Equal(new CommentEvent("hi"), await es.ReadAnyEventWithTimeoutAsync(DefaultTimeout));
-                    Assert.Equal(new FaultEvent(new StreamClosedByServerException()),
-                        await es.ReadAnyEventWithTimeoutAsync(DefaultTimeout));
+                    for (int i = 0; i < nAttempts; i++)
+                    {
+                        Assert.Equal(new CommentEvent("hi"),
+                            await es.ReadAnyEventAsync().WithTimeout());
+                        Assert.Equal(new FaultEvent(new StreamClosedByServerException()),
+                            await es.ReadAnyEventAsync().WithTimeout());
 
-                    Assert.Equal(expectedDelay, es.NextRetryDelay);
-                    expectedDelay += increment;
+                        Assert.Equal(expectedDelay, es.NextRetryDelay);
+                        expectedDelay += increment;
 
-                    Assert.Equal(new StartedEvent(), await es.ReadAnyEventWithTimeoutAsync(DefaultTimeout));
-                }
-            });
+                        Assert.Equal(new StartedEvent(),
+                            await es.ReadAnyEventAsync().WithTimeout());
+                    }
+                });
         }
 
         public class ArithmeticallyIncreasingDelayStrategy : RetryDelayStrategy

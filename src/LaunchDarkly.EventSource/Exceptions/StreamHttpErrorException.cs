@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 
 namespace LaunchDarkly.EventSource.Exceptions
 {
@@ -13,14 +14,14 @@ namespace LaunchDarkly.EventSource.Exceptions
         /// <summary>
         /// The HTTP status code.
         /// </summary>
-        public int Status { get; }
+        public HttpStatusCode Status { get; }
 
         /// <summary>
         /// Creates an instance.
         /// </summary>
         /// <param name="status">the HTTP status code</param>
-        public StreamHttpErrorException(int status) :
-            base(string.Format(Resources.ErrorHttpStatus, status))
+        public StreamHttpErrorException(HttpStatusCode status) :
+            base(string.Format(Resources.ErrorHttpStatus, (int)status))
         {
             Status = status;
         }

@@ -42,7 +42,7 @@ namespace LaunchDarkly.EventSource
             await WithServerAndEventSource(StreamWithCommentThatStaysOpen,
                 async (server, es) =>
                 {
-                    await es.StartAsync();
+                    await es.StartAsync().WithTimeout();
                     var req = server.Recorder.RequireRequest();
                     Assert.Null(req.Headers.Get(Constants.LastEventIdHttpHeader));
                 });
@@ -58,7 +58,7 @@ namespace LaunchDarkly.EventSource
                 config => config.LastEventId(lastEventId),
                 async (server, es) =>
             {
-                await es.StartAsync();
+                await es.StartAsync().WithTimeout();
 
                 var req = server.Recorder.RequireRequest();
                 Assert.Equal(lastEventId, req.Headers.Get(Constants.LastEventIdHttpHeader));
@@ -78,9 +78,9 @@ namespace LaunchDarkly.EventSource
                 null,
                 async (server, es) =>
                 {
-                    await es.StartAsync();
+                    await es.StartAsync().WithTimeout();
                     Assert.Equal(new MessageEvent(MessageEvent.DefaultName, "event1", server.Uri),
-                        await es.ReadMessageAsync());
+                        await es.ReadMessageAsync().WithTimeout());
                     await Assert.ThrowsAnyAsync<ReadTimeoutException>(() => es.ReadMessageAsync());
                 });
         }
