@@ -62,19 +62,34 @@ namespace LaunchDarkly.EventSource.Background
 
         #region Public Events
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Occurs when the stream connection has been opened.
+        /// </summary>
         public event AsyncEventHandler<StateChangedEventArgs> Opened;
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Occurs when the stream connection has been closed.
+        /// </summary>
         public event AsyncEventHandler<StateChangedEventArgs> Closed;
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Occurs when a <see cref="MessageEvent"/> has been received.
+        /// </summary>
         public event AsyncEventHandler<MessageReceivedEventArgs> MessageReceived;
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Occurs when an SSE comment line has been received.
+        /// </summary>
+        /// <remarks>
+        /// An SSE comment is a line that starts with a colon. There is no defined meaning for this
+        /// in the SSE specification, and most clients ignore it. It may be used to provide a
+        /// periodic heartbeat from the server to keep connections from timing out.
+        /// </remarks>
         public event AsyncEventHandler<CommentReceivedEventArgs> CommentReceived;
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Occurs when an error is detected.
+        /// </summary>
         public event AsyncEventHandler<ExceptionEventArgs> Error;
 
         #endregion
