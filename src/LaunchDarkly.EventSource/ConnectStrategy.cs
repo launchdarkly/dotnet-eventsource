@@ -19,7 +19,11 @@ namespace LaunchDarkly.EventSource
     /// requests. To customize the HTTP behavior, you can use methods of <see cref="HttpConnectStrategy"/>:
     /// </para>
     /// <example><code>
-    ///
+    ///     var config = Configuration.Builder(
+    ///         ConnectStrategy.Http(streamUri)
+    ///             .Header("name", "value")
+    ///             .ReadTimeout(TimeSpan.FromMinutes(1))
+    ///     );
     /// </code></example>>
     /// <para>
     /// Or, if you want to consume an input stream from some other source, you can
