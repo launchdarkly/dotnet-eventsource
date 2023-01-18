@@ -8,6 +8,16 @@ using LaunchDarkly.TestHelpers.HttpTest;
 
 namespace TestService
 {
+    // This file contains the basic web service implementation providing the API endpoints
+    // that the SSE test harness expects. All of the actual SSE operations are implemented
+    // in StreamEntity.
+    //
+    // For portability and simplicity, instead of using ASP.NET Core for the web layer,
+    // we're using the LaunchDarkly.TestHelpers.HttpTest classes which are based on
+    // System.Net.HttpListener. This is the same approach we use for the similar SDK test
+    // service in the LaunchDarkly .NET SDKs. See:
+    // https://launchdarkly.github.io/dotnet-test-helpers/api/LaunchDarkly.TestHelpers.HttpTest.html
+    
     public class Program
     {
         public static void Main(string[] args)

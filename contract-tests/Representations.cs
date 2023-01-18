@@ -21,15 +21,15 @@ namespace TestService
         [JsonPropertyName("body")] public string Body { get; set; }
     }
 
-    public class Message
+    public class CallbackMessage
     {
         [JsonPropertyName("kind")] public string Kind { get; set; }
-        [JsonPropertyName("event")] public EventMessage Event { get; set; }
+        [JsonPropertyName("event")] public CallbackEventMessage Event { get; set; }
         [JsonPropertyName("comment")] public string Comment { get; set; }
         [JsonPropertyName("error")] public string Error { get; set; }
     }
 
-    public class EventMessage
+    public class CallbackEventMessage
     {
         [JsonPropertyName("type")] public string Type { get; set; }
         [JsonPropertyName("data")] public string Data { get; set; }

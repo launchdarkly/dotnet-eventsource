@@ -4,8 +4,10 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using LaunchDarkly.EventSource;
-using LaunchDarkly.EventSource.Background;
+using LaunchDarkly.EventSource.Events;
+using LaunchDarkly.EventSource.Exceptions;
 using LaunchDarkly.Logging;
 
 namespace TestService
@@ -65,8 +67,10 @@ namespace TestService
                 httpConfig = httpConfig.ReadTimeout(TimeSpan.FromMilliseconds(_options.ReadTimeoutMs.Value));
             }
 
-            var builder = Configuration.Builder(httpConfig);
-            builder.Logger(log);
+            var builder = Configuration.Builder(httpConfig)
+                .ErrorStrategy(ErrorStrategy.AlwaysContinue) // see comments in RunAsync
+                .Logger(log);
+
             if (_options.InitialDelayMs != null)
             {
                 builder.InitialRetryDelay(TimeSpan.FromMilliseconds(_options.InitialDelayMs.Value));
@@ -80,50 +84,84 @@ namespace TestService
 
             _stream = new EventSource(builder.Build());
 
-            var backgroundEventSource = new BackgroundEventSource(_stream);
-            backgroundEventSource.MessageReceived += async (sender, args) =>
-            {
-                _log.Info("Received event from stream (type: {0}, data: {1})",
-                    args.EventName, args.Message.Data);
-                await SendMessage(new Message
-                {
-                    Kind = "event",
-                    Event = new EventMessage
-                    {
-                        Type = args.EventName,
-                        Data = args.Message.Data,
-                        Id = args.Message.LastEventId
-                    }
-                });
-            };
-            backgroundEventSource.CommentReceived += async (sender, args) =>
-            {
-                var comment = args.Comment;
-                if (comment.StartsWith(":"))
-                {
-                    comment = comment.Substring(1); // this SSE client includes the colon in the comment
-                }
-                _log.Info("Received comment from stream: {0}", comment);
-                await SendMessage(new Message
-                {
-                    Kind = "comment",
-                    Comment = comment
-                });
-            };
-            backgroundEventSource.Error += async (sender, args) =>
-            {
-                var exDesc = LogValues.ExceptionSummary(args.Exception);
-                _log.Info("Received error from stream: {0}", exDesc);
-                await SendMessage(new Message
-                {
-                    Kind = "error",
-                    Error = exDesc.ToString()
-                });
-            };
-
-            Task.Run(backgroundEventSource.RunAsync);
+            Task.Run(RunAsync);
         }
-        
+
+        private async Task RunAsync()
+        {
+            // A typical SSE-based application would only be interested in the events that
+            // are represented by EventMessage, so it could more simply call ReadMessageAsync()
+            // and receive only that type. But for the contract tests, we want to know more
+            // details such as comments and error conditions.
+
+            while (_stream.ReadyState != ReadyState.Shutdown)
+            {
+                try
+                {
+                    var e = await _stream.ReadAnyEventAsync();
+
+                    if (e is MessageEvent me)
+                    {
+                        _log.Info("Received event from stream (type: {0}, data: {1})",
+                            me.Name, me.Data);
+                        await SendMessage(new CallbackMessage
+                        {
+                            Kind = "event",
+                            Event = new CallbackEventMessage
+                            {
+                                Type = me.Name,
+                                Data = me.Data,
+                                Id = me.LastEventId
+                            }
+                        });
+                    }
+                    else if (e is CommentEvent ce)
+                    {
+                        _log.Info("Received comment from stream: {0}", ce.Text);
+                        await SendMessage(new CallbackMessage
+                        {
+                            Kind = "comment",
+                            Comment = ce.Text
+                        });
+                    }
+                    else if (e is FaultEvent fe)
+                    {
+                        if (fe.Exception is StreamClosedByCallerException)
+                        {
+                            // This one is special because it simply means we deliberately
+                            // closed the stream ourselves, so we don't need to report it
+                            // to the test harness.
+                            continue;
+                        }
+                        var exDesc = LogValues.ExceptionSummary(fe.Exception).ToString();
+                        _log.Info("Received error from stream: {0}", exDesc);
+                        await SendMessage(new CallbackMessage
+                        {
+                            Kind = "error",
+                            Error = exDesc
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Because we specified ErrorStrategy.AlwaysContinue, EventSource
+                    // will normally report any errors on the stream as just part of the
+                    // stream, so we will get them as FaultEvents and then it will
+                    // transparently reconnect. Any exception that is thrown here
+                    // probably means there is a bug, so we'll report it to the test
+                    // harness (likely causing test to fail) and also log a detailed
+                    // stacktrace.
+                    _log.Error("Unexpected exception: {0} {1}", LogValues.ExceptionSummary(ex),
+                        LogValues.ExceptionTrace(ex));
+                    await SendMessage(new CallbackMessage
+                    {
+                        Kind = "error",
+                        Error = LogValues.ExceptionSummary(ex).ToString()
+                    });
+                }
+            }
+        }
+
         public void Close()
         {
             _closed = true;
@@ -165,6 +203,10 @@ namespace TestService
                         if (!response.IsSuccessStatusCode)
                         {
                             _log.Error("Callback to {0} returned HTTP {1}", uri, response.StatusCode);
+                        }
+                        else
+                        {
+                            _log.Info("Callback to {0} succeeded", uri);
                         }
                     }
                 }
