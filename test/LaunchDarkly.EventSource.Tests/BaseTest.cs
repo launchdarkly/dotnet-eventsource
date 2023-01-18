@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using LaunchDarkly.Logging;
 using LaunchDarkly.TestHelpers.HttpTest;
 using Xunit;
 using Xunit.Abstractions;
+using static System.Net.WebRequestMethods;
 
-namespace LaunchDarkly.EventSource.Tests
+namespace LaunchDarkly.EventSource
 {
     // [Collection] causes all the tests to be grouped together so they're not parallelized. Running
     // tests in parallel would make task scheduling very unpredictable, increasing the chances of
@@ -15,6 +17,8 @@ namespace LaunchDarkly.EventSource.Tests
     public abstract class BaseTest
     {
         public static readonly Uri _uri = new Uri("http://test-uri");
+
+        public static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(1);
 
         /// <summary>
         /// Tests can use this object wherever an <see cref="ILogAdapter"/> is needed, to
@@ -75,26 +79,78 @@ namespace LaunchDarkly.EventSource.Tests
             return new EventSource(builder.Build());
         }
 
-        protected EventSource MakeEventSource(HttpMessageHandler httpHandler, Action<ConfigurationBuilder> modConfig = null) =>
-            MakeEventSource(_uri, builder =>
-            {
-                builder.HttpMessageHandler(httpHandler);
-                modConfig?.Invoke(builder);
-            });
+        protected EventSource MakeEventSource(
+            Uri uri,
+            Func<HttpConnectStrategy, HttpConnectStrategy> modHttp = null,
+            Action<ConfigurationBuilder> modConfig = null
+            )
+        {
+            var http = ConnectStrategy.Http(uri);
+            http = modHttp is null ? http : modHttp(http);
+            var builder = Configuration.Builder(http)
+                .LogAdapter(_testLogging);
+            AddBaseConfig(builder);
+            modConfig?.Invoke(builder);
+            return new EventSource(builder.Build());
+        }
 
         protected void WithServerAndEventSource(Handler handler, Action<HttpServer, EventSource> action) =>
-            WithServerAndEventSource(handler, null, action);
+            WithServerAndEventSource(handler, null, null, action);
 
-        protected void WithServerAndEventSource(Handler handler, Action<ConfigurationBuilder> modConfig, Action<HttpServer, EventSource> action)
+        protected void WithServerAndEventSource(
+            Handler handler,
+            Func<HttpConnectStrategy, HttpConnectStrategy> modHttp,
+            Action<ConfigurationBuilder> modConfig,
+            Action<HttpServer, EventSource> action
+            )
         {
             using (var server = HttpServer.Start(handler))
             {
-                using (var es = MakeEventSource(server.Uri, modConfig))
+                using (var es = MakeEventSource(server.Uri, modHttp, modConfig))
                 {
                     action(server, es);
                 }
             }
         }
+        
+        protected async Task WithServerAndEventSource(Handler handler, Func<HttpServer, EventSource, Task> action) =>
+            await WithServerAndEventSource(handler, null, null, action);
+
+        protected async Task WithServerAndEventSource(
+            Handler handler,
+            Func<HttpConnectStrategy, HttpConnectStrategy> modHttp,
+            Action<ConfigurationBuilder> modConfig,
+            Func<HttpServer, EventSource, Task> action
+            )
+        {
+            using (var server = HttpServer.Start(handler))
+            {
+                using (var es = MakeEventSource(server.Uri, modHttp, modConfig))
+                {
+                    await action(server, es);
+                }
+            }
+        }
+
+        protected Task WithMockConnectEventSource(
+            Action<MockConnectStrategy> configureMockConnect,
+            Action<ConfigurationBuilder> configureEventSource,
+            Func<MockConnectStrategy, EventSource, Task> action
+            )
+        {
+            var mock = new MockConnectStrategy();
+            configureMockConnect?.Invoke(mock);
+            var builder = Configuration.Builder(mock)
+                .LogAdapter(_testLogging);
+            AddBaseConfig(builder);
+            configureEventSource?.Invoke(builder);
+            return action(mock, new EventSource(builder.Build()));
+        }
+
+        protected Task WithMockConnectEventSource(
+            Action<MockConnectStrategy> configureMockConnect,
+            Func<MockConnectStrategy, EventSource, Task> action
+            ) => WithMockConnectEventSource(configureMockConnect, null, action);
 
         /// <summary>
         /// Override this method to add configuration defaults to the behavior of
@@ -102,6 +158,9 @@ namespace LaunchDarkly.EventSource.Tests
         /// </summary>
         /// <param name="builder"></param>
         protected virtual void AddBaseConfig(ConfigurationBuilder builder) { }
+
+        protected static Handler StreamWithCommentThatStaysOpen =>
+            Handlers.SSE.Start().Then(Handlers.SSE.Comment("")).Then(Handlers.SSE.LeaveOpen());
 
         protected static Handler EmptyStreamThatStaysOpen =>
             Handlers.SSE.Start().Then(Handlers.SSE.LeaveOpen());

@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using LaunchDarkly.EventSource.Events;
+using LaunchDarkly.EventSource.Exceptions;
+using LaunchDarkly.EventSource.Internal;
 using LaunchDarkly.Logging;
 
 namespace LaunchDarkly.EventSource
@@ -17,66 +17,51 @@ namespace LaunchDarkly.EventSource
         #region Private Fields
 
         private readonly Configuration _configuration;
-        private readonly HttpClient _httpClient;
         private readonly Logger _logger;
+        private readonly ConnectStrategy.Client _client;
+        private readonly ErrorStrategy _baseErrorStrategy;
+        private readonly RetryDelayStrategy _baseRetryDelayStrategy;
+        private readonly TimeSpan _retryDelayResetThreshold;
+        private readonly Uri _origin;
+        private readonly object _lock = new object();
 
-        private List<string> _eventDataStringBuffer;
-        private MemoryStream _eventDataUtf8ByteBuffer;
-        private string _eventName;
-        private string _lastEventId;
-        private TimeSpan _retryDelay;
-        private readonly ExponentialBackoffWithDecorrelation _backOff;
-        private CancellationTokenSource _currentRequestToken;
-        private DateTime? _lastSuccessfulConnectionTime;
-        private ReadyState _readyState;
+        private readonly ValueWithLock<ReadyState> _readyState;
+        private readonly ValueWithLock<TimeSpan> _baseRetryDelay;
+        private readonly ValueWithLock<TimeSpan?> _nextRetryDelay;
+        private readonly ValueWithLock<DateTime?> _connectedTime;
+        private readonly ValueWithLock<DateTime?> _disconnectedTime;
+        private readonly ValueWithLock<CancellationToken?> _cancellationToken;
+        private volatile CancellationTokenSource _cancellationTokenSource;
+        private volatile IDisposable _request;
+
+        private EventParser _parser;
+        private ErrorStrategy _currentErrorStrategy;
+        private RetryDelayStrategy _currentRetryDelayStrategy;
+        private volatile string _lastEventId;
+        private volatile bool _deliberatelyClosedConnection;
 
         #endregion
 
-        #region Public Events
-
-        /// <inheritdoc/>
-        public event EventHandler<StateChangedEventArgs> Opened;
-
-        /// <inheritdoc/>
-        public event EventHandler<StateChangedEventArgs> Closed;
-
-        /// <inheritdoc/>
-        public event EventHandler<MessageReceivedEventArgs> MessageReceived;
-
-        /// <inheritdoc/>
-        public event EventHandler<CommentReceivedEventArgs> CommentReceived;
-
-        /// <inheritdoc/>
-        public event EventHandler<ExceptionEventArgs> Error;
-
-        #endregion Public Events
-
+        
         #region Public Properties
 
         /// <inheritdoc/>
-        public ReadyState ReadyState
-        {
-            get
-            {
-                lock (this)
-                {
-                    return _readyState;
-                }
-            }
-            private set
-            {
-                lock (this)
-                {
-                    _readyState = value;
-                }
-            }
-        }
+        public ReadyState ReadyState => _readyState.Get();
 
-        internal TimeSpan BackOffDelay
-        {
-            get;
-            private set;
-        }
+        /// <inheritdoc/>
+        public TimeSpan BaseRetryDelay => _baseRetryDelay.Get();
+
+        /// <inheritdoc/>
+        public string LastEventId => _lastEventId;
+
+        /// <inheritdoc/>
+        public TimeSpan? NextRetryDelay => _nextRetryDelay.Get();
+
+        /// <inheritdoc/>
+        public Uri Origin => _origin;
+
+        /// <inheritdoc/>
+        public Logger Logger => _logger;
 
         #endregion
 
@@ -88,17 +73,25 @@ namespace LaunchDarkly.EventSource
         /// <param name="configuration">the configuration</param>
         public EventSource(Configuration configuration)
         {
-            _readyState = ReadyState.Raw;
-
+            _readyState = new ValueWithLock<ReadyState>(_lock, ReadyState.Raw);
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
             _logger = _configuration.Logger;
 
-            _retryDelay = _configuration.InitialRetryDelay;
+            _client = _configuration.ConnectStrategy.CreateClient(_logger);
+            _origin = _configuration.ConnectStrategy.Origin;
 
-            _backOff = new ExponentialBackoffWithDecorrelation(_retryDelay, _configuration.MaxRetryDelay);
+            _baseErrorStrategy = _currentErrorStrategy = _configuration.ErrorStrategy;
+            _baseRetryDelayStrategy = _currentRetryDelayStrategy = _configuration.RetryDelayStrategy;
+            _retryDelayResetThreshold = _configuration.RetryDelayResetThreshold;
+            _baseRetryDelay = new ValueWithLock<TimeSpan>(_lock, _configuration.InitialRetryDelay);
+            _nextRetryDelay = new ValueWithLock<TimeSpan?>(_lock, null);
+            _lastEventId = _configuration.LastEventId;
 
-            _httpClient = _configuration.HttpClient ?? CreateHttpClient();
+            _connectedTime = new ValueWithLock<DateTime?>(_lock, null);
+            _disconnectedTime = new ValueWithLock<DateTime?>(_lock, null);
+
+            _cancellationToken = new ValueWithLock<CancellationToken?>(_lock, null);
         }
 
         /// <summary>
@@ -116,142 +109,106 @@ namespace LaunchDarkly.EventSource
         /// <inheritdoc/>
         public async Task StartAsync()
         {
-            bool firstTime = true;
-            while (ReadyState != ReadyState.Shutdown)
-            {
-                if (!firstTime)
-                {
-                    if (_lastSuccessfulConnectionTime.HasValue)
-                    {
-                        if (DateTime.Now.Subtract(_lastSuccessfulConnectionTime.Value) >= _configuration.BackoffResetThreshold)
-                        {
-                            _backOff.ResetReconnectAttemptCount();
-                        }
-                        _lastSuccessfulConnectionTime = null;
-                    }
-                    await MaybeWaitWithBackOff();
-                }
-                firstTime = false;
-
-                CancellationTokenSource newRequestTokenSource = null;
-                CancellationToken cancellationToken;
-                lock (this)
-                {
-                    if (_readyState == ReadyState.Shutdown)
-                    {
-                        // in case Close() was called in between the previous ReadyState check and the creation of the new token
-                        return;
-                    }
-                    newRequestTokenSource = new CancellationTokenSource();
-                    _currentRequestToken?.Dispose();
-                    _currentRequestToken = newRequestTokenSource;
-                }
-
-                if (ReadyState == ReadyState.Connecting || ReadyState == ReadyState.Open)
-                {
-                    throw new InvalidOperationException(string.Format(Resources.ErrorAlreadyStarted, ReadyState));
-                }
-
-                SetReadyState(ReadyState.Connecting);
-                cancellationToken = newRequestTokenSource.Token;
-
-                try
-                {
-                    await ConnectToEventSourceAsync(cancellationToken);
-
-                    // ConnectToEventSourceAsync normally doesn't return, unless it detects that the request has been cancelled.
-                    Close(ReadyState.Closed);
-                }
-                catch (Exception e)
-                {
-                    CancelCurrentRequest();
-
-                    // If the user called Close(), ReadyState = Shutdown, so errors are irrelevant.
-                    if (ReadyState != ReadyState.Shutdown)
-                    {
-                        Exception realException = e;
-                        if (realException is AggregateException ae && ae.InnerExceptions.Count == 1)
-                        {
-                            realException = ae.InnerException;
-                        }
-                        if (realException is OperationCanceledException oe)
-                        {
-                            // This exception could either be the result of us explicitly cancelling a request, in which case we don't
-                            // need to do anything else, or it could be that the request timed out.
-                            if (oe.CancellationToken.IsCancellationRequested)
-                            {
-                                realException = null;
-                            }
-                            else
-                            {
-                                realException = new TimeoutException();
-                            }
-                        }
-
-                        if (realException != null)
-                        {
-                            OnError(new ExceptionEventArgs(realException));
-                        }
-                        Close(ReadyState.Closed);
-                    }
-                }
-            }
+            await TryStartAsync(false);
         }
 
-        private async Task MaybeWaitWithBackOff()  {
-            if (_retryDelay.TotalMilliseconds > 0)
+        /// <inheritdoc/>
+        public async Task<MessageEvent> ReadMessageAsync()
+        {
+            while (true)
             {
-                TimeSpan sleepTime = _backOff.GetNextBackOff();
-                if (sleepTime.TotalMilliseconds > 0) {
-                    _logger.Info("Waiting {0} milliseconds before reconnecting...", sleepTime.TotalMilliseconds);
-                    BackOffDelay = sleepTime;
-                    await Task.Delay(sleepTime);
+                IEvent e = await ReadAnyEventAsync();
+                if (e is MessageEvent m)
+                {
+                    return m;
                 }
             }
         }
 
         /// <inheritdoc/>
-        public void Restart(bool resetBackoffDelay)
+        public async Task<IEvent> ReadAnyEventAsync()
         {
-            lock (this)
+            try
             {
-                if (_readyState != ReadyState.Open)
+                while (true)
                 {
-                    return;
-                }
-                if (resetBackoffDelay)
-                {
-                    _backOff.ResetReconnectAttemptCount();
+                    // Reading an event implies starting the stream if it isn't already started.
+                    // We might also be restarting since we could have been interrupted at any time.
+                    if (_parser is null)
+                    {
+                        var fault = await TryStartAsync(true);
+                        return (IEvent)fault ?? (IEvent)(new StartedEvent());
+                    }
+                    var e = await _parser.NextEventAsync();
+                    if (e is SetRetryDelayEvent srde)
+                    {
+                        // SetRetryDelayEvent means the stream contained a "retry:" line. We don't
+                        // surface this to the caller, we just apply the new delay and move on.
+                        _baseRetryDelay.Set(srde.RetryDelay);
+                        _currentRetryDelayStrategy = _baseRetryDelayStrategy;
+                        continue;
+                    }
+                    if (e is MessageEvent me)
+                    {
+                        if (me.LastEventId != null)
+                        {
+                            _lastEventId = me.LastEventId;
+                        }
+                    }
+                    return e;
                 }
             }
-            CancelCurrentRequest();
+            catch (Exception ex)
+            {
+                if (_deliberatelyClosedConnection)
+                {
+                    // If the stream was explicitly closed from another thread, that'll likely show up as
+                    // an I/O error or an OperationCanceledException, but we don't want to report it as one.
+                    ex = new StreamClosedByCallerException();
+                    _deliberatelyClosedConnection = false;
+                }
+                else
+                {
+                    _logger.Debug("Encountered exception: {0}", LogValues.ExceptionSummary(ex));
+                }
+                _disconnectedTime.Set(DateTime.Now);
+                CloseCurrentStream(false, false);
+                _parser = null;
+                ComputeRetryDelay();
+                if (ApplyErrorStrategy(ex) == ErrorStrategy.Action.Continue)
+                {
+                    return new FaultEvent(ex);
+                }
+                throw ex;
+            }
         }
 
+        /// <inheritdoc/>
+        public void Interrupt() =>
+            CloseCurrentStream(true, false);
+
         /// <summary>
-        /// Closes the connection to the SSE server. The <c>EventSource</c> cannot be reopened after this.
+        /// Closes the connection to the SSE server. The EventSource cannot be reopened after this.
         /// </summary>
         public void Close()
         {
-            if (ReadyState != ReadyState.Raw && ReadyState != ReadyState.Shutdown)
+            if (_readyState.GetAndSet(ReadyState.Shutdown) == ReadyState.Shutdown)
             {
-                Close(ReadyState.Shutdown);
+                return;
             }
-            CancelCurrentRequest();
-
-            // do not dispose httpClient if it is user provided
-            if (_configuration.HttpClient == null)
-            {
-                _httpClient.Dispose();
-            }
+            CloseCurrentStream(true, true);
+            _client?.Dispose();
         }
 
         /// <summary>
         /// Equivalent to calling <see cref="Close()"/>.
         /// </summary>
-        public void Dispose()
-        {
+        public void Dispose() =>
             Dispose(true);
-        }
+
+        #endregion
+
+        #region Private Methods
 
         private void Dispose(bool disposing)
         {
@@ -261,211 +218,163 @@ namespace LaunchDarkly.EventSource
             }
         }
 
-        #endregion
-
-        #region Private Methods
-
-        private HttpClient CreateHttpClient()
+        private async Task<FaultEvent> TryStartAsync(bool canReturnFaultEvent)
         {
-            var client =_configuration.HttpMessageHandler is null ?
-                new HttpClient() :
-                new HttpClient(_configuration.HttpMessageHandler, false);
-            client.Timeout = _configuration.ResponseStartTimeout;
-            return client;
-        }
-
-        private void CancelCurrentRequest()
-        {
-            CancellationTokenSource requestTokenSource = null;
-            lock (this)
+            if (_parser != null)
             {
-                requestTokenSource = _currentRequestToken;
-                _currentRequestToken = null;
+                return null;
             }
-            if (requestTokenSource != null)
+            if (ReadyState == ReadyState.Shutdown)
             {
-                _logger.Debug("Cancelling current request");
-                requestTokenSource.Cancel();
-                requestTokenSource.Dispose();
+                throw new StreamClosedByCallerException();
             }
-        }
-
-        internal virtual EventSourceService GetEventSourceService(Configuration configuration)
-        {
-            return new EventSourceService(configuration, _httpClient, _logger);
-        }
-
-        private async Task ConnectToEventSourceAsync(CancellationToken cancellationToken)
-        {
-            _eventDataStringBuffer = null;
-            _eventDataUtf8ByteBuffer = null;
-
-            var svc = GetEventSourceService(_configuration);
-            
-            svc.ConnectionOpened += (o, e) => {
-                _lastSuccessfulConnectionTime = DateTime.Now;
-                SetReadyState(ReadyState.Open, OnOpened);
-            };
-            svc.ConnectionClosed += (o, e) => { SetReadyState(ReadyState.Closed, OnClosed); };
-
-            await svc.GetDataAsync(
-                ProcessResponseLineString,
-                ProcessResponseLineUtf8,
-                _lastEventId,
-                cancellationToken
-            );
-        }
-
-        private void Close(ReadyState state)
-        {
-            _logger.Debug("Close({0}) - state was {1}", state, ReadyState);
-            SetReadyState(state, OnClosed);
-        }
-        
-        private void ProcessResponseLineString(string content)
-        {
-            if (content == null)
+            while (true)
             {
-                // StreamReader may emit a null if the stream has been closed; there's nothing to
-                // be done at this level in that case
-                return;
-            }
-            if (content.Length == 0)
-            {
-                DispatchEvent();
-            }
-            else
-            {
-                HandleParsedLine(EventParser.ParseLineString(content));
-            }
-        }
+                StreamException exception = null;
 
-        private void ProcessResponseLineUtf8(Utf8ByteSpan content)
-        {
-            if (content.Length == 0)
-            {
-                DispatchEvent();
-            }
-            else
-            {
-                HandleParsedLine(EventParser.ParseLineUtf8Bytes(content));
-            }
-        }
-
-
-        private void SetReadyState(ReadyState state, Action<StateChangedEventArgs> action = null)
-        {
-            lock (this)
-            {
-                if (_readyState == state || _readyState == ReadyState.Shutdown)
+                TimeSpan nextDelay = _nextRetryDelay.Get() ?? TimeSpan.Zero;
+                if (nextDelay > TimeSpan.Zero)
                 {
-                    return;
-                }
-                _readyState = state;
-            }
-
-            if (action != null)
-            {
-                action(new StateChangedEventArgs(state));
-            }
-        }
-
-        private void HandleParsedLine(EventParser.Result result)
-        {
-            if (result.IsComment)
-            {
-                OnCommentReceived(new CommentReceivedEventArgs(result.GetValueAsString()));
-            }
-            else if (result.IsDataField)
-            {
-                if (result.ValueString != null)
-                {
-                    if (_eventDataStringBuffer is null)
+                    var disconnectedTime = _disconnectedTime.Get();
+                    TimeSpan delayNow = disconnectedTime.HasValue ?
+                        (nextDelay - (DateTime.Now - disconnectedTime.Value)) :
+                        nextDelay;
+                    if (delayNow > TimeSpan.Zero)
                     {
-                        _eventDataStringBuffer = new List<string>(2);
+                        _logger.Info("Waiting {0} milliseconds before reconnecting", delayNow.TotalMilliseconds);
+                        await Task.Delay(delayNow);
                     }
-                    _eventDataStringBuffer.Add(result.ValueString);
-                    _eventDataStringBuffer.Add("\n");
                 }
-                else
+
+                _readyState.Set(ReadyState.Connecting);
+
+                var connectResult = new ConnectStrategy.Client.Result();
+                CancellationToken newCancellationToken;
+                if (exception is null)
                 {
-                    if (_eventDataUtf8ByteBuffer is null)
+                    _connectedTime.Set(null);
+                    _deliberatelyClosedConnection = false;
+
+                    CancellationTokenSource newRequestTokenSource = new CancellationTokenSource();
+                    lock (_lock)
                     {
-                        _eventDataUtf8ByteBuffer = new MemoryStream(result.ValueBytes.Length + 1);
+                        if (_readyState.Get() == ReadyState.Shutdown)
+                        {
+                            // in case Close() was called in between the previous ReadyState check and the creation of the new token
+                            return null;
+                        }
+                        _cancellationTokenSource?.Dispose();
+                        _cancellationTokenSource = newRequestTokenSource;
+                        _cancellationToken.Set(newRequestTokenSource.Token);
+                        newCancellationToken = newRequestTokenSource.Token;
                     }
-                    _eventDataUtf8ByteBuffer.Write(result.ValueBytes.Data, result.ValueBytes.Offset, result.ValueBytes.Length);
-                    _eventDataUtf8ByteBuffer.WriteByte((byte)'\n');
+
+                    try
+                    {
+                        connectResult = await _client.ConnectAsync(
+                            new ConnectStrategy.Client.Params
+                            {
+                                CancellationToken = newRequestTokenSource.Token,
+                                LastEventId = _lastEventId
+                            });
+                    }
+                    catch (StreamException e)
+                    {
+                        exception = e;
+                    }
                 }
-            }
-            else if (result.IsEventField)
-            {
-                _eventName = result.GetValueAsString();
-            }
-            else if (result.IsIdField)
-            {
-                _lastEventId = result.GetValueAsString();
-            }
-            else if (result.IsRetryField)
-            {
-                if (long.TryParse(result.GetValueAsString(), out var retry))
+
+                if (exception != null)
                 {
-                    _retryDelay = TimeSpan.FromMilliseconds(retry);
+                    _readyState.Set(ReadyState.Closed);
+                    _logger.Debug("Encountered exception: {0}", LogValues.ExceptionSummary(exception));
+                    _disconnectedTime.Set(DateTime.Now);
+                    ComputeRetryDelay();
+                    if (ApplyErrorStrategy(exception) == ErrorStrategy.Action.Continue)
+                    {
+                        // The ErrorStrategy told us to CONTINUE rather than throwing an exception.
+                        if (canReturnFaultEvent)
+                        {
+                            return new FaultEvent(exception);
+                        }
+                        // If canReturnFaultEvent is false, it means the caller explicitly called start(),
+                        // in which case there's no way to return a FaultEvent so we just keep retrying
+                        // transparently.
+                        continue;
+                    }
+                    // The ErrorStrategy told us to THROW rather than CONTINUE. 
+                    throw exception;
                 }
+
+                lock (_lock)
+                {
+                    _connectedTime.Set(DateTime.Now);
+                    _readyState.Set(ReadyState.Open);
+                    _request = connectResult.Closer;
+                }
+                _logger.Debug("Connected to SSE stream");
+
+                _parser = new EventParser(
+                    connectResult.Stream,
+                    connectResult.ReadTimeout ?? Timeout.InfiniteTimeSpan,
+                    _origin,
+                    newCancellationToken,
+                    _logger
+                    );
+
+                _currentErrorStrategy = _baseErrorStrategy;
+                return null;
             }
         }
 
-        private void DispatchEvent()
+        private ErrorStrategy.Action ApplyErrorStrategy(Exception exception)
         {
-            var name = _eventName ?? Constants.MessageField;
-            _eventName = null;
-            MessageEvent message;
-
-            if (_eventDataStringBuffer != null)
-            {
-                if (_eventDataStringBuffer.Count == 0)
-                {
-                    return;
-                }
-                // remove last item which is always a trailing newline
-                _eventDataStringBuffer.RemoveAt(_eventDataStringBuffer.Count - 1);
-                var dataString = string.Concat(_eventDataStringBuffer);
-                message = new MessageEvent(name, dataString, _lastEventId, _configuration.Uri);
-
-                _eventDataStringBuffer.Clear();
-            }
-            else
-            {
-                if (_eventDataUtf8ByteBuffer is null || _eventDataUtf8ByteBuffer.Length == 0)
-                {
-                    return;
-                }
-                var dataSpan = new Utf8ByteSpan(_eventDataUtf8ByteBuffer.GetBuffer(), 0,
-                    (int)_eventDataUtf8ByteBuffer.Length - 1); // remove trailing newline
-                message = new MessageEvent(name, dataSpan, _lastEventId, _configuration.Uri);
-
-                // We've now taken ownership of the original buffer; null out the previous
-                // reference to it so a new one will be created next time
-                _eventDataUtf8ByteBuffer = null;
-            }
-
-            _logger.Debug("Received event \"{0}\"", name);
-            OnMessageReceived(new MessageReceivedEventArgs(message));
+            var result = _currentErrorStrategy.Apply(exception);
+            _currentErrorStrategy = result.Next ?? _currentErrorStrategy;
+            return result.Action;
         }
 
-        private void OnOpened(StateChangedEventArgs e) =>
-            Opened?.Invoke(this, e);
+        private void ComputeRetryDelay()
+        {
+            var connectedTime = _connectedTime.Get();
+            if (_retryDelayResetThreshold > TimeSpan.Zero && connectedTime.HasValue)
+            {
+                TimeSpan connectionDuration = DateTime.Now.Subtract(connectedTime.Value);
+                if (connectionDuration >= _retryDelayResetThreshold)
+                {
+                    _currentRetryDelayStrategy = _baseRetryDelayStrategy;
+                }
+            }
+            var result = _currentRetryDelayStrategy.Apply(_baseRetryDelay.Get());
+            _nextRetryDelay.Set(result.Delay);
+            _currentRetryDelayStrategy = result.Next ?? _currentRetryDelayStrategy;
+        }
 
-        private void OnClosed(StateChangedEventArgs e) =>
-            Closed?.Invoke(this, e);
-
-        private void OnMessageReceived(MessageReceivedEventArgs e) =>
-            MessageReceived?.Invoke(this, e);
-
-        private void OnCommentReceived(CommentReceivedEventArgs e) =>
-            CommentReceived?.Invoke(this, e);
-
-        private void OnError(ExceptionEventArgs e) =>
-            Error?.Invoke(this, e);
+        private void CloseCurrentStream(bool deliberatelyInterrupted, bool closingPermanently)
+        {
+            CancellationTokenSource oldTokenSource;
+            IDisposable oldRequest;
+            lock (_lock)
+            {
+                if (_cancellationTokenSource is null)
+                {
+                    return;
+                }
+                oldTokenSource = _cancellationTokenSource;
+                oldRequest = _request;
+                _cancellationTokenSource = null;
+                _request = null;
+                _deliberatelyClosedConnection = true;
+                if (_readyState.Get() != ReadyState.Shutdown)
+                {
+                    _readyState.Set(ReadyState.Closed);
+                }
+            }
+            _logger.Debug("Cancelling current request");
+            oldTokenSource.Cancel();
+            oldTokenSource.Dispose();
+            oldRequest?.Dispose();
+        }
 
         #endregion
     }

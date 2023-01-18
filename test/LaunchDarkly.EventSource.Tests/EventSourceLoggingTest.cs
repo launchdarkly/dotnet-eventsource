@@ -1,63 +1,61 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using LaunchDarkly.EventSource.Events;
 using LaunchDarkly.Logging;
 using LaunchDarkly.TestHelpers.HttpTest;
 using Xunit;
 using Xunit.Abstractions;
 
-using static LaunchDarkly.EventSource.Tests.TestHelpers;
+using static LaunchDarkly.EventSource.TestHelpers;
 
-namespace LaunchDarkly.EventSource.Tests
+namespace LaunchDarkly.EventSource
 {
     public class EventSourceLoggingTest : BaseTest
     {
-        private static readonly MessageEvent BasicEvent = new MessageEvent("thing", "test", _uri);
-
-        private static Handler HandlerWithBasicEvent() =>
-            StartStream().Then(WriteEvent(BasicEvent)).Then(LeaveStreamOpen());
-
         public EventSourceLoggingTest(ITestOutputHelper testOutput) : base(testOutput) { }
 
         [Fact]
-        public void UsesDefaultLoggerNameWhenLogAdapterIsSpecified()
+        public async Task UsesDefaultLoggerNameWhenLogAdapterIsSpecified()
         {
-            WithServerAndEventSource(HandlerWithBasicEvent(), (server, es) =>
-            {
-                var eventSink = new EventSink(es);
-                _ = Task.Run(es.StartAsync);
+            await WithMockConnectEventSource(
+                mock => mock.ConfigureRequests(
+                        MockConnectStrategy.RespondWithDataAndThenEnd("data:\n\n")
+                    ),
+                async (mock, es) =>
+                {
+                    await es.StartAsync();
 
-                eventSink.ExpectActions(EventSink.OpenedAction());
-
-                Assert.NotEmpty(_logCapture.GetMessages());
-                Assert.True(_logCapture.GetMessages().All(m => m.LoggerName == Configuration.DefaultLoggerName),
-                    _logCapture.ToString());
-            });
+                    Assert.NotEmpty(_logCapture.GetMessages());
+                    Assert.True(_logCapture.GetMessages().All(m => m.LoggerName == Configuration.DefaultLoggerName),
+                        _logCapture.ToString());
+                });
         }
 
         [Fact]
-        public void CanSpecifyLoggerInstance()
+        public async Task CanSpecifyLoggerInstance()
         {
-            WithServerAndEventSource(HandlerWithBasicEvent(), c => c.Logger(_logCapture.Logger("special")), (server, es) =>
-            {
-                var eventSink = new EventSink(es);
-                _ = Task.Run(es.StartAsync);
+            await WithMockConnectEventSource(
+                mock => mock.ConfigureRequests(
+                        MockConnectStrategy.RespondWithDataAndThenEnd("data:\n\n")
+                    ),
+                c => c.Logger(_logCapture.Logger("special")),
+                async (mock, es) =>
+                {
+                    await es.StartAsync();
 
-                eventSink.ExpectActions(EventSink.OpenedAction());
-
-                Assert.NotEmpty(_logCapture.GetMessages());
-                Assert.True(_logCapture.GetMessages().All(m => m.LoggerName == "special"), _logCapture.ToString());
-            });
+                    Assert.NotEmpty(_logCapture.GetMessages());
+                    Assert.True(_logCapture.GetMessages().All(m => m.LoggerName == "special"), _logCapture.ToString());
+                });
         }
 
         [Fact]
-        public void ConnectingLogMessage()
+        public async Task ConnectingLogMessage()
         {
-            WithServerAndEventSource(HandlerWithBasicEvent(), (server, es) =>
+            // This one is specific to HttpConnectStrategy so we must use real HTTP
+            var handler = StartStream().Then(WriteComment(""));
+            await WithServerAndEventSource(handler, async (server, es) =>
             {
-                var eventSink = new EventSink(es);
-                _ = Task.Run(es.StartAsync);
-
-                eventSink.ExpectActions(EventSink.OpenedAction());
+                await es.StartAsync();
 
                 Assert.True(_logCapture.HasMessageWithText(LogLevel.Debug,
                     "Making GET request to EventSource URI " + server.Uri),
@@ -66,21 +64,21 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
-        public void EventReceivedLogMessage()
+        public async Task EventReceivedLogMessage()
         {
-            WithServerAndEventSource(HandlerWithBasicEvent(), (server, es) =>
-            {
-                var eventSink = new EventSink(es, _testLogging);
-                _ = Task.Run(es.StartAsync);
+            await WithMockConnectEventSource(
+                mock => mock.ConfigureRequests(
+                        MockConnectStrategy.RespondWithDataAndThenEnd("event:abc\ndata:\n\n")
+                    ),
+                async (mock, es) =>
+                {
+                    await es.StartAsync();
 
-                eventSink.ExpectActions(
-                    EventSink.OpenedAction(),
-                    EventSink.MessageReceivedAction(BasicEvent)
-                    );
+                    await es.ReadMessageAsync();
 
-                Assert.True(_logCapture.HasMessageWithText(LogLevel.Debug,
-                    string.Format(@"Received event ""{0}""", BasicEvent.Name)));
-            });
+                    Assert.True(_logCapture.HasMessageWithText(LogLevel.Debug,
+                        string.Format(@"Received event ""abc""")));
+                });
         }
     }
 }

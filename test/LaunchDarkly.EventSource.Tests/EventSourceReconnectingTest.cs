@@ -2,132 +2,109 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using LaunchDarkly.EventSource.Events;
+using LaunchDarkly.EventSource.Exceptions;
 using LaunchDarkly.TestHelpers.HttpTest;
 using Xunit;
 using Xunit.Abstractions;
 
-using static LaunchDarkly.EventSource.Tests.TestHelpers;
+using static LaunchDarkly.EventSource.TestHelpers;
 
-namespace LaunchDarkly.EventSource.Tests
+namespace LaunchDarkly.EventSource
 {
     public class EventSourceReconnectingTest : BaseTest
     {
         public EventSourceReconnectingTest(ITestOutputHelper testOutput) : base(testOutput) { }
 
         [Fact]
-        public void ReconnectAfterHttpError()
-        {
-            HttpStatusCode error1 = HttpStatusCode.BadRequest, error2 = HttpStatusCode.InternalServerError;
-            var message = new MessageEvent("put", "hello", _uri);
-
-            var handler = Handlers.Sequential(
-                Handlers.Status((int)error1),
-                Handlers.Status((int)error2),
-                StartStream().Then(WriteEvent(message)).Then(LeaveStreamOpen())
-                );
-
-            WithServerAndEventSource(handler, c => c.InitialRetryDelay(TimeSpan.FromMilliseconds(20)), (server, es) =>
-            {
-                var eventSink = new EventSink(es, _testLogging);
-                _ = Task.Run(es.StartAsync);
-
-                var action1 = eventSink.ExpectAction();
-                var ex1 = Assert.IsType<EventSourceServiceUnsuccessfulResponseException>(action1.Exception);
-                Assert.Equal((int)error1, ex1.StatusCode);
-
-                eventSink.ExpectActions(EventSink.ClosedAction());
-
-                var action2 = eventSink.ExpectAction();
-                var ex2 = Assert.IsType<EventSourceServiceUnsuccessfulResponseException>(action2.Exception);
-                Assert.Equal((int)error2, ex2.StatusCode);
-
-                eventSink.ExpectActions(
-                    EventSink.ClosedAction(),
-                    EventSink.OpenedAction(),
-                    EventSink.MessageReceivedAction(message)
-                    );
-            });
-        }
-
-        [Fact]
-        public void SendMostRecentEventIdOnReconnect()
+        public async Task SendMostRecentEventIdOnReconnect()
         {
             var initialEventId = "abc123";
             var eventId1 = "xyz456";
-            var message1 = new MessageEvent("put", "this is a test message", eventId1, _uri);
+            var message1 = new MessageEvent("put", "hello", eventId1, _uri);
 
-            var handler = Handlers.Sequential(
-                StartStream().Then(WriteEvent(message1)),
-                StartStream().Then(LeaveStreamOpen())
-                );
+            await WithMockConnectEventSource(
+                mock => mock.ConfigureRequests(
+                    MockConnectStrategy.RespondWithDataAndThenEnd(message1.AsSSEData()),
+                    MockConnectStrategy.RespondWithStream()
+                    ),
+                c => c.LastEventId(initialEventId)
+                    .ErrorStrategy(ErrorStrategy.AlwaysContinue),
+                async (mock, es) =>
+                {
+                    Assert.Equal(new StartedEvent(), await es.ReadAnyEventWithTimeoutAsync(DefaultTimeout));
 
-            WithServerAndEventSource(handler, c => c.InitialRetryDelay(TimeSpan.FromMilliseconds(20)).LastEventId(initialEventId), (server, es) =>
-            {
-                var eventSink = new EventSink(es, _testLogging);
-                _ = Task.Run(es.StartAsync);
+                    Assert.Equal(new MessageEvent("put", "hello", eventId1, mock.Origin),
+                        await es.ReadAnyEventWithTimeoutAsync(DefaultTimeout));
 
-                var req1 = server.Recorder.RequireRequest();
-                Assert.Equal(initialEventId, req1.Headers["Last-Event-Id"]);
+                    var p1 = mock.ReceivedConnections.Take();
+                    Assert.Equal(initialEventId, p1.LastEventId);
 
-                var req2 = server.Recorder.RequireRequest();
-                Assert.Equal(eventId1, req2.Headers["Last-Event-Id"]);
-            });
+                    Assert.Equal(new FaultEvent(new StreamClosedByServerException()),
+                        await es.ReadAnyEventWithTimeoutAsync(DefaultTimeout));
+
+                    Assert.Equal(new StartedEvent(), await es.ReadAnyEventWithTimeoutAsync(DefaultTimeout));
+
+                    var p2 = mock.ReceivedConnections.Take();
+                    Assert.Equal(eventId1, p2.LastEventId);
+                });
         }
 
         [Fact]
-        public void RetryDelayDurationsShouldIncrease()
+        public async Task RetryDelayStrategyIsAppliedEachTime()
         {
+            var baseDelay = TimeSpan.FromMilliseconds(10);
+            var increment = TimeSpan.FromMilliseconds(3);
             var nAttempts = 3;
-            var steps = new List<Handler>();
-            steps.Add(StartStream());
+            var requestHandlers = new List<MockConnectStrategy.RequestHandler>();
             for (var i = 0; i < nAttempts; i++)
             {
-                steps.Add(Handlers.WriteChunkString(":hi\n"));
+                requestHandlers.Add(MockConnectStrategy.RespondWithDataAndThenEnd(":hi\n"));
             }
-            steps.Add(LeaveStreamOpen());
-            var handler = Handlers.Sequential(steps.ToArray());
+            requestHandlers.Add(MockConnectStrategy.RespondWithDataAndStayOpen(":abc\n"));
 
-            var backoffs = new List<TimeSpan>();
+            var expectedDelay = baseDelay;
 
-            WithServerAndEventSource(handler, c => c.InitialRetryDelay(TimeSpan.FromMilliseconds(100)), (server, es) =>
-            {
-                _ = new EventSink(es, _testLogging);
-                es.Closed += (_, state) =>
+            await WithMockConnectEventSource(
+                mock => mock.ConfigureRequests(requestHandlers.ToArray()),
+                c => c.ErrorStrategy(ErrorStrategy.AlwaysContinue)
+                    .InitialRetryDelay(baseDelay)
+                    .RetryDelayStrategy(new ArithmeticallyIncreasingDelayStrategy(increment, TimeSpan.Zero)),
+                async (mock, es) =>
                 {
-                    backoffs.Add(es.BackOffDelay);
-                };
-
-                _ = Task.Run(es.StartAsync);
-
-                for (int i = 0; i <= nAttempts; i++)
-                {
-                    _ = server.Recorder.RequireRequest();
-                }
-            });
-
-            AssertBackoffsAlwaysIncrease(backoffs, nAttempts);
-        }
-
-        [Fact]
-        public async Task NoReconnectAttemptIsMadeIfErrorHandlerClosesEventSource()
-        {
-            var handler = Handlers.Sequential(
-                Handlers.Status((int)HttpStatusCode.Unauthorized),
-                StartStream().Then(LeaveStreamOpen())
-                );
-
-            using (var server = HttpServer.Start(handler))
-            {
-                using (var es = MakeEventSource(server.Uri))
-                {
-                    es.Error += (_, e) => es.Close();
-
                     await es.StartAsync();
 
-                    server.Recorder.RequireRequest();
-                    server.Recorder.RequireNoRequests(TimeSpan.FromMilliseconds(100));
+                for (int i = 0; i < nAttempts; i++)
+                {
+                    Assert.Equal(new CommentEvent("hi"), await es.ReadAnyEventWithTimeoutAsync(DefaultTimeout));
+                    Assert.Equal(new FaultEvent(new StreamClosedByServerException()),
+                        await es.ReadAnyEventWithTimeoutAsync(DefaultTimeout));
+
+                    Assert.Equal(expectedDelay, es.NextRetryDelay);
+                    expectedDelay += increment;
+
+                    Assert.Equal(new StartedEvent(), await es.ReadAnyEventWithTimeoutAsync(DefaultTimeout));
                 }
+            });
+        }
+
+        public class ArithmeticallyIncreasingDelayStrategy : RetryDelayStrategy
+        {
+            private readonly TimeSpan _increment, _cumulative;
+
+            public ArithmeticallyIncreasingDelayStrategy(TimeSpan increment, TimeSpan cumulative)
+            {
+                _increment = increment;
+                _cumulative = cumulative;
             }
+
+            public override Result Apply(TimeSpan baseRetryDelay) =>
+                new Result
+                {
+                    Delay = baseRetryDelay + _cumulative,
+                    Next = new ArithmeticallyIncreasingDelayStrategy(_increment,
+                        _cumulative + _increment)
+                };
         }
     }
 }

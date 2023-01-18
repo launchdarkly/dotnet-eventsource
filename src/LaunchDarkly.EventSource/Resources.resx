@@ -126,13 +126,16 @@
   <data name="ErrorHttpStatus" xml:space="preserve">
     <value>Unexpected HTTP status code {0} from server</value>
   </data>
-  <data name="ErrorWrongContentType" xml:space="preserve">
-    <value>Unexpected HTTP content type "{0}"; should be "text/event-stream"</value>
-  </data>
-  <data name="ErrorWrongEncoding" xml:space="preserve">
-    <value>Unexpected character encoding {0}; should be UTF-8</value>
+  <data name="ErrorWrongContentTypeOrEncoding" xml:space="preserve">
+    <value>HTTP content type was "{0}" with encoding {1}; should be "text/event-stream" and UTF-8</value>
   </data>
   <data name="ErrorEmptyResponse" xml:space="preserve">
     <value>HTTP response had no body</value>
+  </data>
+  <data name="StreamClosedByServer" xml:space="preserve">
+    <value>the stream was closed from the server side</value>
+  </data>
+  <data name="StreamClosedByCaller" xml:space="preserve">
+    <value>the stream was closed from the client side</value>
   </data>
 </root>

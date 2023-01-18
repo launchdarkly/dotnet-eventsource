@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
+using LaunchDarkly.EventSource.Events;
 using LaunchDarkly.Logging;
 
 namespace LaunchDarkly.EventSource
@@ -12,10 +12,10 @@ namespace LaunchDarkly.EventSource
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Initialize a builder by calling <c>new ConfigurationBuilder(uri)</c> or
-    /// <c>Configuration.Builder(uri)</c>. The URI is always required; all other properties
-    /// are set to defaults. Use the builder's setter methods to modify any desired properties;
-    /// setter methods can be chained. Then call <c>Build()</c> to construct the final immutable
+    /// Initialize a builder by calling one of the <see cref="Configuration"/> factory methods
+    /// such as <see cref="Configuration.Builder(Uri)"/>. All properties are initially set to
+    /// defaults. Use the builder's setter methods to modify any desired properties; setter
+    /// methods can be chained. Then call <c>Build()</c> to construct the final immutable
     /// <c>Configuration</c>.
     /// </para>
     /// <para>
@@ -27,33 +27,26 @@ namespace LaunchDarkly.EventSource
     {
         #region Private Fields
 
-        internal readonly Uri _uri;
         internal TimeSpan _initialRetryDelay = Configuration.DefaultInitialRetryDelay;
-        internal TimeSpan _backoffResetThreshold = Configuration.DefaultBackoffResetThreshold;
+        internal ConnectStrategy _connectStrategy;
+        internal ErrorStrategy _errorStrategy;
         internal string _lastEventId;
         internal ILogAdapter _logAdapter;
         internal Logger _logger;
-        internal IDictionary<string, string> _requestHeaders = new Dictionary<string, string>();
-        internal HttpMessageHandler _httpMessageHandler;
-        internal HttpClient _httpClient;
-        internal TimeSpan _maxRetryDelay = Configuration.DefaultMaxRetryDelay;
-        internal HttpMethod _method = HttpMethod.Get;
-        internal bool _preferDataAsUtf8Bytes = false;
-        internal TimeSpan _readTimeout = Configuration.DefaultReadTimeout;
-        internal Func<HttpContent> _requestBodyFactory;
-        internal TimeSpan _responseStartTimeout = Configuration.DefaultResponseStartTimeout;
-        internal Action<HttpRequestMessage> _httpRequestModifier;
+        internal RetryDelayStrategy _retryDelayStrategy;
+        internal TimeSpan _retryDelayResetThreshold = Configuration.DefaultRetryDelayResetThreshold;
+
         #endregion
 
         #region Constructor
 
-        internal ConfigurationBuilder(Uri uri)
+        internal ConfigurationBuilder(ConnectStrategy connectStrategy)
         {
-            if (uri == null)
+            if (connectStrategy is null)
             {
-                throw new ArgumentNullException(nameof(uri));
+                throw new ArgumentNullException("connectStrategy");
             }
-            this._uri = uri;
+            _connectStrategy = connectStrategy;
         }
 
         #endregion
@@ -68,23 +61,22 @@ namespace LaunchDarkly.EventSource
             new Configuration(this);
 
         /// <summary>
-        /// Obsolete name for <see cref="ResponseStartTimeout(TimeSpan)"/>.
+        /// Specifies a strategy for determining whether to handle errors transparently
+        /// or throw them as exceptions.
         /// </summary>
-        /// <param name="responseStartTimeout">the timeout</param>
+        /// <remarks>
+        /// By default, any failed connection attempt, or failure of an existing connection,
+        /// will be thrown as a {@link StreamException} when you try to use the stream. You
+        /// may instead use alternate <see cref="LaunchDarkly.EventSource.ErrorStrategy"/>
+        /// implementations, such as <see cref="LaunchDarkly.EventSource.ErrorStrategy.AlwaysContinue"/>,
+        /// or a custom implementation, to allow EventSource to continue after an error.
+        /// </remarks>
+        /// <param name="errorStrategy">the object that will control error handling;
+        /// if null, defaults to <see cref="LaunchDarkly.EventSource.ErrorStrategy.AlwaysThrow"/></param>
         /// <returns>the builder</returns>
-        [Obsolete("Use ResponseStartTimeout")]
-        public ConfigurationBuilder ConnectionTimeout(TimeSpan responseStartTimeout) =>
-            ResponseStartTimeout(responseStartTimeout);
-
-        /// <summary>
-        /// Sets a delegate hook invoked before an HTTP request is performed. This may be useful if you
-        /// want to modify some properties of the request that EventSource doesn't already have an option for.
-        /// </summary>
-        /// <param name="httpRequestModifier">code that will be called with the request before it is sent</param>
-        /// <returns>the builder</returns>
-        public ConfigurationBuilder HttpRequestModifier(Action<HttpRequestMessage> httpRequestModifier)
+        public ConfigurationBuilder ErrorStrategy(ErrorStrategy errorStrategy)
         {
-            this._httpRequestModifier = httpRequestModifier;
+            this._errorStrategy = errorStrategy ?? LaunchDarkly.EventSource.ErrorStrategy.AlwaysThrow;
             return this;
         }
 
@@ -107,101 +99,10 @@ namespace LaunchDarkly.EventSource
         /// </remarks>
         /// <param name="initialRetryDelay">the initial retry delay</param>
         /// <returns>the builder</returns>
-        /// <seealso cref="MaxRetryDelay(TimeSpan)"/>
+        /// <seealso cref="DefaultRetryDelayStrategy"/>
         public ConfigurationBuilder InitialRetryDelay(TimeSpan initialRetryDelay)
         {
             _initialRetryDelay = FiniteTimeSpan(initialRetryDelay);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the maximum amount of time to wait before attempting to reconnect.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// <c>EventSource</c> uses an exponential backoff algorithm (with random jitter) so that
-        /// the delay between reconnections starts at <see cref="InitialRetryDelay(TimeSpan)"/> but
-        /// increases with each subsequent attempt. <c>MaxRetryDelay</c> sets a limit on how long
-        /// the delay can be.
-        /// </para>
-        /// <para>
-        /// The default value is <see cref="Configuration.DefaultMaxRetryDelay"/>. Negative values
-        /// are changed to zero.
-        /// </para>
-        /// </remarks>
-        /// <param name="maxRetryDelay">the maximum retry delay</param>
-        /// <returns>the builder</returns>
-        /// <seealso cref="InitialRetryDelay(TimeSpan)"/>
-        public ConfigurationBuilder MaxRetryDelay(TimeSpan maxRetryDelay)
-        {
-            _maxRetryDelay = FiniteTimeSpan(maxRetryDelay);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the amount of time a connection must stay open before the EventSource resets its backoff delay.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// If a connection fails before the threshold has elapsed, the delay before reconnecting will be greater
-        /// than the last delay; if it fails after the threshold, the delay will start over at the initial minimum
-        /// value. This prevents long delays from occurring on connections that are only rarely restarted.
-        /// </para>
-        /// <para>
-        /// The default value is <see cref="Configuration.DefaultBackoffResetThreshold"/>. Negative
-        /// values are changed to zero.
-        /// </para>
-        /// </remarks>
-        /// <param name="backoffResetThreshold">the threshold time</param>
-        /// <returns>the builder</returns>
-        public ConfigurationBuilder BackoffResetThreshold(TimeSpan backoffResetThreshold)
-        {
-            _backoffResetThreshold = FiniteTimeSpan(backoffResetThreshold);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the maximum amount of time EventSource will wait between starting an HTTP request and
-        /// receiving the response headers.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// This is the same as the <c>Timeout</c> property in .NET's <c>HttpClient</c>. The default value is
-        /// <see cref="Configuration.DefaultConnectionTimeout"/>.
-        /// </para>
-        /// <para>
-        /// It is <i>not</i> the same as a TCP connection timeout. A connection timeout would include only the
-        /// time of establishing the connection, not the time it takes for the server to prepare the beginning
-        /// of the response. .NET does not consistently support a connection timeout, but if you are using .NET
-        /// Core or .NET 5+ you can implement it by using <c>SocketsHttpHandler</c> as your
-        /// <see cref="HttpMessageHandler(System.Net.Http.HttpMessageHandler)"/> and setting the
-        /// <c>ConnectTimeout</c> property there.
-        /// </para>
-        /// </remarks>
-        /// <param name="responseStartTimeout">the timeout</param>
-        /// <returns></returns>
-        public ConfigurationBuilder ResponseStartTimeout(TimeSpan responseStartTimeout)
-        {
-            _responseStartTimeout = TimeSpanCanBeInfinite(responseStartTimeout);
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the timeout when reading from the EventSource API.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The connection will be automatically dropped and restarted if the server sends no data within
-        /// this interval. This prevents keeping a stale connection that may no longer be working. It is common
-        /// for SSE servers to send a simple comment line (":") as a heartbeat to prevent timeouts.
-        /// </para>
-        /// <para>
-        /// The default value is <see cref="Configuration.DefaultReadTimeout"/>.
-        /// </para>
-        /// </remarks>
-        public ConfigurationBuilder ReadTimeout(TimeSpan readTimeout)
-        {
-            _readTimeout = TimeSpanCanBeInfinite(readTimeout);
             return this;
         }
 
@@ -296,132 +197,44 @@ namespace LaunchDarkly.EventSource
         }
 
         /// <summary>
-        /// Specifies whether to use UTF-8 byte arrays internally if possible when
-        /// reading the stream.
+        /// Specifies a strategy for determining the retry delay after an error.
         /// </summary>
         /// <remarks>
-        /// As described in <see cref="MessageEvent"/>, in some applications it may be
-        /// preferable to store and process event data as UTF-8 byte arrays rather than
-        /// strings. By default, <c>EventSource</c> will use the <c>string</c> type when
-        /// processing the event stream; if you then use <see cref="MessageEvent.DataUtf8Bytes"/>
-        /// to get the data, it will be converted to a byte array as needed. However, if
-        /// you set <c>PreferDataAsUtf8Bytes</c> to <see langword="true"/>, the event data
-        /// will be stored internally as a UTF-8 byte array so that if you read
-        /// <see cref="MessageEvent.DataUtf8Bytes"/>, you will get the same array with no
-        /// extra copying or conversion. Therefore, for greatest efficiency you should set
-        /// this to <see langword="true"/> if you intend to process the data as UTF-8. Note
-        /// that Server-Sent Event streams always use UTF-8 encoding, as required by the
-        /// SSE specification.
+        /// Whenever EventSource tries to start a new connection after a stream failure,
+        /// it delays for an amount of time that is determined by two parameters: the
+        /// base retry delay (<see cref="InitialRetryDelay(TimeSpan)"/>), and the retry
+        /// delay strategy which transforms the base retry delay in some way. The default
+        /// behavior is to apply an exponential backoff and jitter. You may instead use a
+        /// modified version of <see cref="DefaultRetryDelayStrategy"/> to customize the
+        /// backoff and jitter, or a custom implementation with any other logic.
         /// </remarks>
-        /// <param name="preferDataAsUtf8Bytes">true if you intend to request the event
-        /// data as UTF-8 bytes</param>
+        /// <param name="retryDelayStrategy">the object that will control retry delays; if
+        /// null, defaults to <see cref="LaunchDarkly.EventSource.RetryDelayStrategy.Default"/></param>
         /// <returns>the builder</returns>
-        public ConfigurationBuilder PreferDataAsUtf8Bytes(bool preferDataAsUtf8Bytes)
+        public ConfigurationBuilder RetryDelayStrategy(RetryDelayStrategy retryDelayStrategy)
         {
-            _preferDataAsUtf8Bytes = preferDataAsUtf8Bytes;
+            _retryDelayStrategy = retryDelayStrategy;
             return this;
         }
 
         /// <summary>
-        /// Sets the request headers to be sent with each EventSource HTTP request.
-        /// </summary>
-        /// <param name="headers">the headers (null is equivalent to an empty dictionary)</param>
-        /// <returns>the builder</returns>
-        public ConfigurationBuilder RequestHeaders(IDictionary<string, string> headers)
-        {
-            _requestHeaders = headers is null ? new Dictionary<string, string>() :
-                new Dictionary<string, string>(headers);
-            return this;
-        }
-        
-        /// <summary>
-        /// Adds a request header to be sent with each EventSource HTTP request.
-        /// </summary>
-        /// <param name="name">the header name</param>
-        /// <param name="value">the header value </param>
-        /// <returns>the builder</returns>
-        public ConfigurationBuilder RequestHeader(string name, string value)
-        {
-            if (name != null)
-            {
-                _requestHeaders[name] = value;
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the <c>HttpMessageHandler</c> that will be used for the HTTP client, or null for the default handler.
+        /// Sets the amount of time a connection must stay open before the EventSource
+        /// resets its delay strategy.
         /// </summary>
         /// <remarks>
-        /// If you have specified a custom HTTP client instance with <see cref="HttpClient"/>, then
-        /// <see cref="HttpMessageHandler(HttpMessageHandler)"/> is ignored.
+        /// When using the default strategy (see <see cref="RetryDelayStrategy"/>), this means
+        /// that the delay before each reconnect attempt will be greater than the last delay
+        /// unless the current connection lasted longer than the threshold, in which case the
+        /// delay will start over at the initial minimum value. This prevents long delays from
+        /// occurring on connections that are only rarely restarted.
         /// </remarks>
-        /// <param name="handler">the message handler implementation</param>
+        /// <param name="retryDelayResetThreshold">the threshold time</param>
         /// <returns>the builder</returns>
-        public ConfigurationBuilder HttpMessageHandler(HttpMessageHandler handler)
+        /// <see cref="Configuration.DefaultRetryDelayResetThreshold"/>
+        public ConfigurationBuilder RetryDelayResetThreshold(TimeSpan retryDelayResetThreshold)
         {
-            this._httpMessageHandler = handler;
+            _retryDelayResetThreshold = FiniteTimeSpan(retryDelayResetThreshold);
             return this;
-        }
-
-        /// <summary>
-        /// Specifies that EventSource should use a specific HttpClient instance for HTTP requests.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// Normally, EventSource creates its own HttpClient and disposes of it when you dispose of the
-        /// EventSource. If you provide your own HttpClient using this method, you are responsible for
-        /// managing the HttpClient's lifecycle-- EventSource will not dispose of it.
-        /// </para>
-        /// <para>
-        /// EventSource will not modify this client's properties, so if you call <see cref="HttpMessageHandler"/>
-        /// or <see cref="ConnectionTimeout"/>, those methods will be ignored.
-        /// </para>
-        /// </remarks>
-        /// <param name="client">an HttpClient instance, or null to use the default behavior</param>
-        /// <returns>the builder</returns>
-        public ConfigurationBuilder HttpClient(HttpClient client)
-        {
-            this._httpClient = client;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the HTTP method that will be used when connecting to the EventSource API.
-        /// </summary>
-        /// <remarks>
-        /// By default, this is <see cref="HttpMethod.Get"/>.
-        /// </remarks>
-        public ConfigurationBuilder Method(HttpMethod method)
-        {
-            this._method = method ?? throw new ArgumentNullException(nameof(method));
-            return this;
-        }
-
-        /// <summary>
-        /// Sets a factory for HTTP request body content, if the HTTP method is one that allows a request body.
-        /// </summary>
-        /// <remarks>
-        /// This is in the form of a factory function because the request may need to be sent more than once.
-        /// </remarks>
-        /// <param name="factory">the factory function, or null for none</param>
-        /// <returns>the builder</returns>
-        public ConfigurationBuilder RequestBodyFactory(Func<HttpContent> factory)
-        {
-            this._requestBodyFactory = factory;
-            return this;
-        }
-
-        /// <summary>
-        /// Equivalent <see cref="RequestBodyFactory(Func{HttpContent})"/>, but for content
-        /// that is a simple string.
-        /// </summary>
-        /// <param name="bodyString">the content</param>
-        /// <param name="contentType">the Content-Type header</param>
-        /// <returns>the builder</returns>
-        public ConfigurationBuilder RequestBody(string bodyString, string contentType)
-        {
-            return RequestBodyFactory(() => new StringContent(bodyString, Encoding.UTF8, contentType));
         }
 
         #endregion
@@ -429,11 +242,11 @@ namespace LaunchDarkly.EventSource
         #region Private methods
 
         // Canonicalizes the value so all negative numbers become InfiniteTimeSpan
-        private static TimeSpan TimeSpanCanBeInfinite(TimeSpan t) =>
+        internal static TimeSpan TimeSpanCanBeInfinite(TimeSpan t) =>
             t < TimeSpan.Zero ? Timeout.InfiniteTimeSpan : t;
 
         // Replaces all negative times with zero
-        private static TimeSpan FiniteTimeSpan(TimeSpan t) =>
+        internal static TimeSpan FiniteTimeSpan(TimeSpan t) =>
             t < TimeSpan.Zero ? TimeSpan.Zero : t;
 
         #endregion

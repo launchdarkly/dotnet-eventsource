@@ -1,11 +1,11 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Threading.Tasks;
-using LaunchDarkly.TestHelpers;
-using LaunchDarkly.TestHelpers.HttpTest;
+using LaunchDarkly.EventSource.Events;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace LaunchDarkly.EventSource.Tests
+namespace LaunchDarkly.EventSource
 {
     public class EventSourceEncodingTest : BaseTest
     {
@@ -23,16 +23,15 @@ namespace LaunchDarkly.EventSource.Tests
             MakeLongString(500, 1000) + "\n\n"
         };
 
-        private static readonly EventSink.Action[] expectedEventActions = new EventSink.Action[]
+        private static async Task ExpectEvents(EventSource es, Uri uri)
         {
-            EventSink.OpenedAction(ReadyState.Open),
-            EventSink.CommentReceivedAction(": hello"),
-            EventSink.MessageReceivedAction(new MessageEvent("message", "value1", null, _uri)),
-            EventSink.MessageReceivedAction(new MessageEvent("event2", "ça\nqué", null, _uri)),
-            EventSink.MessageReceivedAction(new MessageEvent("message",
-                MakeLongString(0, 500) + MakeLongString(500, 1000), null, _uri))
-        };
-        
+            Assert.Equal(new CommentEvent("hello"), await es.ReadAnyEventAsync());
+            Assert.Equal(new MessageEvent("message", "value1", null, uri), await es.ReadAnyEventAsync());
+            Assert.Equal(new MessageEvent("event2", "ça\nqué", null, uri), await es.ReadAnyEventAsync());
+            Assert.Equal(new MessageEvent("message", MakeLongString(0, 500) + MakeLongString(500, 1000), null, uri),
+                await es.ReadAnyEventAsync());
+        }
+
         private static string MakeLongString(int startNum, int endNum)
         {
             // This is meant to verify that we're able to read event data from the stream
@@ -45,77 +44,18 @@ namespace LaunchDarkly.EventSource.Tests
             return ret.ToString();
         }
 
-        private static Handler MakeStreamHandler(Encoding encoding)
-        {
-            var ret = Handlers.StartChunks("text/event-stream", encoding);
-            foreach (var chunk in streamChunks)
-            {
-                ret = ret.Then(Handlers.WriteChunkString(chunk, encoding));
-            }
-            return ret.Then(Handlers.Hang());
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void CanReceiveUtf8EventDataAsStrings(bool setExplicitEncoding)
-        {
-            using (var server = HttpServer.Start(MakeStreamHandler(setExplicitEncoding ? Encoding.UTF8 : null)))
-            {
-                var config = Configuration.Builder(server.Uri)
-                    .LogAdapter(_testLogging)
-                    .Build();
-                using (var es = new EventSource(config))
-                {
-                    var eventSink = new EventSink(es, _testLogging) { ExpectUtf8Data = false };
-
-                    _ = Task.Run(es.StartAsync);
-
-                    eventSink.ExpectActions(expectedEventActions);
-                }
-            }
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void CanReceiveUtf8EventDataAsBytes(bool setExplicitEncoding)
-        {
-            using (var server = HttpServer.Start(MakeStreamHandler(setExplicitEncoding ? Encoding.UTF8 : null)))
-            {
-                var config = Configuration.Builder(server.Uri)
-                    .LogAdapter(_testLogging)
-                    .PreferDataAsUtf8Bytes(true)
-                    .Build();
-                using (var es = new EventSource(config))
-                {
-                    var eventSink = new EventSink(es, _testLogging) { ExpectUtf8Data = true };
-
-                    _ = Task.Run(es.StartAsync);
-
-                    eventSink.ExpectActions(expectedEventActions);
-                }
-            }
-        }
-
         [Fact]
-        public void NonUtf8EncodingIsRejected()
+        public async Task CanReceiveUtf8EventDataAsBytes()
         {
-            using (var server = HttpServer.Start(MakeStreamHandler(Encoding.GetEncoding("iso-8859-1"))))
-            {
-                var config = Configuration.Builder(server.Uri)
-                    .LogAdapter(_testLogging)
-                    .Build();
-                using (var es = new EventSource(config))
+            await WithMockConnectEventSource(
+                mock => mock.ConfigureRequests(
+                    MockConnectStrategy.RespondWithDataAndStayOpen(streamChunks)
+                    ),
+                async (mock, es) =>
                 {
-                    var sink = new EventSink(es, _testLogging) { ExpectUtf8Data = false };
-                    _ = Task.Run(es.StartAsync);
-
-                    var errorAction = sink.ExpectAction();
-                    var ex = Assert.IsType<EventSourceServiceCancelledException>(errorAction.Exception);
-                    Assert.Matches(".*encoding.*8859.*", ex.Message);
-                }
-            }
+                    await es.StartAsync();
+                    await ExpectEvents(es, MockConnectStrategy.MockOrigin);
+                });
         }
     }
 }
