@@ -9,9 +9,31 @@ using LaunchDarkly.Logging;
 namespace LaunchDarkly.EventSource
 {
     /// <summary>
-    /// Provides an EventSource client for consuming Server-Sent Events. Additional details on the Server-Sent Events spec
-    /// can be found at https://html.spec.whatwg.org/multipage/server-sent-events.html
+    /// A client for consuming <see href="https://html.spec.whatwg.org/multipage/server-sent-events.html">Server-Sent
+    /// Events.</see>
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The client is created in an inactive state. It uses a pull model where the
+    /// caller starts the EventSource and then requests data from it, one event at
+    /// a time. The initial connection attempt is made when you call <see cref="StartAsync"/>,
+    /// or when you first try to read an event.
+    /// </para>
+    /// <para>
+    /// If, instead of requesting events in a loop, you would like to have them
+    /// pushed to you using an event handler model, use
+    /// <see cref="LaunchDarkly.EventSource.Background.BackgroundEventSource"/>.
+    /// </para>
+    /// <para>
+    /// Note that although EventSource is named after the JavaScript API that is described
+    /// in the SSE specification, its behavior is not necessarily identical to standard
+    /// web browser implementations of EventSource: it can be configured to automatically
+    /// retry (with a backoff delay) for error conditions where a browser will not retry,
+    /// and it also supports request configuration options (such as request headers and
+    /// method) that the browser EventSource does not support. However, its interpretation
+    /// of the stream data is fully conformant with the SSE specification.
+    /// </para>
+    /// </remarks>
     public class EventSource : IEventSource, IDisposable
     {
         #region Private Fields
@@ -42,7 +64,6 @@ namespace LaunchDarkly.EventSource
 
         #endregion
 
-        
         #region Public Properties
 
         /// <inheritdoc/>
@@ -172,7 +193,7 @@ namespace LaunchDarkly.EventSource
                     _logger.Debug("Encountered exception: {0}", LogValues.ExceptionSummary(ex));
                 }
                 _disconnectedTime.Set(DateTime.Now);
-                CloseCurrentStream(false, false);
+                CloseCurrentStream();
                 _parser = null;
                 ComputeRetryDelay();
                 if (ApplyErrorStrategy(ex) == ErrorStrategy.Action.Continue)
@@ -185,18 +206,16 @@ namespace LaunchDarkly.EventSource
 
         /// <inheritdoc/>
         public void Interrupt() =>
-            CloseCurrentStream(true, false);
+            CloseCurrentStream();
 
-        /// <summary>
-        /// Closes the connection to the SSE server. The EventSource cannot be reopened after this.
-        /// </summary>
+        /// <inheritdoc/>
         public void Close()
         {
             if (_readyState.GetAndSet(ReadyState.Shutdown) == ReadyState.Shutdown)
             {
                 return;
             }
-            CloseCurrentStream(true, true);
+            CloseCurrentStream();
             _client?.Dispose();
         }
 
@@ -350,7 +369,7 @@ namespace LaunchDarkly.EventSource
             _currentRetryDelayStrategy = result.Next ?? _currentRetryDelayStrategy;
         }
 
-        private void CloseCurrentStream(bool deliberatelyInterrupted, bool closingPermanently)
+        private void CloseCurrentStream()
         {
             CancellationTokenSource oldTokenSource;
             IDisposable oldRequest;

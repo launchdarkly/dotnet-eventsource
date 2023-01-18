@@ -286,6 +286,17 @@ namespace LaunchDarkly.EventSource
                 );
 
         /// <summary>
+        /// Equivalent <see cref="RequestBodyFactory(Func{HttpContent})"/>, but for content
+        /// that is a simple string.
+        /// </summary>
+        /// <param name="bodyString">the content</param>
+        /// <param name="contentType">the Content-Type header</param>
+        /// <returns>a new HttpConnectStrategy instance with this property modified</returns>
+        public HttpConnectStrategy RequestBody(string bodyString, string contentType) =>
+            RequestBodyFactory(() => new StringContent(bodyString, Encoding.UTF8, contentType));
+
+
+        /// <summary>
         /// Sets a factory for HTTP request body content, if the HTTP method is one that allows a request body.
         /// </summary>
         /// <remarks>

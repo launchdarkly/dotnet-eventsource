@@ -24,17 +24,16 @@ namespace LaunchDarkly.EventSource.Background
     /// </para>
     /// <example><code>
     /// // before (version 5.x)
-    ///     var eventSource = new EventSource(myEventSourceConfiguration);
+    ///     var eventSource = new EventSource(eventSourceConfig);
     ///     eventSource.MessageReceived += myMessageReceivedHandler;
     ///     Task.Run(() => eventSource.StartAsync());
     ///
     /// // after (version 6.x)
-    ///     var eventSource = new EventSource(myEventSourceConfiguration);
-    ///     var backgroundEventSource = new BackgroundEventSource(eventSource);
+    ///     var backgroundEventSource = new BackgroundEventSource(eventSourceConfig);
     ///     backgroundEventSource.MessageReceived += myAsyncMessageReceivedHandler;
     ///     // note that myAsyncMessageReceivedHandler is an async function, unlike the
     ///     // previous myMessageReceivedHandler which was a synchronous void function
-    ///     Task.Run(() => backgroundEventSource.RunAsync();
+    ///     Task.Run(backgroundEventSource.RunAsync);
     /// </code></example>
     /// </remarks>
     public class BackgroundEventSource : IDisposable
@@ -91,7 +90,7 @@ namespace LaunchDarkly.EventSource.Background
 
         #endregion
 
-        #region Public Constructor
+        #region Public Constructors
 
         /// <summary>
         /// Creates a new instance to wrap an already-constructed <see cref="EventSource"/>.
@@ -106,6 +105,15 @@ namespace LaunchDarkly.EventSource.Background
             }
             _eventSource = eventSource;
 		}
+
+        /// <summary>
+        /// Creates a new instance to wrap a new <see cref="EventSource"/>.
+        /// </summary>
+        /// <param name="configuration">the configuration</param>
+        /// <exception cref="ArgumentNullException">if the parameter is null</exception>
+        public BackgroundEventSource(Configuration configuration) :
+            this(new EventSource(configuration))
+        { }
 
         #endregion
 
@@ -125,31 +133,57 @@ namespace LaunchDarkly.EventSource.Background
                     var e = await _eventSource.ReadAnyEventAsync();
                     if (e is MessageEvent me)
                     {
-                        await MessageReceived.Invoke(this, new MessageReceivedEventArgs(me));
+                        await InvokeHandler(MessageReceived, new MessageReceivedEventArgs(me));
                     }
                     else if (e is CommentEvent ce)
                     {
-                        await CommentReceived.Invoke(this, new CommentReceivedEventArgs(ce.Text));
+                        await InvokeHandler(CommentReceived, new CommentReceivedEventArgs(ce.Text));
                     }
                     else if (e is StartedEvent se)
                     {
-                        await Opened.Invoke(this, new StateChangedEventArgs(_eventSource.ReadyState));
+                        await InvokeHandler(Opened, new StateChangedEventArgs(_eventSource.ReadyState));
                     }
                     else if (e is FaultEvent fe)
                     {
-                        await Error.Invoke(this, new ExceptionEventArgs(fe.Exception));
-                        await Closed.Invoke(this, new StateChangedEventArgs(_eventSource.ReadyState));
+                        await InvokeErrorHandler(fe.Exception);
+                        await InvokeHandler(Closed, new StateChangedEventArgs(_eventSource.ReadyState));
                     }
                 }
                 catch (Exception ex)
                 {
-                    if (_eventSource.ReadyState != ReadyState.Shutdown)
-                    {
-                        _eventSource.Logger.Error("Unexpected error in BackgroundEventSource task: {0}",
-                            LogValues.ExceptionSummary(ex));
-                        _eventSource.Logger.Debug(LogValues.ExceptionTrace(ex));
-                    }
+
+                    await InvokeErrorHandler(ex);
                 }
+            }
+        }
+
+        private async Task InvokeHandler<T>(AsyncEventHandler<T> handler, T args)
+        {
+            try
+            {
+                await handler.Invoke(this, args);
+            }
+            catch (Exception ex)
+            {
+                _eventSource.Logger.Error(
+                    "BackgroundEventSource caught an exception while calling an event handler: {0}",
+                    LogValues.ExceptionSummary(ex));
+                await InvokeErrorHandler(ex);
+            }
+        }
+
+        private async Task InvokeErrorHandler(Exception ex)
+        {
+            try
+            {
+                await Error.Invoke(this, new ExceptionEventArgs(ex));
+            }
+            catch (Exception anotherEx)
+            {
+                _eventSource.Logger.Error(
+                    "BackgroundEventSource caught an exception while calling an error handler: {0}",
+                    LogValues.ExceptionSummary(anotherEx));
+                _eventSource.Logger.Debug(LogValues.ExceptionTrace(anotherEx));
             }
         }
 

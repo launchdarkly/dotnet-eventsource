@@ -30,20 +30,16 @@
     <ProjectReference Include="..\..\src\LaunchDarkly.EventSource\LaunchDarkly.EventSource.csproj" />
   </ItemGroup>
 
-	<ItemGroup>
-	  <None Remove="Internal\" />
-	  <None Remove="Events\" />
-	  <None Remove="Exceptions\" />
-	  <None Remove="System.IO.Pipelines" />
-	</ItemGroup>
   <ItemGroup>
     <None Update="xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  
   <ItemGroup>
-    <Folder Include="Internal\" />
+    <Folder Include="Background\" />
     <Folder Include="Events\" />
     <Folder Include="Exceptions\" />
+    <Folder Include="Internal\" />
   </ItemGroup>
 </Project>

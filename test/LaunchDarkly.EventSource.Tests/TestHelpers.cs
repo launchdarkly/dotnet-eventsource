@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -39,6 +40,15 @@ namespace LaunchDarkly.EventSource
             }
             return Handlers.WriteChunkString(s.ToString() + "\n");
         }
+
+        public static T RequireValue<T>(BlockingCollection<T> queue, TimeSpan timeout)
+        {
+            Assert.True(queue.TryTake(out var value, timeout), "timed out waiting for value");
+            return value;
+        }
+
+        public static T RequireValue<T>(BlockingCollection<T> queue) =>
+            RequireValue(queue, TimeSpan.FromSeconds(1));
 
         public static string AsSSEData(this MessageEvent e)
         {
