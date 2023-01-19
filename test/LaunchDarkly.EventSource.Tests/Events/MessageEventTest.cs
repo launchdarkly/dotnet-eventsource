@@ -1,77 +1,44 @@
 ﻿using System;
+using System.IO;
+using System.Text;
+using LaunchDarkly.TestHelpers;
 using Xunit;
 
 namespace LaunchDarkly.EventSource.Events
 {
     public class MessageEventTest
     {
-        [Theory]
-        [InlineData("http://test.com", null, null)]
-        [InlineData("http://test.com", "testing", null)]
-        [InlineData("http://test1.com", "something", "200")]
-        [InlineData("http://test2.com", "various", "125")]
-        [InlineData("http://test3.com", "testing", "1")]
-        public void MessageEventEqual(string url, string data, string lastEventId)
-        {
-            var uri = new Uri(url);
-
-            MessageEvent event1 = new MessageEvent("message", data, lastEventId, uri);
-
-            MessageEvent event2 = new MessageEvent("message", data, lastEventId, uri);
-
-            Assert.Equal(event1, event2);
-        }
- 
-        [Fact]
-        public void MessageEventNotEqual()
-        {
-            var uri = new Uri("http://test.com");
-
-            Assert.NotEqual(new MessageEvent("name1", "data", "id", uri),
-                new MessageEvent("name2", "data", "id", uri));
-            Assert.NotEqual(new MessageEvent("name", "data1", "id", uri),
-                new MessageEvent("name", "data2", "id", uri));
-            Assert.NotEqual(new MessageEvent("name", "data", "id1", uri),
-                new MessageEvent("name", "data", "id2", uri));
-            Assert.NotEqual(new MessageEvent("name", "data", "id", uri),
-                new MessageEvent("name", "data", "id", new Uri("http://other")));
-        }
-
-        [Theory]
-        [InlineData("http://test.com", null, null)]
-        [InlineData("http://test.com", "testing", null)]
-        [InlineData("http://test1.com", "something", "200")]
-        [InlineData("http://test2.com", "various", "125")]
-        [InlineData("http://test3.com", "testing", "1")]
-        public void Message_event_hashcode_returns_the_same_value_when_called_twice(string url, string data, string lastEventId)
-        {
-
-            MessageEvent event1 = new MessageEvent("message", data, lastEventId, new Uri(url));
-
-            var hash1 = event1.GetHashCode();
-
-            var hash2 = event1.GetHashCode();
-
-            Assert.Equal(hash1, hash2);
-
-        }
-
+        private static readonly Uri Uri1 = new Uri("http://uri1"),
+            Uri2 = new Uri("http://uri2");
 
         [Fact]
-        public void Message_event_hashcode_returns_different_values_when_property_values_changed()
+        public void BasicProperties()
         {
-            var uri = new Uri("http://test.com");
+            var e1 = new MessageEvent("name1", "data1", "id1", Uri1);
+            Assert.Equal("name1", e1.Name);
+            Assert.Equal("data1", e1.Data);
+            Assert.Equal("id1", e1.LastEventId);
+            Assert.Equal(Uri1, e1.Origin);
 
-            MessageEvent event1 = new MessageEvent("message", "test", uri);
+            var e2 = new MessageEvent("name1", "data1", Uri2);
+            Assert.Equal("name1", e2.Name);
+            Assert.Equal("data1", e2.Data);
+            Assert.Null(e2.LastEventId);
+            Assert.Equal(Uri2, e2.Origin);
+        }
 
-            var hash1 = event1.GetHashCode();
-
-            var event2 = new MessageEvent("message", "test2", uri);
-
-            var hash2 = event2.GetHashCode();
-
-            Assert.NotEqual(hash1, hash2);
-
+        [Fact]
+        public void EqualityAndHashCode()
+        {
+            TypeBehavior.CheckEqualsAndHashCode(
+                () => new MessageEvent("name1", "data1", "id1", Uri1),
+                () => new MessageEvent("name2", "data1", "id1", Uri1),
+                () => new MessageEvent("name1", "data2", "id1", Uri1),
+                () => new MessageEvent("name1", "data1", "id2", Uri1),
+                () => new MessageEvent("name1", "data1", "id1", Uri2),
+                () => new MessageEvent("name1", "data1", null, Uri1),
+                () => new MessageEvent("name1", "data1", "id1", null)
+                );
         }
     }
 }
