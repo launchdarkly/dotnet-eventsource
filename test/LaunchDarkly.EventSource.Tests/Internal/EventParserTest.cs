@@ -194,7 +194,7 @@ namespace LaunchDarkly.EventSource.Internal
         {
             stream.Logger = _testLogger;
             _parser = new EventParser(stream, bufferSize, TimeSpan.FromDays(1),
-                Origin, new CancellationTokenSource().Token, _testLogger);
+                Origin, false, null, new CancellationTokenSource().Token, _testLogger);
         }
 
         private Task<IEvent> RequireEvent() => _parser.NextEventAsync();

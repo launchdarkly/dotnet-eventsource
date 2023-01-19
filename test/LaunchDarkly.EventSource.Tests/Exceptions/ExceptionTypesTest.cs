@@ -16,7 +16,8 @@ namespace LaunchDarkly.EventSource.Exceptions
             TypeBehavior.CheckEqualsAndHashCode<Exception>(
                 () => new ReadTimeoutException(),
                 () => new StreamClosedByCallerException(),
-                () => new StreamClosedByServerException()
+                () => new StreamClosedByServerException(),
+                () => new StreamClosedWithIncompleteMessageException()
                 );
         }
 

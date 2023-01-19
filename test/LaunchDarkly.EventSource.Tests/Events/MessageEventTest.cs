@@ -28,6 +28,41 @@ namespace LaunchDarkly.EventSource.Events
         }
 
         [Fact]
+        public void StreamingDataBehavior()
+        {
+            var data = "lazily-read-data";
+
+            var e1 = new MessageEvent(
+                "name",
+                new MemoryStream(Encoding.UTF8.GetBytes(data)),
+                "id",
+                Uri1);
+            Assert.Equal("name", e1.Name);
+            Assert.Equal("id", e1.LastEventId);
+            Assert.Equal(Uri1, e1.Origin);
+            Assert.Equal(data, new StreamReader(e1.DataStream, Encoding.UTF8).ReadToEnd());
+
+            var e2 = new MessageEvent(
+                "name",
+                new MemoryStream(Encoding.UTF8.GetBytes(data)),
+                "id",
+                Uri1);
+            Assert.Equal("name", e2.Name);
+            Assert.Equal("id", e2.LastEventId);
+            Assert.Equal(Uri1, e2.Origin);
+            Assert.Equal(data, e2.Data);
+            Assert.Equal(data, e2.Data); // can read twice, it's memoized
+
+            var e3 = new MessageEvent(
+                "name",
+                data, // passed in as a string rather than a stream
+                "id",
+                Uri1);
+            // can read the string as a stream
+            Assert.Equal(data, new StreamReader(e3.DataStream, Encoding.UTF8).ReadToEnd());
+        }
+
+        [Fact]
         public void EqualityAndHashCode()
         {
             TypeBehavior.CheckEqualsAndHashCode(

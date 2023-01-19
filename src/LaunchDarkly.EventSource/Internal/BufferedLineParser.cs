@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using LaunchDarkly.EventSource.Events;
 using LaunchDarkly.EventSource.Exceptions;
 
@@ -25,7 +26,8 @@ namespace LaunchDarkly.EventSource.Internal
         // This abstraction is used instead of Stream because EventParser needs to wrap the
         // stream read in its own timeout logic, but ByteArrayLineScanner doesn't need to
         // know about the details of that.
-        internal delegate Task<int> ReadFunc(byte[] b, int offset, int size);
+        internal delegate Task<int> ReadFunc(byte[] b, int offset, int size,
+            CancellationToken cancellationToken);
 
         private ReadFunc _readFunc;
         private readonly byte[] _readBuffer;
@@ -62,7 +64,7 @@ namespace LaunchDarkly.EventSource.Internal
         /// by reaching the end of the buffer before the next read from the underlying stream.
         /// </summary>
         /// <returns></returns>
-        public async Task<Chunk> ReadAsync()
+        public async Task<Chunk> ReadAsync(CancellationToken cancellationToken)
         {
             if (_scanPos > 0 && _readBufferCount > _scanPos)
             {
@@ -81,7 +83,7 @@ namespace LaunchDarkly.EventSource.Internal
                 {
                     return new Chunk { Span = CurrentSpan, EndOfLine = false };
                 }
-                if (!await ReadMoreIntoBuffer())
+                if (!await ReadMoreIntoBuffer(cancellationToken))
                 {
                     throw new StreamClosedByServerException();
                 }
@@ -138,10 +140,10 @@ namespace LaunchDarkly.EventSource.Internal
             return true;
         }
 
-        private async Task<bool> ReadMoreIntoBuffer()
+        private async Task<bool> ReadMoreIntoBuffer(CancellationToken cancellationToken)
         {
             int readCount = await _readFunc(_readBuffer, _readBufferCount,
-                _readBuffer.Length - _readBufferCount);
+                _readBuffer.Length - _readBufferCount, cancellationToken);
             if (readCount <= 0)
             {
                 return false; // stream was closed

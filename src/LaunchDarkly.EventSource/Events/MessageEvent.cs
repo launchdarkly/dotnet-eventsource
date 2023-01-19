@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 
 namespace LaunchDarkly.EventSource.Events
 {
@@ -12,15 +14,8 @@ namespace LaunchDarkly.EventSource.Events
     /// </para>
     /// <para>
     /// The event name and ID properties are always stored as strings. The data property
-    /// is available as either a string or a (<see cref="Utf8ByteSpan"/>); for efficiency,
-    /// it is always read as UTF-8 data first, and only converted to a string if you
-    /// access the <see cref="Data"/> property.
-    /// </para>
-    /// <para>
-    /// When <see cref="EventSource"/> returns a <see cref="MessageEvent"/>, it is in an
-    /// ephemeral state where the data may be referencing an internal buffer; this buffer
-    /// will be overwritten if you read another event. If you want the event to be usable
-    /// past that point, you must call <see cref="ReadFully"/> to get a copy.
+    /// can be read as a string, but you can choose to consume it as a stream instead;
+    /// see <see cref="DataStream"/>.
     /// </para>
     /// </remarks>
     public class MessageEvent : IEvent
@@ -34,11 +29,11 @@ namespace LaunchDarkly.EventSource.Events
         #region Private Fields
 
         private readonly string _name;
-        private readonly string _dataString;
-        private readonly Utf8ByteSpan _dataUtf8Bytes;
+        private volatile string _dataString;
+        private volatile Stream _dataStream;
         private readonly string _lastEventId;
         private readonly Uri _origin;
-
+        
         #endregion
 
         #region Public Constructors
@@ -46,35 +41,23 @@ namespace LaunchDarkly.EventSource.Events
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageEvent"/> class.
         /// </summary>
+        /// <remarks>
+        /// This constructor assumes that the event data has been fully read into memory as a
+        /// string.
+        /// </remarks>
         /// <param name="name">the event name</param>
         /// <param name="data">the data received in the server-sent event</param>
         /// <param name="lastEventId">the last event identifier, or null</param>
         /// <param name="origin">the origin URI of the stream</param>
         public MessageEvent(string name, string data, string lastEventId, Uri origin)
         {
+            if (name is null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
             _name = name;
-            _dataString = data;
-            _dataUtf8Bytes = new Utf8ByteSpan();
-            _lastEventId = lastEventId;
-            _origin = origin;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MessageEvent"/> class,
-        /// providing the data as a UTF-8 byte span.
-        /// </summary>
-        /// <param name="name">the event name</param>
-        /// <param name="dataUtf8Bytes">the data received in the server-sent event;
-        ///   the <c>MessageEvent</c> will store a reference to the byte array, rather than
-        ///   copying it, so it should not be modified afterward by the caller
-        /// </param>
-        /// <param name="lastEventId">the last event identifier, or null</param>
-        /// <param name="origin">the origin URI of the stream</param>
-        public MessageEvent(string name, Utf8ByteSpan dataUtf8Bytes, string lastEventId, Uri origin)
-        {
-            _name = name;
-            _dataString = null;
-            _dataUtf8Bytes = dataUtf8Bytes;
+            _dataString = data ?? "";
+            _dataStream = null;
             _lastEventId = lastEventId;
             _origin = origin;
         }
@@ -82,13 +65,43 @@ namespace LaunchDarkly.EventSource.Events
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageEvent" /> class.
         /// </summary>
+        /// <remarks>
+        /// The <see cref="LastEventId" /> will be initialized to null. This constructor assumes
+        /// that the event data has been fully read into memory as a string.
+        /// </remarks>
         /// <param name="name">the event name</param>
         /// <param name="data">the data received in the server-sent event</param>
         /// <param name="origin">the origin URI of the stream</param>
-        /// <remarks>
-        /// The <see cref="LastEventId" /> will be initialized to null.
-        /// </remarks>
         public MessageEvent(string name, string data, Uri origin) : this(name, data, null, origin) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MessageEvent"/> class
+        /// with lazy-loading behavior.
+        /// </summary>
+        /// <param name="name">the event name</param>
+        /// <param name="dataStream">a <see cref="Stream"/> for consuming the event data</param>
+        /// <param name="lastEventId">the last event identifier, or null</param>
+        /// <param name="origin">the origin URI of the stream</param>
+        public MessageEvent(string name, Stream dataStream, string lastEventId, Uri origin)
+        {
+            if (name is null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+            if (dataStream is null)
+            {
+                _dataString = "";
+                _dataStream = null;
+            }
+            else
+            {
+                _dataStream = dataStream;
+                _dataString = null;
+            }
+            _name = name;
+            _lastEventId = lastEventId;
+            _origin = origin;
+        }
 
         #endregion
 
@@ -105,37 +118,84 @@ namespace LaunchDarkly.EventSource.Events
         public string Name => _name;
 
         /// <summary>
-        /// Gets the data received in the event as a string.
+        /// Returns the event data as a string.
         /// </summary>
         /// <remarks>
         /// <para>
-        /// This is the value of the <c>data:</c> field in the SSE data; if there are multiple
-        /// <c>data:</c> lines for a single event, they are concatenated with <c>"\n"</c>.
+        /// The format of event data is described in the SSE specification. Every event has at least one
+        /// line with a <c>data</c> or <c>data:</c> prefix. After removing the prefix, multiple lines
+        /// are concatenated with a separator of <c>\n</c> (ASCII 10).
         /// </para>
         /// <para>
-        /// If the data was originally stored as a string, the same string is returned.
-        /// If it was stored as a UTF-8 byte array, the bytes are copied to a new string.
+        /// If you have set the <see cref="ConfigurationBuilder.StreamEventData(bool)"/> option to
+        /// <see langword="true"/> to enable streaming delivery of event data to your handler without
+        /// buffering the entire event, you should use <see cref="DataStream"/> instead of
+        /// <see cref="Data"/>. Reading <see cref="Data"/> in this mode would defeat the purpose by
+        /// causing all of the data to be read at once. However, if you do this, <see cref="Data"/>
+        /// memoizes the result so that calling it repeatedly does not try to read the stream again.
+        /// Also, be aware that doing this is a synchronous operation that will block the calling
+        /// thread until all of the data is available.
+        /// </para>
+        /// <para>
+        /// The method will never return <see langword="null"/>; every event has data, even if the
+        /// data is empty (zero length).
         /// </para>
         /// </remarks>
-        public string Data => _dataString is null ? _dataUtf8Bytes.GetString() : _dataString;
+        public string Data
+        {
+            get
+            {
+                lock (this)
+                {
+                    if (_dataString != null)
+                    {
+                        return _dataString;
+                    }
+                }
+                return ReadFullyInternal();
+            }
+        }
 
         /// <summary>
-        /// Gets the data received in the event as a UTF-8 byte span.
+        /// Returns a single-use <see cref="Stream"/> for consuming the event data.
         /// </summary>
         /// <remarks>
         /// <para>
-        /// This is the value of the <c>data:</c> field in the SSE data; if there are multiple
-        /// <c>data:</c> lines for a single event, they are concatenated with <c>"\n"</c>.
-        /// </para>
-        /// <para>
-        /// If the data was originally stored as UTF-8 bytes, the returned value refers to
-        /// the same array, offset, and length (it is the caller's responsibility not to
-        /// modify the byte array). If it was originally stored as a string, the string
-        /// is copied to a new byte array.
+        /// This stream only supports reading. Calling <c>Write</c> or <c>Seek</c>, or
+        /// trying to access <c>Position</c> or <c>Length</c>, will throw an exception.
+        /// It is intended for asynchronous use with <c>ReadAsync</c>; doing a synchronous
+        /// read with <c>Read</c> is possible, but should only be done from synchronous
+        /// code that is not running on a <c>Task</c> thread, since otherwise it may
+        /// cause a deadlock due to blocking that thread.
         /// </para>
         /// </remarks>
-        public Utf8ByteSpan DataUtf8Bytes => _dataString is null ? _dataUtf8Bytes :
-            new Utf8ByteSpan(_dataString);
+        public Stream DataStream
+        {
+            get
+            {
+                lock (this)
+                {
+                    if (_dataStream is null)
+                    {
+                        _dataStream = new MemoryStream(Encoding.UTF8.GetBytes(_dataString));
+                    }
+                    return _dataStream;
+                }
+            }
+        }
+
+        /// <summary>
+        /// True if the event data is being provided as a stream, rather than having been
+        /// read fully as a string.
+        /// </summary>
+        /// <remarks>
+        /// This is initially true for every event if you are using the
+        /// <see cref="ConfigurationBuilder.StreamEventData(bool)"/> mode, meaning that the
+        /// data is being provided to you via <see cref="DataStream"/> incrementally as it
+        /// arrives. If you instead read the <see cref="Data"/> property, causing it to be
+        /// read all at once, then this property becomes false.
+        /// </remarks>
+        public bool IsStreamingData => _dataString is null;
 
         /// <summary>
         /// Gets the last event identifier received in the server-sent event.
@@ -153,46 +213,18 @@ namespace LaunchDarkly.EventSource.Events
         /// Gets the origin URI of the stream that generated the server-sent event.
         /// </summary>
         public Uri Origin => _origin;
-
-        /// <summary>
-        /// True if the event data is stored internally as UTF-8 bytes.
-        /// </summary>
-        /// <remarks>
-        /// The data can be accessed with either <see cref="Data"/> or <see cref="DataUtf8Bytes"/>
-        /// regardless of the value of this property. The property only indicates the <i>original</i>
-        /// format of the data, so, for instance, if it is <see langword="true"/> then
-        /// reading <see cref="Data"/> will have more overhead (due to copying) than
-        /// reading <see cref="DataUtf8Bytes"/>.
-        /// </remarks>
-        public bool IsDataUtf8Bytes => _dataString is null;
-
+        
         #endregion
 
         #region Public Methods
 
         /// <summary>
-        /// Returns a MessageEvent instance that is guaranteed to contain its own data as a string,
-        /// without any reference to an internal buffer.
-        /// </summary>
-        /// <remarks>
-        /// For efficiency, when <see cref="EventSource"/> returns a <see cref="MessageEvent"/> it
-        /// may be referencing a temporary buffer that will be reused for the next event. Therefore,
-        /// storing the original <see cref="MessageEvent"/> past that point may not be safe.
-        /// <see cref="ReadFully"/> returns a copy of the event with the data fully read into its
-        /// own string buffer; or, if the original event was already in that state, it simply
-        /// returns the original event.
-        /// </remarks>
-        /// <returns>an instance that is safe to store independently</returns>
-        public MessageEvent ReadFully() =>
-            _dataString is null ?
-                new MessageEvent(_name, Data, _lastEventId, _origin) :
-                this;
-
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object" /> is equal to this instance.
+        /// Determines whether the specified object is equal to this instance.
         /// </summary>
         /// <remarks>
         /// This method is potentially inefficient and should be used only in testing.
+        /// Also, if the event contains a <see cref="DataStream"/>, it is not possible to
+        /// compare streams so this method will ignore the data field.
         /// </remarks>
         /// <param name="obj">the <see cref="System.Object" /> to compare with this instance</param>
         /// <returns><see langword="true"/> if the instances are equal</returns>
@@ -205,33 +237,70 @@ namespace LaunchDarkly.EventSource.Events
             {
                 return false;
             }
-            if (this._dataString != null)
+            if (this._dataStream != null || that._dataStream != null)
             {
-                return that._dataString != null ?
-                    this._dataString == that._dataString :
-                    that._dataUtf8Bytes.Equals(this._dataString);
-
+                return true;
             }
-            return that._dataString != null ?
-                this._dataUtf8Bytes.Equals(that._dataString) :
-                this._dataUtf8Bytes.Equals(that._dataUtf8Bytes);
+            return this._dataString == that._dataString;
         }
 
         /// <summary>
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
-        /// This method is potentially inefficient and should be used only in testing.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data
+        /// structures like a hash table. This method is potentially inefficient and should be
+        /// used only in testing; also, you should not try to use a MessageEvent as a hash key
+        /// or store it in a Set if it has a <see cref="DataStream"/>, since then it is mutable.
         /// </returns>
         public override int GetHashCode()
         {
             int hash = 17;
 
-            hash = hash * 31 + (_dataString != null ? _dataString.GetHashCode() : _dataUtf8Bytes.GetString().GetHashCode());
+            hash = hash * 31 + (_dataString != null ? _dataString.GetHashCode() : 0);
             hash = hash * 31 + (_lastEventId != null ? _lastEventId.GetHashCode() : 0);
             hash = hash * 31 + (_origin != null ? _origin.GetHashCode() : 0);
             return hash;
+        }
+
+        /// <summary>
+        /// Returns a simple string representation of the MessageEvent. Do not rely on
+        /// the exact format of this string; it is intended for debugging.
+        /// </summary>
+        /// <returns>a string representation</returns>
+        public override string ToString()
+        {
+            var sb = new StringBuilder("MessageEvent(Name=")
+                .Append(_name)
+                .Append(",Data=");
+            lock (this)
+            {
+                sb.Append(_dataString ?? "<streaming>");
+            }
+            if (_lastEventId != null)
+            {
+                sb.Append(",Id=").Append(_lastEventId);
+            }
+            sb.Append(",Origin=").Append(_origin).Append(')');
+            return sb.ToString();
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private string ReadFullyInternal()
+        {
+            string s;
+            using (var reader = new StreamReader(_dataStream, Encoding.UTF8))
+            {
+                s = reader.ReadToEnd();
+            }
+            lock (this)
+            {
+                _dataString = s;
+            }
+            return s;
         }
 
         #endregion
