@@ -21,4 +21,4 @@ jobs:
 
 documentation:
   gitHubPages: true
-  title: LaunchDarkly .NET EventSource Client
+  title: LaunchDarkly .NET SSE Client

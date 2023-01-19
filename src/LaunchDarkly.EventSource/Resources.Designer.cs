@@ -94,20 +94,29 @@ namespace LaunchDarkly.EventSource {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unexpected HTTP content type &quot;{0}&quot;; should be &quot;text/event-stream&quot;.
+        ///   Looks up a localized string similar to HTTP content type was &quot;{0}&quot; with encoding {1}; should be &quot;text/event-stream&quot; and UTF-8.
         /// </summary>
-        internal static string ErrorWrongContentType {
+        internal static string ErrorWrongContentTypeOrEncoding {
             get {
-                return ResourceManager.GetString("ErrorWrongContentType", resourceCulture);
+                return ResourceManager.GetString("ErrorWrongContentTypeOrEncoding", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unexpected character encoding {0}; should be UTF-8.
+        ///   Looks up a localized string similar to the stream was closed from the client side.
         /// </summary>
-        internal static string ErrorWrongEncoding {
+        internal static string StreamClosedByCaller {
             get {
-                return ResourceManager.GetString("ErrorWrongEncoding", resourceCulture);
+                return ResourceManager.GetString("StreamClosedByCaller", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to the stream was closed from the server side.
+        /// </summary>
+        internal static string StreamClosedByServer {
+            get {
+                return ResourceManager.GetString("StreamClosedByServer", resourceCulture);
             }
         }
     }

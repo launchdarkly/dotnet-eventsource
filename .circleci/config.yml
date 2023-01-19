@@ -34,7 +34,7 @@ jobs:
     steps:
       - run:
           name: install packages
-          command: apt-get -q update && apt-get install -qy awscli
+          command: apt-get -q update && apt-get install -qy make
       - checkout
       - run:
           name: build
@@ -47,6 +47,12 @@ jobs:
               test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj
       - store_test_results:
           path: /tmp/circle-reports
+
+      - run: make build-contract-tests
+      - run:
+          command: make start-contract-test-service
+          background: true
+      - run: make run-contract-tests
 
   test_windows:
     parameters:

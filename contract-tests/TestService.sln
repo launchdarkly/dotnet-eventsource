@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.810.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestService", "TestService.csproj", "{427B5AC1-5A5A-4506-B55A-09187EB85190}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaunchDarkly.EventSource", "..\src\LaunchDarkly.EventSource\LaunchDarkly.EventSource.csproj", "{6AD8F034-7096-4420-953F-68F529F2B300}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{427B5AC1-5A5A-4506-B55A-09187EB85190}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{427B5AC1-5A5A-4506-B55A-09187EB85190}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{427B5AC1-5A5A-4506-B55A-09187EB85190}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{427B5AC1-5A5A-4506-B55A-09187EB85190}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6AD8F034-7096-4420-953F-68F529F2B300}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AD8F034-7096-4420-953F-68F529F2B300}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AD8F034-7096-4420-953F-68F529F2B300}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AD8F034-7096-4420-953F-68F529F2B300}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {934189FE-533F-429D-87E8-A2311F8730A6}
+	EndGlobalSection
+EndGlobal
