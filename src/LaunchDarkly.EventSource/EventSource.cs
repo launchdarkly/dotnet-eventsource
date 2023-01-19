@@ -41,9 +41,6 @@ namespace LaunchDarkly.EventSource
         private readonly Configuration _configuration;
         private readonly Logger _logger;
         private readonly ConnectStrategy.Client _client;
-        private readonly ErrorStrategy _baseErrorStrategy;
-        private readonly RetryDelayStrategy _baseRetryDelayStrategy;
-        private readonly TimeSpan _retryDelayResetThreshold;
         private readonly Uri _origin;
         private readonly object _lock = new object();
 
@@ -101,9 +98,8 @@ namespace LaunchDarkly.EventSource
             _origin = _configuration.ConnectStrategy.Origin;
 
             _readyState = ReadyState.Raw;
-            _baseErrorStrategy = _currentErrorStrategy = _configuration.ErrorStrategy;
-            _baseRetryDelayStrategy = _currentRetryDelayStrategy = _configuration.RetryDelayStrategy;
-            _retryDelayResetThreshold = _configuration.RetryDelayResetThreshold;
+            _currentErrorStrategy = _configuration.ErrorStrategy;
+            _currentRetryDelayStrategy = _configuration.RetryDelayStrategy;
             _baseRetryDelay = _configuration.InitialRetryDelay;
             _nextRetryDelay = null;
             _lastEventId = _configuration.LastEventId;
@@ -117,7 +113,7 @@ namespace LaunchDarkly.EventSource
         /// </summary>
         /// <param name="uri">the stream URI</param>
         /// <exception cref="ArgumentNullException">if the URI is null</exception>
-        public EventSource(Uri uri) : this(Configuration.Builder(uri).Build()) {}
+        public EventSource(Uri uri) : this(Configuration.Builder(uri).Build()) { }
 
         #endregion
 
@@ -177,7 +173,7 @@ namespace LaunchDarkly.EventSource
                             {
                                 _baseRetryDelay = srde.RetryDelay;
                             }
-                            _currentRetryDelayStrategy = _baseRetryDelayStrategy;
+                            _currentRetryDelayStrategy = _configuration.RetryDelayStrategy;
                             continue;
                         }
                         if (e is MessageEvent me)
@@ -372,7 +368,7 @@ namespace LaunchDarkly.EventSource
                     _logger
                     );
 
-                _currentErrorStrategy = _baseErrorStrategy;
+                _currentErrorStrategy = _configuration.ErrorStrategy;
                 return null;
             }
         }
@@ -388,12 +384,12 @@ namespace LaunchDarkly.EventSource
         {
             lock (_lock)
             {
-                if (_retryDelayResetThreshold > TimeSpan.Zero && _connectedTime.HasValue)
+                if (_configuration.RetryDelayResetThreshold > TimeSpan.Zero && _connectedTime.HasValue)
                 {
                     TimeSpan connectionDuration = DateTime.Now.Subtract(_connectedTime.Value);
-                    if (connectionDuration >= _retryDelayResetThreshold)
+                    if (connectionDuration >= _configuration.RetryDelayResetThreshold)
                     {
-                        _currentRetryDelayStrategy = _baseRetryDelayStrategy;
+                        _currentRetryDelayStrategy = _configuration.RetryDelayStrategy;
                     }
                     var result = _currentRetryDelayStrategy.Apply(_baseRetryDelay);
                     _nextRetryDelay = result.Delay;
