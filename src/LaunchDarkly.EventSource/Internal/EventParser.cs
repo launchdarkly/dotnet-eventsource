@@ -15,8 +15,7 @@ namespace LaunchDarkly.EventSource.Internal
     /// </summary>
     internal sealed class EventParser
     {
-        private const int ReadBufferSize = 1000;
-        private const int ValueBufferInitialCapacity = 1000;
+        internal const int ValueBufferInitialCapacity = 1000;
 
         private readonly Stream _stream;
         private readonly BufferedLineParser _lineParser;
@@ -41,6 +40,7 @@ namespace LaunchDarkly.EventSource.Internal
 
         public EventParser(
             Stream stream,
+            int readBufferSize,
             TimeSpan readTimeout,
             Uri origin,
             CancellationToken cancellationToken,
@@ -50,7 +50,7 @@ namespace LaunchDarkly.EventSource.Internal
             _stream = stream;
             _lineParser = new BufferedLineParser(
                 ReadFromStream,
-                ReadBufferSize
+                readBufferSize
                 );
             _readTimeout = readTimeout;
             _origin = origin;

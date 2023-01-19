@@ -38,6 +38,8 @@ namespace LaunchDarkly.EventSource
     {
         #region Private Fields
 
+        private const int ReadBufferSize = 1000;
+
         private readonly Configuration _configuration;
         private readonly Logger _logger;
         private readonly ConnectStrategy.Client _client;
@@ -362,6 +364,7 @@ namespace LaunchDarkly.EventSource
 
                 _parser = new EventParser(
                     connectResult.Stream,
+                    ReadBufferSize,
                     connectResult.ReadTimeout ?? Timeout.InfiniteTimeSpan,
                     _origin,
                     newCancellationToken,

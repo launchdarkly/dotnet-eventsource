@@ -11,5 +11,10 @@ namespace LaunchDarkly.EventSource.Internal
         {
             RetryDelay = retryDelay;
         }
+
+        public override bool Equals(object obj) =>
+            obj is SetRetryDelayEvent srde && srde.RetryDelay == RetryDelay;
+
+        public override int GetHashCode() => RetryDelay.GetHashCode();
     }
 }

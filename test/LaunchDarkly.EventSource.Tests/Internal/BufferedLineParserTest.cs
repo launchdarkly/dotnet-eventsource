@@ -146,55 +146,5 @@ namespace LaunchDarkly.EventSource.Internal
             }
             return s.ToString();
         }
-
-        public class FakeInputStream : Stream
-        {
-            private byte[][] _chunks;
-            private int _curChunk = 0;
-            private int _posInChunk = 0;
-
-            public override bool CanRead => true;
-            public override bool CanSeek => false;
-            public override bool CanWrite => false;
-
-            public override long Length => throw new NotImplementedException();
-
-            public override long Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-            public FakeInputStream(byte[][] chunks)
-            {
-                _chunks = chunks;
-            }
-
-            public override void Flush() { }
-
-            public override int Read(byte[] buffer, int offset, int count)
-            {
-                if (_curChunk >= _chunks.Length)
-                {
-                    return -1;
-                }
-                int remaining = _chunks[_curChunk].Length - _posInChunk;
-                if (remaining <= count)
-                {
-                    System.Buffer.BlockCopy(_chunks[_curChunk], _posInChunk, buffer, offset, remaining);
-                    _curChunk++;
-                    _posInChunk = 0;
-                    return remaining;
-                }
-                System.Buffer.BlockCopy(_chunks[_curChunk], _posInChunk, buffer, offset, count);
-                _posInChunk += count;
-                return count;
-            }
-
-            public new Task<int> ReadAsync(byte[] buffer, int offset, int count)
-            {
-                return Task.FromResult(Read(buffer, offset, count));
-            }
-
-            public override long Seek(long offset, SeekOrigin origin) { return 0; }
-            public override void SetLength(long value) { }
-            public override void Write(byte[] buffer, int offset, int count) { }
-        }
     }
 }

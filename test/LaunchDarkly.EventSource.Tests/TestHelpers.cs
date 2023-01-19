@@ -13,6 +13,8 @@ namespace LaunchDarkly.EventSource
 {
     public static class TestHelpers
     {
+        private static int _generatedStringCounter = 0;
+
         public static readonly TimeSpan OneSecond = TimeSpan.FromSeconds(1);
 
         public static Handler StartStream() => Handlers.SSE.Start();
@@ -63,6 +65,17 @@ namespace LaunchDarkly.EventSource
                 sb.Append("id:").Append(e.LastEventId).Append("\n");
             }
             sb.Append("\n");
+            return sb.ToString();
+        }
+
+        public static string MakeStringOfLength(int n)
+        {
+            int offset = _generatedStringCounter++;
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < n; i++)
+            {
+                sb.Append((char)('!' + (i + offset) % ('~' - '!' + 1)));
+            }
             return sb.ToString();
         }
 
