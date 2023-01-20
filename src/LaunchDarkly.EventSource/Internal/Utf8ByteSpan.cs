@@ -41,7 +41,7 @@ namespace LaunchDarkly.EventSource.Internal
         /// <param name="length">The number of bytes of relevant data within the array.</param>
         public Utf8ByteSpan(byte[] data, int offset, int length)
         {
-            Data = length == 0 ? null : data;
+            Data = data;
             Offset = offset;
             Length = length;
         }

@@ -16,14 +16,6 @@ namespace LaunchDarkly.EventSource.Internal
         }
 
         [Fact]
-        public void ZeroLengthSpanDoesNotStoreDataBuffer()
-        {
-            var span = new Utf8ByteSpan(new byte[100], 1, 0);
-            Assert.Equal(0, span.Length);
-            Assert.Null(span.Data);
-        }
-
-        [Fact]
         public void SpanToString()
         {
             var s = "olé";
