@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using LaunchDarkly.EventSource.Events;
+using LaunchDarkly.EventSource.Exceptions;
 using LaunchDarkly.Logging;
 
 namespace LaunchDarkly.EventSource
@@ -30,11 +32,13 @@ namespace LaunchDarkly.EventSource
         internal TimeSpan _initialRetryDelay = Configuration.DefaultInitialRetryDelay;
         internal ConnectStrategy _connectStrategy;
         internal ErrorStrategy _errorStrategy;
+        internal HashSet<string> _expectFields;
         internal string _lastEventId;
         internal ILogAdapter _logAdapter;
         internal Logger _logger;
         internal RetryDelayStrategy _retryDelayStrategy;
         internal TimeSpan _retryDelayResetThreshold = Configuration.DefaultRetryDelayResetThreshold;
+        internal bool _streamEventData;
 
         #endregion
 
@@ -77,6 +81,50 @@ namespace LaunchDarkly.EventSource
         public ConfigurationBuilder ErrorStrategy(ErrorStrategy errorStrategy)
         {
             this._errorStrategy = errorStrategy ?? LaunchDarkly.EventSource.ErrorStrategy.AlwaysThrow;
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies that the application expects the server to send certain fields in every event.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This setting makes no difference unless you have enabled <see cref="StreamEventData(bool)"/>
+        /// mode. In that case, it causes EventSource to only use the streaming data mode for an event
+        /// if the specified fields have already been received; otherwise, it will buffer the whole
+        /// event (as if <see cref="StreamEventData(bool)"/> had not been enabled), to ensure that those
+        /// fields are not lost if they appear after the <c>data:</c> field.
+        /// </para>
+        /// <para>
+        /// For instance, if you had called <c>ExpectFields("event")</c>, then EventSource would be able
+        /// to use streaming data mode for the following SSE response--
+        /// </para>
+        /// <code>
+        /// event: hello
+        /// data: here is some very long streaming data
+        /// </code>
+        /// <para>
+        /// --but it would buffer the full event if the server used the opposite order:
+        /// </para>
+        /// <code>
+        /// data: here is some very long streaming data
+        /// event: hello
+        /// </code>
+        /// <para>
+        /// Such behavior is not automatic because in some applications, there might never be an
+        /// <c>event:</c> field, and EventSource has no way to anticipate this.
+        /// </para>
+        /// <para>
+        /// Specifying any field names other than <c>"event"</c> and <c>"id"</c> has no effect, since
+        /// the only fields defined in SSE are <c>event</c>, <c>id</c>, and <c>data</c> (not counting
+        /// <c>retry</c>, since that is a directive to the client rather than part of a message).
+        /// </para>
+        /// </remarks>
+        /// <param name="fieldNames">a list of SSE field names (case-sensitive)</param>
+        /// <returns>the builder</returns>
+        public ConfigurationBuilder ExpectFields(params string[] fieldNames)
+        {
+            _expectFields = fieldNames is null ? null : new HashSet<string>(fieldNames);
             return this;
         }
 
@@ -234,6 +282,60 @@ namespace LaunchDarkly.EventSource
         public ConfigurationBuilder RetryDelayResetThreshold(TimeSpan retryDelayResetThreshold)
         {
             _retryDelayResetThreshold = FiniteTimeSpan(retryDelayResetThreshold);
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies whether EventSource should return a <see cref="MessageEvent"/> to the
+        /// handler as soon as it receives the beginning of the event data, allowing the caller
+        /// to read the data incrementally.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The default for this property is <see langword="false"/>, meaning that EventSource
+        /// will always read the entire event into memory before returning it.
+        /// </para>
+        /// <para>
+        /// If you set it to <see langword="true"/>, it will instead return the event as soon as
+        /// it sees a <c>data</c> field-- setting <see cref="MessageEvent.DataStream"/> to a
+        /// <see cref="System.IO.Stream"/> that reads directly from the data as it arrives. The
+        /// EventSource will perform any necessary parsing under the covers, so that for instance
+        /// if there are multiple <c>data:</c> lines in the event, the Stream will emit a newline
+        /// character between each and will omit the <c>data:</c> field names. The Stream will
+        /// report "end of stream" as soon as the event is terminated normally by a blank line.
+        /// If the stream is closed before normal termination of the event, reading the Stream
+        /// will throw a <see cref="StreamClosedWithIncompleteMessageException"/>.
+        /// </para>
+        /// <para>
+        /// This mode is designed for applications that expect very large data items to be
+        /// delivered over SSE. Use it with caution, since there are several limitations:
+        /// </para>
+        /// <list type="bullet">
+        /// <item><description>
+        /// The <see cref="MessageEvent"/> is constructed as soon as a <c>data:</c> field appears,
+        /// so it will only include fields that appeared before that point. In other words, if
+        /// the SSE server happens to send <c>data:</c> first and <c>event:</c> second,
+        /// <see cref="MessageEvent.Name"/> will not contain the value of the <c>event:</c> field
+        /// but will be <see cref="MessageEvent.DefaultName"/> instead. Therefore, you should only
+        /// use this mode if the server's behavior is predictable in this regard.
+        /// </description></item>
+        /// <item><description>
+        /// The SSE protocol specifies that an event should be processed only if it is terminated
+        /// by a blank line, but in this mode the handler will receive the event as soon as a
+        /// <c>data:</c> field appears-- so, if the stream happens to cut off abnormally without a
+        /// trailing blank line, technically you will be receiving an incomplete event that should
+        /// have been ignored. You will know this has happened if reading from the Stream throws
+        /// a <see cref="StreamClosedWithIncompleteMessageException"/>.
+        /// </description></item>
+        /// </list>
+        /// </remarks>
+        /// <param name="streamEventData">true if events should be dispatched immediately with
+        /// asynchronous data rather than read fully first</param>
+        /// <returns>the builder</returns>
+        /// <see cref="MessageEvent.DataStream"/>
+        public ConfigurationBuilder StreamEventData(bool streamEventData)
+        {
+            _streamEventData = streamEventData;
             return this;
         }
 

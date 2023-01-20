@@ -44,6 +44,15 @@ namespace LaunchDarkly.EventSource
         }
 
         [Fact]
+        public void CanSetExpectFields()
+        {
+            Assert.Null(Configuration.Builder(uri).Build().ExpectFields);
+
+            Assert.Equivalent(new HashSet<string> { "event", "id" },
+                Configuration.Builder(uri).ExpectFields("event", "id").Build().ExpectFields);
+        }
+
+        [Fact]
         public void CanSetRetryDelayStrategy()
         {
             Assert.Same(RetryDelayStrategy.Default,
@@ -116,6 +125,14 @@ namespace LaunchDarkly.EventSource
             var logger = Logs.ToConsole.Logger("test");
             var b = Configuration.Builder(uri).Logger(logger);
             Assert.Same(logger, b.Build().Logger);
+        }
+
+        [Fact]
+        public void CanSetStreamEventData()
+        {
+            Assert.False(Configuration.Builder(uri).Build().StreamEventData);
+
+            Assert.True(Configuration.Builder(uri).StreamEventData(true).Build().StreamEventData);
         }
     }
 }

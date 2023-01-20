@@ -6,6 +6,23 @@ namespace LaunchDarkly.EventSource.Internal
 {
     internal static class AsyncHelpers
     {
+        private static readonly TaskFactory _taskFactory = new TaskFactory(CancellationToken.None,
+            TaskCreationOptions.None, TaskContinuationOptions.None, TaskScheduler.Default);
+
+        // This procedure for blocking on a Task without using Task.Wait is derived from the MIT-licensed ASP.NET
+        // code here: https://github.com/aspnet/AspNetIdentity/blob/master/src/Microsoft.AspNet.Identity.Core/AsyncHelper.cs
+        // In general, mixing sync and async code is not recommended, and if done in other ways can result in
+        // deadlocks. See: https://stackoverflow.com/questions/9343594/how-to-call-asynchronous-method-from-synchronous-method-in-c
+        // Task.Wait would only be safe if we could guarantee that every intermediate Task within the async
+        // code had been modified with ConfigureAwait(false), but that is very error-prone.
+
+        internal static T WaitSafely<T>(Func<Task<T>> taskFn) =>
+            _taskFactory.StartNew(taskFn)
+                .Unwrap()
+                .GetAwaiter()
+                .GetResult();
+        // Note, GetResult does not throw AggregateException so we don't need to post-process exceptions
+
         // General-purpose timeout logic that uses a timed CancellationToken instead of
         // Task.Delay. The cancellationToken that is passed in is for explicitly cancelling
         // the operation from elsewhere; DoWithTimeout wraps this to create a token that can

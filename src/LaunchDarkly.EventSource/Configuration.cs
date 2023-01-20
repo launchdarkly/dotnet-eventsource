@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using LaunchDarkly.Logging;
 
 namespace LaunchDarkly.EventSource
@@ -48,6 +49,12 @@ namespace LaunchDarkly.EventSource
         public ErrorStrategy ErrorStrategy { get; }
 
         /// <summary>
+        /// A set of field names that are expected to appear before the data field in streaming mode.
+        /// </summary>
+        /// <seealso cref="ConfigurationBuilder.ExpectFields(string[])"/>
+        public HashSet<string> ExpectFields { get; }
+
+        /// <summary>
         /// The initial amount of time to wait before attempting to reconnect to the EventSource API.
         /// </summary>
         /// <seealso cref="ConfigurationBuilder.InitialRetryDelay(TimeSpan)"/>
@@ -80,6 +87,13 @@ namespace LaunchDarkly.EventSource
         /// <seealso cref="ConfigurationBuilder.RetryDelayResetThreshold(TimeSpan)"/>
         public TimeSpan RetryDelayResetThreshold { get; }
 
+        /// <summary>
+        /// True if EventSource should return not-fully-read events containing a stream for
+        /// reading the data.
+        /// </summary>
+        /// <seealso cref="ConfigurationBuilder.StreamEventData(bool)"/>
+        public bool StreamEventData { get; }
+
         #endregion
 
         #region Internal Constructor
@@ -91,11 +105,13 @@ namespace LaunchDarkly.EventSource
 
             ConnectStrategy = builder._connectStrategy;
             ErrorStrategy = builder._errorStrategy ?? ErrorStrategy.AlwaysThrow;
+            ExpectFields = builder._expectFields;
             InitialRetryDelay = builder._initialRetryDelay;
             LastEventId = builder._lastEventId;
             Logger = logger ?? Logs.None.Logger("");
             RetryDelayStrategy = builder._retryDelayStrategy ?? RetryDelayStrategy.Default;
             RetryDelayResetThreshold = builder._retryDelayResetThreshold;
+            StreamEventData = builder._streamEventData;
         }
 
         #endregion

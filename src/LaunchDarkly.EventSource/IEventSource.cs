@@ -102,12 +102,6 @@ namespace LaunchDarkly.EventSource
         /// read will always throw a <see cref="StreamClosedByCallerException"/>.
         /// </para>
         /// <para>
-        /// The returned <see cref="MessageEvent"/> may contain references to temporary internal
-        /// data that will be overwritten if you read another event. If you are going to store
-        /// the event somewhere past the point where you read another event, you should call
-        /// <see cref="MessageEvent.ReadFully"/> to obtain a long-lived copy.
-        /// </para>
-        /// <para>
         /// This method must be called from the same thread that first started using the
         /// stream (that is, the thread that called <see cref="StartAsync"/> or read the
         /// first event).
@@ -136,13 +130,6 @@ namespace LaunchDarkly.EventSource
         /// However, the client will never retry if you called <see cref="Close"/> or
         /// <see cref="IDisposable.Dispose"/>; in that case, trying to read will always
         /// throw a <see cref="StreamClosedByCallerException"/>.
-        /// </para>
-        /// <para>
-        /// If the returned event is a <see cref="MessageEvent"/>, it may contain references
-        /// to temporary internal data that will be overwritten if you read another event.
-        /// If you are going to store the event somewhere past the point where you read
-        /// another event, you should call <see cref="MessageEvent.ReadFully"/> to obtain
-        /// a long-lived copy.
         /// </para>
         /// <para>
         /// This method must be called from the same thread that first started using the

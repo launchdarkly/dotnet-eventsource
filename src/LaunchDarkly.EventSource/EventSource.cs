@@ -367,6 +367,8 @@ namespace LaunchDarkly.EventSource
                     ReadBufferSize,
                     connectResult.ReadTimeout ?? Timeout.InfiniteTimeSpan,
                     _origin,
+                    _configuration.StreamEventData,
+                    _configuration.ExpectFields,
                     newCancellationToken,
                     _logger
                     );

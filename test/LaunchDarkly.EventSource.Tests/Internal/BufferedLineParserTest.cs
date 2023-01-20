@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using LaunchDarkly.EventSource.Exceptions;
 using Xunit;
@@ -89,11 +90,12 @@ namespace LaunchDarkly.EventSource.Internal
 
             var actualLines = new List<string>();
             var buf = new MemoryStream();
+            var token = new CancellationTokenSource().Token;
             while (true)
             {
                 try
                 {
-                    var chunk = await parser.ReadAsync();
+                    var chunk = await parser.ReadAsync(token);
                     buf.Write(chunk.Span.Data, chunk.Span.Offset, chunk.Span.Length);
                     if (chunk.EndOfLine)
                     {
