@@ -434,6 +434,12 @@ namespace LaunchDarkly.EventSource.Internal
                         }
 
                         int availableSize = _parser._chunk.Length - _readOffset;
+                        if (availableSize == 0)
+                        {
+                            // We don't want to return "zero bytes read" because in .NET that means EOF
+                            _haveChunk = false;
+                            continue; // We'll go to (B) in the next loop
+                        }
                         if (availableSize > count)
                         {
                             Buffer.BlockCopy(_parser._chunk.Data, _parser._chunk.Offset + _readOffset,
