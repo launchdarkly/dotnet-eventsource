@@ -109,10 +109,7 @@ namespace LaunchDarkly.EventSource.Internal
             {
                 // We dispatched an incremental message that has not yet been fully read, so we need
                 // to skip the rest of that message before we can proceed.
-                var obsoleteStream = _currentMessageDataStream;
-                _skipRestOfMessage = true;
-                _currentMessageDataStream = null;
-                obsoleteStream.Close();
+                _currentMessageDataStream.Close();
             }
 
             await GetNextChunk(_cancellationToken); // throws exception if stream has closed
