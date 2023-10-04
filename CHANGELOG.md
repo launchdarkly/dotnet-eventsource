@@ -2,6 +2,10 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [5.1.0] - 2023-10-04
+### Changed:
+- Update minimum `LaunchDarkly.Logging` version to `2.0.0` to share the same min version as SDK implementations.
+
 ## [5.0.1] - 2022-08-24
 ### Changed:
 - Relaxed dependency constraint to allow use of `LaunchDarkly.Logging` 1.x or 2.x.
