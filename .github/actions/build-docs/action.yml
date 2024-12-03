@@ -1,0 +1,21 @@
+name: Build Documentation
+description: 'Build Documentation.'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup dotnet build tools
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0
+    - name: Install docfx
+      shell: bash
+      run:  dotnet tool update -g docfx
+
+    # Note: in the docfx.json file, the 'Configuration' property is set to Debug so that we don't require
+    # signing to happen just to build docs.
+    - name: Build docs
+      shell: bash
+      run: |
+        docfx metadata
+        docfx build
