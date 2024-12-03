@@ -1,22 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <!-- The TESTFRAMEWORK variable allows us to override the target frameworks with a
-         single framework that we are testing; this allows us to test with older SDK
-         versions that would error out if they saw any newer target frameworks listed
-         here, even if we weren't running those. -->
-    <TestFramework Condition="'$(TESTFRAMEWORK)' == ''">netcoreapp3.1;net462;net6.0</TestFramework>
-    <TargetFrameworks>$(TESTFRAMEWORK)</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="$(OS) == 'Windows_NT'">$(TargetFrameworks);net462</TargetFrameworks>
 
     <Copyright>Copyright © 2017 Catamorphic, Co.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="LaunchDarkly.TestHelpers" Version="2.0.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.0" />
-    <PackageReference Include="xunit" Version="2.4.2" />
-    <PackageReference Include="xunit.runner.console" Version="2.4.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5" />
-    <PackageReference Include="JunitXml.TestLogger" Version="3.0.114" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
@@ -27,11 +24,5 @@
 
 	<ItemGroup>
     <ProjectReference Include="..\..\src\LaunchDarkly.EventSource\LaunchDarkly.EventSource.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="xunit.runner.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 </Project>
