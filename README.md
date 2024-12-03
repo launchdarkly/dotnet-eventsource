@@ -1,7 +1,7 @@
 # LaunchDarkly EventSource SSE Client for .NET
 
 [![NuGet](https://img.shields.io/nuget/v/LaunchDarkly.EventSource.svg?style=flat-square)](https://www.nuget.org/packages/LaunchDarkly.EventSource/)
-[![CircleCI](https://circleci.com/gh/launchdarkly/dotnet-eventsource.svg?style=shield)](https://circleci.com/gh/launchdarkly/dotnet-eventsource)
+[![Build and run](https://github.com/launchdarkly/dotnet-eventsource/actions/workflows/ci.yml/badge.svg)](https://github.com/launchdarkly/dotnet-eventsource/actions/workflows/ci.yml)
 [![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)](https://launchdarkly.github.io/dotnet-eventsource)
 
 ## Overview
@@ -37,7 +37,7 @@ Public key token is 18e8c36453e3060f
 We encourage pull requests and other contributions from the community. Check out our [contributing guidelines](CONTRIBUTING.md) for instructions on how to contribute to this project.
 
 ## About LaunchDarkly
- 
+
 * LaunchDarkly is a continuous delivery platform that provides feature flags as a service and allows developers to iterate quickly and safely. We allow you to easily flag your features and manage them from the LaunchDarkly dashboard.  With LaunchDarkly, you can:
     * Roll out a new feature to a subset of your users (like a group of users who opt-in to a beta tester group), gathering feedback and bug reports from real-world use cases.
     * Gradually roll out a feature to an increasing percentage of users, and track the effect that the feature has on key metrics (for instance, how likely is a user to complete a purchase if they have feature A versus feature B?).

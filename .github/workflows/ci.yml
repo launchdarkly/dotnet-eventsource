@@ -1,0 +1,45 @@
+name: Build and run
+on:
+  push:
+    branches: [ main, 'feat/**' ]
+    paths-ignore:
+      - '**.md' # Do not need to run CI for markdown changes.
+  pull_request:
+    branches: [ main, 'feat/**' ]
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  build-and-run:
+    strategy:
+      matrix:
+        target:
+          - os: windows-latest
+            build-framework: net462
+            test-target-framework: net462
+          - os: ubuntu-latest
+            build-framework: net8.0
+            test-target-framework: net8.0
+      fail-fast: false
+    runs-on: ${{ matrix.target.os }}
+
+    permissions:
+      id-token: write # Needed if using OIDC to get release secrets.
+
+    env:
+      TESTFRAMEWORKS: ${{ matrix.target.test-target-framework }}
+      BUILDFRAMEWORKS: ${{ matrix.target.build-framework }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup dotnet build tools
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0
+
+      - run: dotnet restore
+
+      - run: dotnet build src/LaunchDarkly.EventSource/LaunchDarkly.EventSource.csproj
+
+      - run: dotnet test test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj
