@@ -1,0 +1,50 @@
+name: Publish Package
+description: 'Packs DLLs into unsigned Nuget package and publishes to Nuget.'
+inputs:
+  dry_run:
+    description: 'Is this a dry run. If so no package will be published.'
+    required: true
+outputs:
+  hashes:
+    description: sha256sum hashes of built artifacts
+    value: ${{ steps.hash.outputs.hashes }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup dotnet build tools
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0
+
+    - name: Create Nuget Package
+      shell: bash
+      run: |
+        dotnet restore ./src/LaunchDarkly.EventSource/LaunchDarkly.EventSource.csproj
+        dotnet pack --no-build --output nupkgs --configuration Release ./src/LaunchDarkly.EventSource/LaunchDarkly.EventSource.csproj
+
+    - name: Publish Package
+      if: ${{ inputs.dry_run == 'false' }}
+      shell: bash
+      run: |
+        for pkg in $(find ./nupkgs -name '*.nupkg' -o -name '*.snupkg'); do
+          echo "publishing ${pkg}"
+          dotnet nuget push "${pkg}" --api-key ${{ env.NUGET_API_KEY }} --source https://www.nuget.org
+          echo "published ${pkg}"
+        done
+
+    - name: Hash nuget packages
+      id: hash
+      if: ${{ inputs.dry_run == 'false' }}
+      shell: bash
+      run: |
+        echo "hashes=$(sha256sum ./nupkgs/*.nupkg ./nupkgs/*.snupkg | base64 -w0)" >> "$GITHUB_OUTPUT"
+
+    - name: Dry Run Publish
+      if: ${{ inputs.dry_run == 'true' }}
+      shell: bash
+      run: |
+        echo "This is a dry run and packages are not being published."
+        for pkg in $(find ./nupkgs -name '*.nupkg' -o -name '*.snupkg'); do
+          echo "detected package ${pkg}"
+        done

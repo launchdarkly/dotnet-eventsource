@@ -1,0 +1,24 @@
+name: Publish Documentation
+description: 'Publish the documentation to Github pages'
+inputs:
+  dry_run:
+    description: 'Is this a dry run. If so no package will be published.'
+    required: true
+  token:
+    description: 'Token to use for publishing.'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: launchdarkly/gh-actions/actions/publish-pages@publish-pages-v1.0.2
+      if: ${{ inputs.dry_run == 'false' }}
+      name: 'Publish to Github pages'
+      with:
+        docs_path: docs
+        github_token: ${{ inputs.token }}
+    - name: Dry Run Publish
+      if: ${{ inputs.dry_run == 'true' }}
+      shell: bash
+      run: |
+        echo "This is a dry run and docs are not being published."

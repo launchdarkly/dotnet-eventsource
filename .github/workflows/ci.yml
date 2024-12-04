@@ -35,3 +35,6 @@ jobs:
       - run: dotnet build src/LaunchDarkly.EventSource/LaunchDarkly.EventSource.csproj
 
       - run: dotnet test test/LaunchDarkly.EventSource.Tests/LaunchDarkly.EventSource.Tests.csproj
+
+      - name: build docs
+        uses: ./.github/actions/build-docs
