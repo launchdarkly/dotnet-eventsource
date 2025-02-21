@@ -30,7 +30,7 @@ namespace LaunchDarkly.EventSource
         /// </summary>
         /// <param name="readyState">One of the <see cref="EventSource.ReadyState"/> values, which represents the state of the EventSource connection.</param>
         /// <param name="headers">Response headers when the <see cref="StateChangedEventArgs.ReadyState"/> is <see cref="ReadyState.Open"/>. Otherwise null.</param>
-        public StateChangedEventArgs(ReadyState readyState, IEnumerable<KeyValuePair<string,IEnumerable<string>>> headers)
+        public StateChangedEventArgs(ReadyState readyState, IEnumerable<KeyValuePair<string,IEnumerable<string>>> headers = null)
         {
             ReadyState = readyState;
             Headers = headers;
