@@ -37,7 +37,7 @@ namespace LaunchDarkly.EventSource
         /// <summary>
         /// Occurs when the connection to the EventSource API has been opened.
         /// </summary>
-        public event EventHandler<EventArgs> ConnectionOpened;
+        public event EventHandler<EventSourceOpenedEventArgs> ConnectionOpened;
         /// <summary>
         /// Occurs when the connection to the EventSource API has been closed.
         /// </summary>
@@ -108,7 +108,8 @@ namespace LaunchDarkly.EventSource
                         throw new EventSourceServiceCancelledException(
                             string.Format(Resources.ErrorWrongEncoding, encoding.HeaderName));
                     }
-                    OnConnectionOpened();
+
+                    OnConnectionOpened(response.Headers);
 
                     if (_configuration.PreferDataAsUtf8Bytes)
                     {
@@ -257,9 +258,9 @@ namespace LaunchDarkly.EventSource
             }
         }
 
-        private void OnConnectionOpened()
+        private void OnConnectionOpened(HttpHeaders headers)
         {
-            ConnectionOpened?.Invoke(this, EventArgs.Empty);
+            ConnectionOpened?.Invoke(this, new EventSourceOpenedEventArgs(headers));
         }
 
         private void OnConnectionClosed()

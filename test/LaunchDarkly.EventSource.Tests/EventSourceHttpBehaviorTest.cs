@@ -166,6 +166,36 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
+        public async void OpenedEventIncludesHeaders()
+        {
+            var taskComplete = new TaskCompletionSource<bool>();
+
+            Handler streamHandler = Handlers.StartChunks("text/event-stream")
+                .Then(async ctx =>
+                {
+                    await Handlers.WriteChunkString("data:potato\n\n")(ctx);
+                    await taskComplete.Task;
+                });
+            using (var server = HttpServer.Start(streamHandler))
+            {
+                using (var es = MakeEventSource(server.Uri))
+                {
+                    es.Opened += (sender, args) =>
+                    {
+                        // The transfer-encoding header should always be present for an SSE stream.
+                        taskComplete.SetResult(
+                            args.Headers.FirstOrDefault(item => string.Equals(item.Key, "transfer-encoding", StringComparison.OrdinalIgnoreCase)).Value != null);
+                    };
+                    _ = Task.Run(es.StartAsync);
+
+                    await taskComplete.Task;
+                }
+            }
+
+            Assert.True(taskComplete.Task.Result);
+        }
+
+        [Fact]
         public void ReceiveEventStreamInChunks()
         {
             // This simply verifies that chunked streaming works as expected and that events are being
