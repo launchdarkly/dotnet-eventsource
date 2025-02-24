@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>5.1.0</Version>
+    <!--x-release-please-start-version-->
+    <Version>5.2.0</Version>
+    <!--x-release-please-end-->
     <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <AssemblyName>LaunchDarkly.EventSource</AssemblyName>
