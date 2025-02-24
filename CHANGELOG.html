@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+
+  <head>
+    <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Change log | LaunchDarkly EventSource for .NET </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Change log | LaunchDarkly EventSource for .NET ">
+    
+    
+      <link rel="shortcut icon" href="favicon.ico">
+      <link rel="stylesheet" href="styles/docfx.vendor.min.css">
+      <link rel="stylesheet" href="styles/docfx.css">
+      <link rel="stylesheet" href="styles/main.css">
+      <meta property="docfx:navrel" content="">
+      <meta property="docfx:tocrel" content="">
+    
+    <meta property="docfx:rel" content="">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+
+              <a class="navbar-brand" href="index.html">
+                <img id="logo" class="svg" src="logo.svg" alt="LaunchDarkly EventSource for .NET">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first=First data-prev=Previous data-next=Next data-last=Last></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="article row grid">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="change-log">Change log</h1>
+
+<p>All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to <a href="http://semver.org">Semantic Versioning</a>.</p>
+<h2 id="520-2025-02-24"><a href="https://github.com/launchdarkly/dotnet-eventsource/compare/5.1.0...5.2.0">5.2.0</a> (2025-02-24)</h2>
+<h3 id="features">Features</h3>
+<ul>
+<li>Report event source headers on open. (<a href="https://github.com/launchdarkly/dotnet-eventsource/issues/104">#104</a>) (<a href="https://github.com/launchdarkly/dotnet-eventsource/commit/e2cba638029bc7e8b2c515d8a540493203929df0">e2cba63</a>)</li>
+</ul>
+<h2 id="510---2023-10-04">[5.1.0] - 2023-10-04</h2>
+<h3 id="changed">Changed:</h3>
+<ul>
+<li>Update minimum <code>LaunchDarkly.Logging</code> version to <code>2.0.0</code> to share the same min version as SDK implementations.</li>
+</ul>
+<h2 id="501---2022-08-24">[5.0.1] - 2022-08-24</h2>
+<h3 id="changed-1">Changed:</h3>
+<ul>
+<li>Relaxed dependency constraint to allow use of <code>LaunchDarkly.Logging</code> 1.x or 2.x.</li>
+</ul>
+<h2 id="500---2022-08-18">[5.0.0] - 2022-08-18</h2>
+<h3 id="changed-2">Changed:</h3>
+<ul>
+<li>Removed EOL target framework .NET Framework 4.5.2. Lowest compatible platform versions are now .NET Core 3.1, .NET Framework 4.6.2, .NET 6.0, and .NET Standard 2.0.</li>
+<li>EventSource now considers any server response with an encoding other than UTF-8 to be invalid. The Server-Sent Events specification states that event streams must always use UTF-8.</li>
+</ul>
+<h3 id="removed">Removed:</h3>
+<ul>
+<li><code>ConfigurationBuilder.DefaultEncoding</code> (no longer relevant since the encoding must be UTF-8).</li>
+</ul>
+<h2 id="420---2022-04-19">[4.2.0] - 2022-04-19</h2>
+<h3 id="added">Added:</h3>
+<ul>
+<li><code>ConfigurationBuilder. HttpRequestModifier</code>, for making custom modifications to outgoing HTTP requests. (Thanks, <a href="https://github.com/launchdarkly/dotnet-eventsource/pull/85">acquleo</a>!)</li>
+</ul>
+<h2 id="413---2021-10-04">[4.1.3] - 2021-10-04</h2>
+<h3 id="changed-3">Changed:</h3>
+<ul>
+<li>Updated <code>LaunchDarkly.Logging</code> dependency to 1.0.1, to match the version used in the latest server-side .NET SDK release. Since .NET Framework is stricter about dependency versions than .NET Core, it is desirable to keep transitive dependency versions in sync in all packages used by the SDK.</li>
+</ul>
+<h2 id="412---2021-05-17">[4.1.2] - 2021-05-17</h2>
+<h3 id="fixed">Fixed:</h3>
+<ul>
+<li>Fixed a memory leak in which a <code>CancellationTokenSource</code> instance was not disposed of after reading from the stream. This bug was introduced in the 4.0.0 release. (<a href="https://github.com/launchdarkly/dotnet-eventsource/issues/77">#77</a>)</li>
+</ul>
+<h2 id="411---2021-05-04">[4.1.1] - 2021-05-04</h2>
+<p>(The 4.1.0 release was an accidental duplicate of 4.0.0 and did not include these changes.)</p>
+<h3 id="added-1">Added:</h3>
+<ul>
+<li><code>ConfigurationBuilder.ResponseStartTimeout</code>-- added as a more accurately named replacement for <code>ConnectionTimeout</code>.</li>
+</ul>
+<h3 id="deprecated">Deprecated:</h3>
+<ul>
+<li><code>ConfigurationBuilder.ConnectionTimeout</code></li>
+</ul>
+<h2 id="410---2021-05-04">[4.1.0] - 2021-05-04</h2>
+<p><em>This release was an accidental duplicate of 4.0.0. Please use 4.1.1 instead.</em></p>
+<h2 id="400---2021-02-22">[4.0.0] - 2021-02-22</h2>
+<p>Starting with this version, the API documentation for the latest release is viewable at <a href="https://launchdarkly.github.io/dotnet-eventsource">https://launchdarkly.github.io/dotnet-eventsource</a>.</p>
+<p>The 4.x major version of <code>LaunchDarkly.EventSource</code> will be used in the upcoming major version releases of LaunchDarkly's .NET-based SDKs. This release streamlines the API, updates platform compatibility, and improves performance.</p>
+<h3 id="added-2">Added:</h3>
+<ul>
+<li><code>EventSource.Restart</code>: this method allows the caller to trigger a connection restart even if there was not an error on the stream.</li>
+<li><code>MessageEvent.Name</code>: previously, the event name was only available as a property of <code>MessageReceivedEventArgs</code>.</li>
+<li><code>ConfigurationBuilder.DefaultEncoding</code>: sets the character encoding to use for parsing the stream data if the server did not specify an encoding in its <code>Content-Type</code>.</li>
+<li><code>ConfigurationBuilder.PreferDataAsUtf8Bytes</code>: an optional mode in which <code>EventSource</code> will read the <code>data:</code> property of events as a raw UTF-8 byte array (assuming the stream encoding is UTF-8) to avoid unnecessarily allocating a UTF-16 <code>string</code>. This is meant as an optimization for applications that will be processing the data with a UTF-8-based API such as <code>System.Text.Json</code>.</li>
+<li>Simple <code>EventSource(Uri)</code> constructor for cases where you do not need any other configuration options.</li>
+<li>Standard .NET XML documentation of all public types and methods is now produced in the build.</li>
+<li>The release now publishes a <a href="https://github.com/dotnet/sourcelink/blob/master/README.md">Source Link</a> package.</li>
+</ul>
+<h3 id="changed-4">Changed:</h3>
+<ul>
+<li>The minimum .NET Standard compatibility version is now 2.0.</li>
+<li>The minimum .NET Framework compatibility version is now 4.5.2.</li>
+<li>Logging now works through the new <a href="https://github.com/launchdarkly/dotnet-logging"><code>LaunchDarkly.Logging</code></a> facade which is used by LaunchDarkly .NET-based SDKs, instead of <code>Common.Logging</code>.</li>
+<li><code>ConfigurationBuilder</code> methods no longer throw any exceptions, except for one case: passing <code>null</code> for the stream URI. In all cases where a property has a maximum and/or minimum value, if you try to set a value outside that range it will simply be changed to the closest valid value. If two properties do not make sense to use together (such as a non-null <code>HttpClient</code> and a non-null <code>HttpMessageHandler</code>), one will simply override the other as described in the API documentation.</li>
+<li><code>ConfigurationBuilder.DelayRetryDuration</code> is named to <code>InitialRetryDelay</code>, which more accurately describes its meaning.</li>
+<li><code>ConfigurationBuilder.MessageHandler</code> is renamed to <code>HttpMessageHandler</code>, since that's the name of its type (also, &quot;message&quot; has other meanings in this API).</li>
+<li>The type of <code>Configuration.HttpContentFactory</code> is now simply <code>Func&amp;lt;HttpContent&amp;gt;</code> rather than using a custom delegate type.</li>
+<li>If you pass a <code>Dictionary</code> of headers to <code>ConfigurationBuilder.RequestHeaders</code>, it will now be copied. Previously the configuration retained a reference to the original <code>Dictionary</code>, which could cause problems if it was later modified.</li>
+<li><code>EventSource</code> now implements the stream read timeout in a way that uses the task scheduler more efficiently. Previously, it executed an additional task for each read with <code>Task.Delay</code>; now, it uses a timed cancellation token.</li>
+<li>Exception messages have been rewritten for clarity and style.</li>
+</ul>
+<h3 id="fixed-1">Fixed:</h3>
+<ul>
+<li><code>ConfigurationBuilder.BackoffResetThreshold</code> had no effect; the default value was being used regardless of what you set it to.</li>
+<li>When reading the SSE stream, <code>EventSource</code> was using a case-insensitive comparison to recognize field names like <code>event</code> and <code>data</code>. The <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html#event-stream-interpretation">SSE specification</a> states that field name &quot;must be compared literally, with no case folding performed,&quot; so a field name like <code>EVENT</code> is invalid.</li>
+</ul>
+<h3 id="removed-1">Removed:</h3>
+<ul>
+<li>Removed all types and methods that were marked as deprecated/obsolete in the last 3.x version.</li>
+<li><code>Configuration</code> no longer has a public constructor. Instances must now be created with <code>Configuration.Builder</code>.</li>
+<li>The helper class <code>ExponentialBackoffWithDecorrelation</code> is no longer public.</li>
+</ul>
+<h2 id="340---2020-12-03">[3.4.0] - 2020-12-03</h2>
+<h3 id="added-3">Added:</h3>
+<ul>
+<li>You can now tell EventSource to use an <code>HttpClient</code> instance that you provide by calling <code>ConfigurationBuilder.HttpClient</code>. (Thanks, <a href="https://github.com/launchdarkly/dotnet-eventsource/pull/61">thorstenfleischmann</a>!)</li>
+</ul>
+<h2 id="333---2020-11-05">[3.3.3] - 2020-11-05</h2>
+<h3 id="added-4">Added:</h3>
+<ul>
+<li>The package now has a specific target for .NET Standard 2.0, in addition to the previous targets of .NET Standard 1.4 and .NET Framework 4.5. There is no functional difference between the 2.0 and 1.4 builds, but it may be desirable for .NET Core/.NET Standard code to be able to avoid linking to any .NET Standard 1.x assemblies.</li>
+</ul>
+<h2 id="332---2019-10-23">[3.3.2] - 2019-10-23</h2>
+<h3 id="fixed-2">Fixed:</h3>
+<ul>
+<li>If a stream connection is restarted, <code>EventSource</code> should send a <code>Last-Event-Id</code> header if it previously received an event with an <code>id</code> field. (Thanks, <a href="https://github.com/launchdarkly/dotnet-eventsource/pull/53">fracek</a>!)</li>
+</ul>
+<h2 id="331---2019-08-08">[3.3.1] - 2019-08-08</h2>
+<h3 id="fixed-3">Fixed:</h3>
+<ul>
+<li>If you don't explicitly provide an <code>HttpMessageHandler</code> in the configuration, EventSource will now use the default <code>HttpClient</code> constructor; previously, it would create an instance of the standard .NET <code>HttpMessageHandler</code> implementation and tell the <code>HttpClient</code> to use that. In .NET Framework and .NET Standard, this makes no difference, but in Xamarin, calling the default <code>HttpClient</code> constructor may allow it to use a better HTTP implementation based on native APIs.</li>
+<li>Expanded and improved documentation comments.</li>
+</ul>
+<h2 id="330---2019-03-26">[3.3.0] - 2019-03-26</h2>
+<h3 id="added-5">Added:</h3>
+<ul>
+<li>The <code>EventSource</code> now implements <code>IDisposable</code>. Calling <code>Dispose()</code> has the same effect as calling <code>Close()</code>.</li>
+</ul>
+<h3 id="fixed-4">Fixed:</h3>
+<ul>
+<li>Under some circumstances, a <code>CancellationTokenSource</code> might not be disposed of after making an HTTP request, which could cause a timer object to be leaked.</li>
+</ul>
+<h2 id="323---2019-01-14">[3.2.3] - 2019-01-14</h2>
+<h3 id="fixed-5">Fixed:</h3>
+<ul>
+<li>The assemblies in this package now have Authenticode signatures. The release note for 3.2.1 was an error; that release did not include signatures.</li>
+</ul>
+<h2 id="322---2019-01-09">[3.2.2] - 2019-01-09</h2>
+<h3 id="removed-2">Removed</h3>
+<ul>
+<li>The console applications for manual testing have been removed (because the unit tests now include full end-to-end tests against a stub HTTP server).</li>
+</ul>
+<h2 id="321---2019-01-09">[3.2.1] - 2019-01-09</h2>
+<h3 id="changed-5">Changed</h3>
+<ul>
+<li>The published assemblies are now digitally signed as well as strong-named. Also, they are now built in Release mode and do not contain debug information.</li>
+</ul>
+<h2 id="320---2018-10-24">[3.2.0] - 2018-10-24</h2>
+<h3 id="added-6">Added</h3>
+<ul>
+<li>Previously, the delay before reconnect attempts would increase exponentially only if the previous connection could not be made at all or returned an HTTP error; if it received an HTTP 200 status, the delay would be reset to the minimum even if the connection then immediately failed. Now, the new configuration property <code>BackoffResetThreshold</code> (default: 1 minute) specifies the length of time that a connection must stay active in order for the reconnect delay to be reset. (<a href="https://github.com/launchdarkly/dotnet-eventsource/issues/37">#37</a>)</li>
+</ul>
+<h3 id="fixed-6">Fixed</h3>
+<ul>
+<li><p>Fixed an <a href="https://blogs.msdn.microsoft.com/pfxteam/2011/09/28/task-exception-handling-in-net-4-5/">unobserved exception</a> that could occur following a stream timeout, which could cause a crash in .NET 4.0.</p>
+</li>
+<li><p>A <code>NullReferenceException</code> could sometimes be logged if a stream connection failed. (<a href="https://github.com/launchdarkly/dotnet-eventsource/issues/24">#24</a>)</p>
+</li>
+</ul>
+<h2 id="315---2018-08-29">[3.1.5] - 2018-08-29</h2>
+<p>Duplicate of 3.1.4, created due to a problem in the release process.</p>
+<h2 id="314---2018-08-29">[3.1.4] - 2018-08-29</h2>
+<h3 id="fixed-7">Fixed</h3>
+<ul>
+<li>Fixed a bug that prevented the event source from reconnecting to the stream if it received an HTTP error status from the server (as opposed to simply losing the connection).</li>
+</ul>
+<h2 id="313---2018-08-13">[3.1.3] - 2018-08-13</h2>
+<h3 id="fixed-8">Fixed</h3>
+<ul>
+<li>The reconnection attempt counter is no longer shared among all EventSource instances. Previously, if you connected to more than one stream, all but the first would behave as if they were reconnecting and would have a backoff delay.</li>
+</ul>
+<h2 id="312---2018-08-02">[3.1.2] - 2018-08-02</h2>
+<h3 id="changed-6">Changed</h3>
+<ul>
+<li>The SDK was referencing some system assemblies via <code>&lt;PackageReference&gt;</code>, which could cause dependency conflicts. These have been changed to framework <code>&lt;Reference&gt;</code>s. A redundant reference to <code>System.Runtime</code> was removed.</li>
+</ul>
+<h3 id="fixed-9">Fixed</h3>
+<ul>
+<li>If the stream connection fails, there should be an increasing backoff interval before each reconnect attempt. Previously, it would log a message about waiting some number of milliseconds, but then not actually wait.</li>
+</ul>
+<h2 id="311---2018-06-28">[3.1.1] - 2018-06-28</h2>
+<h3 id="removed-3">Removed</h3>
+<ul>
+<li>Removed an unused dependency on Newtonsoft.Json.</li>
+</ul>
+<h2 id="310---2018-06-01">[3.1.0] - 2018-06-01</h2>
+<h3 id="added-7">Added</h3>
+<ul>
+<li>The new class <code>ConfigurationBuilder</code> provides a validated fluent builder pattern for <code>Configuration</code> instances.</li>
+<li>The HTTP method and request body can now be specified in <code>ConfigurationBuilder</code> or in the <code>Configuration</code> constructor. The default is still to use <code>GET</code> and not send a request body.</li>
+</ul>
+<h2 id="300---2018-02-23">[3.0.0] - 2018-02-23</h2>
+<h3 id="changed-7">Changed</h3>
+<ul>
+<li>Logging is now done via <code>Common.Logging</code>.</li>
+</ul>
+<h3 id="added-8">Added</h3>
+<ul>
+<li><code>EventSource</code> now uses the interface <code>IEventSource</code>.</li>
+</ul>
+<h2 id="221---2018-02-05">[2.2.1] - 2018-02-05</h2>
+<ul>
+<li>Downgrade Microsoft.Extensions.Logging to 1.0.2 to reduce dependencies brought in when building against .NET Framework.</li>
+</ul>
+<h2 id="220---2018-01-19">[2.2.0] - 2018-01-19</h2>
+<h3 id="added-9">Added</h3>
+<ul>
+<li>Exposed <code>EventSourceServiceCancelledException</code> as a public class.</li>
+</ul>
+<h3 id="changed-8">Changed</h3>
+<ul>
+<li>Removed unused and transitive dependencies.</li>
+<li>Added a reference to the Apache 2.0 license in <code>LaunchDarkly.EventSource.csproj</code></li>
+<li>Improved logging. Thanks @JeffAshton!</li>
+</ul>
+<h2 id="211---2017-11-29">[2.1.1] - 2017-11-29</h2>
+<h3 id="changed-9">Changed</h3>
+<ul>
+<li>Move from .NET Standard 1.6 to 1.4.</li>
+</ul>
+<h2 id="210---2017-11-16">[2.1.0] - 2017-11-16</h2>
+<h3 id="added-10">Added</h3>
+<ul>
+<li>Exposed the <code>ExponentialBackoffWithDecorrelation</code> as a public class. This class may be used to calculate exponential backoff with jitter.</li>
+</ul>
+<h3 id="changed-10">Changed</h3>
+<ul>
+<li>Reconnects to EventSource are now handled inline, rather than using <a href="https://github.com/App-vNext/Polly">Polly</a> for managing retry policies.</li>
+</ul>
+<h2 id="200---2017-10-11">[2.0.0] - 2017-10-11</h2>
+<h3 id="changed-11">Changed</h3>
+<ul>
+<li>Removed the <code>closeOnEndOfStream</code> property.</li>
+</ul>
+<h2 id="110-2017-10-02">[1.1.0] 2017-10-02</h2>
+<h3 id="added-11">Added</h3>
+<ul>
+<li><code>ConnectToEventSourceAsync</code> now takes in a new boolean parameter, <code>closeOnEndOfStream</code>, which, if true, will close the EventSource connection when the end of the stream is reached.</li>
+</ul>
+<h3 id="changed-12">Changed</h3>
+<ul>
+<li>Fixed a bug causing causing read timeouts to never propogate.</li>
+</ul>
+<h2 id="101-2017-09-27">[1.0.1] 2017-09-27</h2>
+<h3 id="added-12">Added</h3>
+<ul>
+<li>Signed EventSource Assembly.</li>
+</ul>
+<h3 id="changed-13">Changed</h3>
+<ul>
+<li>Change dependency on Polly to Polly-Signed.</li>
+</ul>
+<h2 id="100-2017-09-22">[1.0.0] 2017-09-22</h2>
+<p>Hello world!</p>
+
+</article>
+          </div>
+
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/launchdarkly/dotnet-eventsource/blob/main/CHANGELOG.md/#L1" class="contribution-link">Edit this page</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In this article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+      
+      <span>Generated by <strong>DocFX</strong></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="text/javascript" src="styles/docfx.vendor.min.js"></script>
+    <script type="text/javascript" src="styles/docfx.js"></script>
+    <script type="text/javascript" src="styles/main.js"></script>
+  </body>
+</html>
