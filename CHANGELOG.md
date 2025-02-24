@@ -2,6 +2,14 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [5.3.0](https://github.com/launchdarkly/dotnet-eventsource/compare/v5.2.0...5.3.0) (2025-02-24)
+
+
+### Features
+
+* Report event source headers on open. ([#104](https://github.com/launchdarkly/dotnet-eventsource/issues/104)) ([e2cba63](https://github.com/launchdarkly/dotnet-eventsource/commit/e2cba638029bc7e8b2c515d8a540493203929df0))
+* Update minimum version of LaunchDarkly.Logging to 2.0.0 ([#99](https://github.com/launchdarkly/dotnet-eventsource/issues/99)) ([b1ea835](https://github.com/launchdarkly/dotnet-eventsource/commit/b1ea835a1e9753bf6902e47aec535eb1d7517aaa))
+
 ## [5.2.0](https://github.com/launchdarkly/dotnet-eventsource/compare/5.1.0...5.2.0) (2025-02-24)
 
 
