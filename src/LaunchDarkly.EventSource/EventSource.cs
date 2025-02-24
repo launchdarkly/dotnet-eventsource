@@ -301,10 +301,10 @@ namespace LaunchDarkly.EventSource
             _eventDataUtf8ByteBuffer = null;
 
             var svc = GetEventSourceService(_configuration);
-            
+
             svc.ConnectionOpened += (o, e) => {
                 _lastSuccessfulConnectionTime = DateTime.Now;
-                SetReadyState(ReadyState.Open, OnOpened);
+                SetReadyState(ReadyState.Open, OnOpened, e.Headers);
             };
             svc.ConnectionClosed += (o, e) => { SetReadyState(ReadyState.Closed, OnClosed); };
 
@@ -321,7 +321,7 @@ namespace LaunchDarkly.EventSource
             _logger.Debug("Close({0}) - state was {1}", state, ReadyState);
             SetReadyState(state, OnClosed);
         }
-        
+
         private void ProcessResponseLineString(string content)
         {
             if (content == null)
@@ -353,7 +353,8 @@ namespace LaunchDarkly.EventSource
         }
 
 
-        private void SetReadyState(ReadyState state, Action<StateChangedEventArgs> action = null)
+        private void SetReadyState(ReadyState state, Action<StateChangedEventArgs> action = null,
+            IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers = null)
         {
             lock (this)
             {
@@ -361,12 +362,13 @@ namespace LaunchDarkly.EventSource
                 {
                     return;
                 }
+
                 _readyState = state;
             }
 
             if (action != null)
             {
-                action(new StateChangedEventArgs(state));
+                action(new StateChangedEventArgs(state, headers));
             }
         }
 
