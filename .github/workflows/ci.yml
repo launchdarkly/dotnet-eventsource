@@ -8,6 +8,7 @@ on:
     branches: [ main, 'feat/**' ]
     paths-ignore:
       - '**.md'
+  workflow_call:
 
 jobs:
   build-and-run:
