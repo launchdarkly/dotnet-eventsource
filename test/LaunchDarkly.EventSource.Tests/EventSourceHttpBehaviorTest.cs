@@ -166,6 +166,37 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
+        public async Task MalformedAuthorizationHeaderDoesNotExposeKeyInException()
+        {
+            using (var server = HttpServer.Start(EmptyStreamThatStaysOpen))
+            {
+                var taskComplete = new TaskCompletionSource<bool>();
+                var errorMessage = string.Empty;
+
+                var invalidSdkKey = "\nsecret-api-key-with";
+                var headers = new Dictionary<string, string> { { "Authorization", invalidSdkKey } };
+
+                using (var es = MakeEventSource(server.Uri, builder => builder.RequestHeaders(headers)))
+                {
+                    es.Error += (sender, args) =>
+                    {
+                        errorMessage = args.Exception.Message;
+                        taskComplete.SetResult(true);
+                    };
+
+                    _ = Task.Run(es.StartAsync);
+
+                    // Wait for the error event with a timeout
+                    var timeoutTask = Task.Delay(TimeSpan.FromSeconds(5));
+                    var completedTask = await Task.WhenAny(taskComplete.Task, timeoutTask);
+
+                    Assert.True(completedTask == taskComplete.Task, "Test timed out waiting for error event");
+                    Assert.DoesNotContain(invalidSdkKey, errorMessage);
+                }
+            }
+        }
+
+        [Fact]
         public async void OpenedEventIncludesHeaders()
         {
             var taskComplete = new TaskCompletionSource<bool>();
