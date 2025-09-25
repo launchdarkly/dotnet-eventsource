@@ -2,6 +2,13 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [5.2.1](https://github.com/launchdarkly/dotnet-eventsource/compare/5.2.0...5.2.1) (2025-09-25)
+
+
+### Bug Fixes
+
+* Avoid showing authorization value in exception ([#111](https://github.com/launchdarkly/dotnet-eventsource/issues/111)) ([e5f7933](https://github.com/launchdarkly/dotnet-eventsource/commit/e5f793354ebb5b0445b7c747474f8cb98c21288b))
+
 ## [5.2.0](https://github.com/launchdarkly/dotnet-eventsource/compare/5.1.0...5.2.0) (2025-02-24)
 
 
