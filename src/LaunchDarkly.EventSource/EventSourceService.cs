@@ -199,7 +199,20 @@ namespace LaunchDarkly.EventSource
             {
                 foreach (var item in _configuration.RequestHeaders)
                 {
-                    request.Headers.Add(item.Key, item.Value);
+                    try
+                    {
+                        request.Headers.Add(item.Key, item.Value);
+                    }
+                    catch (FormatException)
+                    {
+                        // Avoid showing the Authorization header value in the exception message
+                        if (item.Key.Equals("Authorization", StringComparison.OrdinalIgnoreCase))
+                        {
+                            throw new FormatException("The Authorization header is invalid.");
+                        }
+
+                        throw;
+                    }
                 }
             }
 
