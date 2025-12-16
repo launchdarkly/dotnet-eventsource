@@ -256,7 +256,7 @@ namespace LaunchDarkly.EventSource
             // Any non-2xx response status is an error. A 204 (no content) is also an error.
             if (!response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NoContent)
             {
-                throw new EventSourceServiceUnsuccessfulResponseException((int)response.StatusCode);
+                throw new EventSourceServiceUnsuccessfulResponseException((int)response.StatusCode, response.Headers);
             }
 
             if (response.Content == null)
