@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <!--x-release-please-start-version-->
-    <Version>5.2.1</Version>
+    <Version>5.3.0</Version>
     <!--x-release-please-end-->
     <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

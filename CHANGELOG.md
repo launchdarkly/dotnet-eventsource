@@ -2,6 +2,13 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [5.3.0](https://github.com/launchdarkly/dotnet-eventsource/compare/5.2.1...5.3.0) (2025-12-16)
+
+
+### Features
+
+* adds headers to EventSourceServiceUnsuccessfulResponseException ([a0d1b1f](https://github.com/launchdarkly/dotnet-eventsource/commit/a0d1b1f7dc75e64d645403a69eeff9b87915abfc))
+
 ## [5.2.1](https://github.com/launchdarkly/dotnet-eventsource/compare/5.2.0...5.2.1) (2025-09-25)
 
 
