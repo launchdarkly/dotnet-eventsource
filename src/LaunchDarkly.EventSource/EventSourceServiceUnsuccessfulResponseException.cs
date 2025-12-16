@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 
 namespace LaunchDarkly.EventSource
 {
@@ -14,6 +15,11 @@ namespace LaunchDarkly.EventSource
         /// </summary>
         public int StatusCode { get; }
 
+        /// <summary>
+        /// The HTTP headers from the response.
+        /// </summary>
+        public IEnumerable<KeyValuePair<string, IEnumerable<string>>> Headers { get; }
+
         #endregion
 
         #region Public Constructors 
@@ -23,9 +29,20 @@ namespace LaunchDarkly.EventSource
         /// </summary>
         /// <param name="statusCode">the HTTP status code of the response</param>
         public EventSourceServiceUnsuccessfulResponseException(int statusCode) :
+            this(statusCode, new Dictionary<string, IEnumerable<string>>())
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance with headers.
+        /// </summary>
+        /// <param name="statusCode">the HTTP status code of the response</param>
+        /// <param name="headers">the HTTP headers from the response</param>
+        public EventSourceServiceUnsuccessfulResponseException(int statusCode, IEnumerable<KeyValuePair<string, IEnumerable<string>>> headers) :
             base(string.Format(Resources.ErrorHttpStatus, statusCode))
         {
             StatusCode = statusCode;
+            Headers = headers ?? new Dictionary<string, IEnumerable<string>>();
         }
 
         #endregion
