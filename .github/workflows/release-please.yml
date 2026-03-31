@@ -23,14 +23,57 @@ jobs:
           token: ${{secrets.GITHUB_TOKEN}}
           target-branch: main
 
+  create-tag:
+    needs: ['release-please']
+    if: ${{ needs.release-please.outputs.releases_created == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create release tag
+        env:
+          TAG_NAME: ${{ needs.release-please.outputs.tag_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh api "repos/${{ github.repository }}/git/ref/tags/${TAG_NAME}" >/dev/null 2>&1; then
+            echo "Tag ${TAG_NAME} already exists, skipping creation."
+          else
+            echo "Creating tag ${TAG_NAME}."
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag "${TAG_NAME}"
+            git push origin "${TAG_NAME}"
+          fi
+
   ci:
     needs: ['release-please']
     if: ${{ needs.release-please.outputs.releases_created == 'true' }}
     uses: ./.github/workflows/ci.yml
+
   publish:
-    needs: ['release-please', 'ci']
+    needs: ['release-please', 'ci', 'create-tag']
     if: ${{ needs.release-please.outputs.releases_created == 'true' }}
     uses: ./.github/workflows/publish.yml
     with:
       dry_run: false
       tag: ${{ needs.release-please.outputs.tag_name }}
+
+  publish-release:
+    needs: ['release-please', 'publish']
+    if: ${{ needs.release-please.outputs.releases_created == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ needs.release-please.outputs.tag_name }}
+        run: >
+          gh release edit "$TAG_NAME"
+          --repo ${{ github.repository }}
+          --draft=false

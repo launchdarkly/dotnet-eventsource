@@ -30,6 +30,7 @@ jobs:
       id-token: write # Needed if using OIDC to get release secrets.
       contents: write # Contents and pull-requests are for release-please to make releases.
       pull-requests: write
+      attestations: write
 
     steps:
       - uses: actions/checkout@v4
@@ -71,16 +72,15 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           dry_run: ${{ inputs.dry_run }}
 
-  provenance:
-    permissions:
-      actions: read
-      id-token: write
-      contents: write
-    if: ${{ inputs.dry_run  == 'false' }}
-    needs: ['publish']
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.10.0
-    with:
-      base64-subjects: "${{ needs.publish.outputs.hashes }}"
-      upload-assets: true
-      upload-tag-name: ${{ inputs.tag }}
-      provenance-name: ${{ format('LaunchDarkly.EventSource-{0}_provenance.intoto.jsonl', inputs.tag) }}
+      - name: Generate checksums file
+        if: ${{ !inputs.dry_run }}
+        env:
+          HASHES: ${{ steps.publish.outputs.hashes }}
+        run: |
+          echo "$HASHES" | base64 -d > checksums.txt
+
+      - name: Attest build provenance
+        if: ${{ !inputs.dry_run }}
+        uses: actions/attest@v4
+        with:
+          subject-checksums: checksums.txt
