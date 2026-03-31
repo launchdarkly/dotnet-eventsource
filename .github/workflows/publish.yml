@@ -8,9 +8,14 @@ on:
         type: boolean
         required: true
       tag:
-        description: 'Tag for provenance. For a dry run the value does not matter.'
+        description: 'Tag of an existing draft release. For a dry run the value does not matter.'
         type: string
         required: true
+      publish_release:
+        description: 'Publish (un-draft) the release after all artifacts are uploaded?'
+        type: boolean
+        required: false
+        default: true
 
   workflow_call:
     inputs:
@@ -22,6 +27,11 @@ on:
         description: 'Tag for provenance'
         type: string
         required: true
+      publish_release:
+        description: 'Publish (un-draft) the release after all artifacts are uploaded?'
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   publish:
@@ -84,3 +94,19 @@ jobs:
         uses: actions/attest@v4
         with:
           subject-checksums: checksums.txt
+
+  publish-release:
+    needs: ['publish']
+    if: ${{ !inputs.dry_run && inputs.publish_release }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ inputs.tag }}
+        run: >
+          gh release edit "$TAG_NAME"
+          --repo ${{ github.repository }}
+          --draft=false
