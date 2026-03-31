@@ -5,7 +5,6 @@
       "bootstrap-sha": "42cd339937a4affdbe94ab0d49694a86eb85c75f",
       "include-v-in-tag": false,
       "include-component-in-tag": false,
-      "force-tag-creation": true,
       "extra-files": [
         "src/LaunchDarkly.EventSource/LaunchDarkly.EventSource.csproj"
       ]
