@@ -64,7 +64,7 @@ jobs:
           dry_run: ${{ inputs.dry_run }}
 
       - name: Attest build provenance
-        if: ${{ inputs.dry_run == 'false' }}
+        if: ${{ format('{0}', inputs.dry_run) == 'false' }}
         uses: actions/attest@v4
         with:
           subject-path: 'nupkgs/*'
