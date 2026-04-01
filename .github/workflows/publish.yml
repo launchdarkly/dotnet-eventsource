@@ -7,20 +7,12 @@ on:
         description: 'Is this a dry run. If so no package will be published.'
         type: boolean
         required: true
-      tag:
-        description: 'Tag for provenance. For a dry run the value does not matter.'
-        type: string
-        required: true
 
   workflow_call:
     inputs:
       dry_run:
         description: 'Is this a dry run. If so no package will be published.'
         type: boolean
-        required: true
-      tag:
-        description: 'Tag for provenance'
-        type: string
         required: true
 
 jobs:
@@ -72,7 +64,7 @@ jobs:
           dry_run: ${{ inputs.dry_run }}
 
       - name: Attest build provenance
-        if: ${{ !inputs.dry_run }}
+        if: ${{ inputs.dry_run == 'false' }}
         uses: actions/attest@v4
         with:
           subject-path: 'nupkgs/*'
