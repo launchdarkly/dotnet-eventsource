@@ -4,11 +4,6 @@ inputs:
   dry_run:
     description: 'Is this a dry run. If so no package will be published.'
     required: true
-outputs:
-  hashes:
-    description: sha256sum hashes of built artifacts
-    value: ${{ steps.hash.outputs.hashes }}
-
 runs:
   using: composite
   steps:
@@ -32,13 +27,6 @@ runs:
           dotnet nuget push "${pkg}" --api-key ${{ env.NUGET_API_KEY }} --source https://www.nuget.org
           echo "published ${pkg}"
         done
-
-    - name: Hash nuget packages
-      id: hash
-      if: ${{ inputs.dry_run == 'false' }}
-      shell: bash
-      run: |
-        echo "hashes=$(sha256sum ./nupkgs/*.nupkg ./nupkgs/*.snupkg | base64 -w0)" >> "$GITHUB_OUTPUT"
 
     - name: Dry Run Publish
       if: ${{ inputs.dry_run == 'true' }}

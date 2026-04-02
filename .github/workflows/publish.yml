@@ -7,20 +7,12 @@ on:
         description: 'Is this a dry run. If so no package will be published.'
         type: boolean
         required: true
-      tag:
-        description: 'Tag for provenance. For a dry run the value does not matter.'
-        type: string
-        required: true
 
   workflow_call:
     inputs:
       dry_run:
         description: 'Is this a dry run. If so no package will be published.'
         type: boolean
-        required: true
-      tag:
-        description: 'Tag for provenance'
-        type: string
         required: true
 
 jobs:
@@ -30,6 +22,7 @@ jobs:
       id-token: write # Needed if using OIDC to get release secrets.
       contents: write # Contents and pull-requests are for release-please to make releases.
       pull-requests: write
+      attestations: write
 
     steps:
       - uses: actions/checkout@v4
@@ -45,7 +38,6 @@ jobs:
             /production/common/releasing/digicert/code_signing_cert_sha1_hash = DIGICERT_CODE_SIGNING_CERT_SHA1_HASH,
             /production/common/releasing/nuget/api_key = NUGET_API_KEY'
           s3_path_pairs: 'launchdarkly-releaser/dotnet/LaunchDarkly.EventSource.snk = LaunchDarkly.EventSource.snk'
-
 
       - name: Build Release
         uses: ./.github/actions/release-build
@@ -71,16 +63,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           dry_run: ${{ inputs.dry_run }}
 
-  provenance:
-    permissions:
-      actions: read
-      id-token: write
-      contents: write
-    if: ${{ inputs.dry_run  == 'false' }}
-    needs: ['publish']
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.10.0
-    with:
-      base64-subjects: "${{ needs.publish.outputs.hashes }}"
-      upload-assets: true
-      upload-tag-name: ${{ inputs.tag }}
-      provenance-name: ${{ format('LaunchDarkly.EventSource-{0}_provenance.intoto.jsonl', inputs.tag) }}
+      - name: Attest build provenance
+        if: ${{ format('{0}', inputs.dry_run) == 'false' }}
+        uses: actions/attest@v4
+        with:
+          subject-path: 'nupkgs/*'

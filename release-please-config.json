@@ -6,7 +6,8 @@
       "include-v-in-tag": false,
       "include-component-in-tag": false,
       "extra-files": [
-        "src/LaunchDarkly.EventSource/LaunchDarkly.EventSource.csproj"
+        "src/LaunchDarkly.EventSource/LaunchDarkly.EventSource.csproj",
+        "PROVENANCE.md"
       ]
     }
   }
