@@ -8,7 +8,7 @@ on:
 jobs:
   release-please:
     outputs:
-      releases_created: ${{ steps.release.outputs.releases_created }}
+      release_created: ${{ steps.release.outputs.release_created }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write # Needed if using OIDC to get release secrets.
@@ -54,12 +54,12 @@ jobs:
 
   ci:
     needs: ['release-please']
-    if: ${{ needs.release-please.outputs.releases_created == 'true' }}
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
     uses: ./.github/workflows/ci.yml
 
   publish:
     needs: ['release-please', 'ci']
-    if: ${{ needs.release-please.outputs.releases_created == 'true' }}
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
     uses: ./.github/workflows/publish.yml
     with:
       dry_run: false
