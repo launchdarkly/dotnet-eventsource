@@ -26,6 +26,7 @@ jobs:
     needs: ['release-please']
     permissions:
       id-token: write
+      contents: read
     if: ${{ needs.release-please.outputs.releases_created == 'true' }}
     uses: ./.github/workflows/ci.yml
 
