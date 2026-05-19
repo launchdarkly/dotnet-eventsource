@@ -16,7 +16,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
         with:
           token: ${{secrets.GITHUB_TOKEN}}
@@ -24,11 +24,19 @@ jobs:
 
   ci:
     needs: ['release-please']
+    permissions:
+      id-token: write
+      contents: read
     if: ${{ needs.release-please.outputs.releases_created == 'true' }}
     uses: ./.github/workflows/ci.yml
 
   publish:
     needs: ['release-please', 'ci']
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+      attestations: write
     if: ${{ needs.release-please.outputs.releases_created == 'true' }}
     uses: ./.github/workflows/publish.yml
     with:
