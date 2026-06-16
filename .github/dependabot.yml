@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+  - package-ecosystem: "nuget"
+    directory: "/src/LaunchDarkly.EventSource"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+  - package-ecosystem: "nuget"
+    directory: "/test/LaunchDarkly.EventSource.Tests"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
