@@ -49,7 +49,7 @@ jobs:
         uses: launchdarkly/gh-actions/actions/sign-dlls@sign-dlls-v1.0.0
         with:
           build_configuration_path: ./src/LaunchDarkly.EventSource/bin/Release
-          dll_name: LaunchDarkly.EventSource.Microsoft.dll
+          dll_name: LaunchDarkly.EventSource.dll
 
       - name: Publish Nupkg
         id: publish
