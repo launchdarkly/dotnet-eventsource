@@ -107,13 +107,25 @@ namespace LaunchDarkly.EventSource.Tests
             return ret;
         }
 
-        public void ExpectActions(params Action[] expectedActions)
+        public void ExpectActions(params Action[] expectedActions) =>
+            ExpectActions(null, expectedActions);
+
+        public void ExpectActions(Func<Action, bool> allowSkip, params Action[] expectedActions)
         {
             int i = 0;
             foreach (var a in expectedActions)
             {
-                Assert.True(_actions.TryTake(out var actual, WaitForActionTimeout),
-                    "timed out waiting for action " + i + " (" + a + ")");
+                Action actual;
+                while (true)
+                {
+                    Assert.True(_actions.TryTake(out actual, WaitForActionTimeout),
+                        "timed out waiting for action " + i + " (" + a + ")");
+                    if (allowSkip != null && allowSkip(actual))
+                    {
+                        continue;
+                    }
+                    break;
+                }
 
                 // The MessageEvent.Equals method takes Origin into account, which is inconvenient for
                 // our tests because the origin will vary for each embedded test server. So, ignore it.
