@@ -204,6 +204,12 @@ namespace LaunchDarkly.EventSource.Tests
 
             var backoffs = new List<TimeSpan>();
 
+            // On .NET Framework, cancelling a stream read can surface as an IOException
+            // rather than OperationCanceledException, which causes an Error event to fire
+            // before the Closed event. We skip these transient error events since they are
+            // an expected side effect of cancellation on that platform.
+            Func<EventSink.Action, bool> skipCancellationErrors = a => a.Kind == "Error";
+
             using (var server = HttpServer.Start(handler))
             {
                 using (var es = MakeEventSource(server.Uri, config => config.InitialRetryDelay(initialDelay)))
@@ -225,6 +231,7 @@ namespace LaunchDarkly.EventSource.Tests
                         es.Restart(resetBackoff);
 
                         sink.ExpectActions(
+                            skipCancellationErrors,
                             EventSink.ClosedAction(),
                             EventSink.OpenedAction(),
                             EventSink.MessageReceivedAction(anEvent)
