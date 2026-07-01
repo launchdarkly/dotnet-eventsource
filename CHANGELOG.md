@@ -2,6 +2,13 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [5.3.1](https://github.com/launchdarkly/dotnet-eventsource/compare/5.3.0...5.3.1) (2026-07-01)
+
+
+### Bug Fixes
+
+* fix dll_name for Authenticode signing in publish workflow ([#121](https://github.com/launchdarkly/dotnet-eventsource/issues/121)) ([ac7c5a7](https://github.com/launchdarkly/dotnet-eventsource/commit/ac7c5a79f8e4524275983255c56231d886114eb0))
+
 ## [5.3.0](https://github.com/launchdarkly/dotnet-eventsource/compare/5.2.1...5.3.0) (2025-12-16)
 
 

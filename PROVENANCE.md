@@ -9,7 +9,7 @@ To verify build provenance attestations, we recommend using the [GitHub CLI `att
 <!-- x-release-please-start-version -->
 ```
 # Set the version of the SDK to verify
-SDK_VERSION=5.3.0
+SDK_VERSION=5.3.1
 ```
 <!-- x-release-please-end -->
 
