@@ -17,7 +17,18 @@ namespace LaunchDarkly.EventSource
     {
         #region Private Fields
 
-        private const int Utf8ReadBufferSize = 1000;
+        // Buffer size for both the StreamReader (text mode) and the ByteArrayLineScanner
+        // (PreferDataAsUtf8Bytes mode). Chosen as 8192 rather than a smaller value because
+        // Xamarin.Android.Net.AndroidMessageHandler silently wraps HTTP response bodies in a
+        // System.IO.BufferedStream whose default internal buffer is 4096 bytes. When a caller
+        // passes count < 4096 to Stream.Read, BufferedStream engages its internal-buffer
+        // branch and issues a 4096-byte read against the underlying Java InputStream. On an
+        // SSE keepalive-driven connection, once the first HTTP chunk is drained, the follow-up
+        // read blocks until the next server-side keepalive arrives (~60 s), stalling the SSE
+        // client for that duration. Any value >= 4096 bypasses that branch by taking
+        // BufferedStream's passthrough path; 8192 matches Okio's Segment.SIZE and gives one
+        // doubling of headroom against future BufferedStream default changes. See SDK-2755.
+        private const int ReadBufferSize = 8192;
 
         private readonly Configuration _configuration;
         private readonly HttpClient _httpClient;
@@ -119,7 +130,8 @@ namespace LaunchDarkly.EventSource
                     else
                     {
                         _logger.Debug("Reading stream with string conversion");
-                        using (var reader = new StreamReader(stream, Encoding.UTF8))
+                        using (var reader = new StreamReader(stream, Encoding.UTF8,
+                            detectEncodingFromByteOrderMarks: true, bufferSize: ReadBufferSize))
                         {
                             await ProcessResponseFromReaderAsync(processResponseLineString, reader, cancellationToken);
                         }
@@ -169,7 +181,7 @@ namespace LaunchDarkly.EventSource
             CancellationToken cancellationToken
             )
         {
-            var lineScanner = new ByteArrayLineScanner(Utf8ReadBufferSize);
+            var lineScanner = new ByteArrayLineScanner(ReadBufferSize);
             while (!cancellationToken.IsCancellationRequested)
             {
                 // Note that even though Stream.ReadAsync has an overload that takes a CancellationToken, that
