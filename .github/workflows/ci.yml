@@ -39,3 +39,46 @@ jobs:
 
       - name: build docs
         uses: ./.github/actions/build-docs
+
+  contract-tests:
+    runs-on: ubuntu-latest
+    name: 'Contract Tests'
+    env:
+      TEST_SERVICE_PORT: 8000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup dotnet build tools
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0
+
+      - name: Build test service
+        run: make build-contract-tests
+
+      - name: Start test service in background
+        run: make start-contract-test-service-bg
+
+      # Skips are for pre-existing dotnet-eventsource behavioral gaps unrelated to
+      # SDK-2755 (see contract-tests/TestService.cs for the omitted capabilities and
+      # docs/optional_features.md for what each capability tests). Filing a follow-up
+      # ticket to fix these in the library will let us remove these skips.
+      - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests-v1.1.0
+        with:
+          test_service_port: ${{ env.TEST_SERVICE_PORT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repo: sse-contract-tests
+          branch: main
+          extra_params: >-
+            -skip "basic parsing/ID field is ignored if it contains a null"
+            -skip "linefeeds/CR separator"
+            -skip "linefeeds/CRLF where CR is end of 1 chunk"
+            -skip "reconnection/discards partial messages on retry"
+
+      - name: Upload test service logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-test-service-logs
+          path: /tmp/sse-contract-test-service.log
