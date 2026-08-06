@@ -76,10 +76,20 @@ namespace TestService
                 configBuilder.Method(new HttpMethod(options.Method));
                 if (!string.IsNullOrEmpty(options.Body))
                 {
+                    // Match the same case-insensitive comparison used above when skipping
+                    // Content-Type from the request-header loop, so both operations agree on
+                    // what counts as the Content-Type key.
                     string contentType = "text/plain; charset=utf-8";
-                    if (options.Headers != null && options.Headers.TryGetValue("content-type", out var ct))
+                    if (options.Headers != null)
                     {
-                        contentType = ct;
+                        foreach (var kv in options.Headers)
+                        {
+                            if (string.Equals(kv.Key, "content-type", System.StringComparison.OrdinalIgnoreCase))
+                            {
+                                contentType = kv.Value;
+                                break;
+                            }
+                        }
                     }
                     var bodyString = options.Body;
                     var mediaType = contentType.Split(';')[0].Trim();
