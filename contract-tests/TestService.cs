@@ -34,9 +34,21 @@ namespace TestService
 
     public class Webapp
     {
+        // Capabilities the LaunchDarkly.EventSource library implements correctly against the
+        // sse-contract-tests harness. Each entry here was verified end-to-end by running the
+        // harness's tests for that capability. Deliberately omitted:
+        //
+        //   * "comments" -- CommentReceived fires with the raw line including the leading colon;
+        //     the harness expects the colon stripped. See EventParser.cs where colonPos==0 stores
+        //     `line` (with colon) as ValueString. Real .NET SDK behavior; not fixed here.
+        //   * "event-type-listeners" -- not applicable; MessageReceived fires for all event types
+        //     without explicit registration.
+        //   * "server-directed-shutdown-request" -- .NET retries on 204 instead of halting.
+        //     EventSourceService.ValidateResponse throws on 204, EventSource.cs top-level loop
+        //     re-enters on Closed (not Shutdown) state. Real .NET SDK behavior; not fixed here.
         private static readonly string[] Capabilities = new[]
         {
-            "comments",
+            "bom",
             "headers",
             "last-event-id",
             "payload-size-stress-testable",

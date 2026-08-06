@@ -91,8 +91,12 @@ namespace TestService
 
             _eventSource = new EventSource(configBuilder.Build());
             _eventSource.MessageReceived += OnMessageReceived;
-            _eventSource.CommentReceived += OnCommentReceived;
             _eventSource.Error += OnError;
+            // Deliberately not subscribing to CommentReceived: the "comments" capability is
+            // not declared because .NET EventSource returns comment strings with the leading
+            // colon still attached, which does not match the harness's expected shape. If we
+            // forwarded comments anyway, the harness would receive unexpected comment messages
+            // in tests that assume no comment reporting.
 
             // Fire-and-forget: EventSource fires events on its own internal thread as data arrives.
             _ = _eventSource.StartAsync();
@@ -113,7 +117,6 @@ namespace TestService
         {
             _closed = true;
             _eventSource.MessageReceived -= OnMessageReceived;
-            _eventSource.CommentReceived -= OnCommentReceived;
             _eventSource.Error -= OnError;
             _eventSource.Close();
             _callbackClient.Dispose();
@@ -134,11 +137,6 @@ namespace TestService
                 },
             };
             SendCallback(msg);
-        }
-
-        private void OnCommentReceived(object sender, CommentReceivedEventArgs e)
-        {
-            SendCallback(new Message { Kind = "comment", Comment = e.Comment });
         }
 
         private void OnError(object sender, ExceptionEventArgs e)
