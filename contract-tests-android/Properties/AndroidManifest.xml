@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- largeHeap gives the app the ~512 MB per-process heap limit instead of the default
+         ~192 MB. Needed for the payload-size sweep in sse-contract-tests to exercise the
+         largest sizes (up to 128 MiB payloads inflate to ~500+ MB peak footprint through
+         UTF-16 decoding and JSON serialization). -->
+    <application android:label="ContractTestService" android:usesCleartextTraffic="true" android:largeHeap="true" />
+</manifest>
