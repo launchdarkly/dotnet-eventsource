@@ -106,6 +106,11 @@ jobs:
       - name: Install .NET Android workload
         run: dotnet workload install android
 
+      # avdmanager fails to create the AVD if this directory doesn't already exist:
+      # "cannot create /home/runner/.android/avd/test.avd/config.ini: Directory nonexistent"
+      - name: Ensure AVD directory exists
+        run: mkdir -p ~/.android/avd
+
       # /dev/kvm is present on ubuntu-latest runners but locked to root/the kvm group;
       # this udev rule opens it to all users so the emulator step can hardware-accelerate.
       - name: Enable KVM permissions
@@ -134,13 +139,13 @@ jobs:
           # 8 GB is comfortable. GitHub's ubuntu-latest runners have 16 GB total RAM.
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -memory 8192
           disable-animations: true
+          # Log capture runs in the background inside the emulator-runner scope so it can
+          # reach the emulator via adb; the resulting file persists on the runner filesystem
+          # after emulator teardown and is uploaded as an artifact on failure.
           script: |
+            adb logcat "DOTNET:V" "ContractTestService:V" "*:S" > /tmp/android-service.log 2>&1 &
             make start-contract-test-service-android
             make run-contract-tests-android
-
-      - name: Upload Android service logs
-        if: failure()
-        run: adb logcat -d "DOTNET:V" "ContractTestService:V" "*:S" > /tmp/android-service.log 2>&1 || true
 
       - uses: actions/upload-artifact@v4
         if: failure()
