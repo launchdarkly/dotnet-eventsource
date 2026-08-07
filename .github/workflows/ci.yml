@@ -60,10 +60,7 @@ jobs:
       - name: Start test service in background
         run: make start-contract-test-service-bg
 
-      # Skips are for pre-existing dotnet-eventsource behavioral gaps unrelated to
-      # SDK-2755 (see contract-tests/TestService.cs for the omitted capabilities and
-      # docs/optional_features.md for what each capability tests). Filing a follow-up
-      # ticket to fix these in the library will let us remove these skips.
+      # Skips are for pre-existing dotnet-eventsource behavioral gaps.
       - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests-v1.1.0
         with:
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
