@@ -14,12 +14,6 @@ namespace TestService
     /// harness. Subscribes to the SSE client's events and forwards each one to the harness callback
     /// URL as a JSON message.
     /// </summary>
-    /// <remarks>
-    /// This is the .NET analogue of ssetest.StreamEntity in okhttp-eventsource's contract-tests
-    /// service. The main structural difference: .NET's EventSource is push-based (fires event
-    /// handlers on its own internal thread), so we don't need a background reader thread the way
-    /// the Java service does around its blocking event iterator.
-    /// </remarks>
     public class StreamEntity
     {
         private readonly StreamOptions _options;
