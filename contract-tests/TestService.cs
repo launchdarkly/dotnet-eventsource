@@ -8,30 +8,15 @@ using LaunchDarkly.TestHelpers.HttpTest;
 namespace TestService
 {
     /// <summary>
-    /// HTTP entry point for the SSE contract-tests service. Implements the endpoints described in
-    /// launchdarkly/sse-contract-tests/docs/service_spec.md for the LaunchDarkly.EventSource
-    /// library. This is the .NET analogue of ssetest.TestService in okhttp-eventsource's
-    /// contract-tests service.
+    /// HTTP application logic for the SSE contract-tests service. Implements the endpoints
+    /// described in launchdarkly/sse-contract-tests/docs/service_spec.md for the
+    /// LaunchDarkly.EventSource library. This is the .NET analogue of ssetest.TestService in
+    /// okhttp-eventsource's contract-tests service.
+    ///
+    /// The entry point that starts the HTTP server lives in Program.cs (desktop) and in
+    /// ../contract-tests-android/MainActivity.cs (Android). Both instantiate this Webapp and
+    /// hand its Handler to HttpServer.Start; the routing logic here is platform-agnostic.
     /// </summary>
-    public class Program
-    {
-        const int Port = 8000;
-
-        public static void Main(string[] args)
-        {
-            var quitSignal = new EventWaitHandle(false, EventResetMode.AutoReset);
-
-            var app = new Webapp(quitSignal);
-            var server = HttpServer.Start(Port, app.Handler);
-            server.Recorder.Enabled = false;
-
-            System.Console.WriteLine("Listening on port {0}", Port);
-
-            quitSignal.WaitOne();
-            server.Dispose();
-        }
-    }
-
     public class Webapp
     {
         // Capabilities the LaunchDarkly.EventSource library implements correctly against the
