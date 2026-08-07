@@ -10,8 +10,7 @@ namespace TestService
     /// <summary>
     /// HTTP application logic for the SSE contract-tests service. Implements the endpoints
     /// described in launchdarkly/sse-contract-tests/docs/service_spec.md for the
-    /// LaunchDarkly.EventSource library. This is the .NET analogue of ssetest.TestService in
-    /// okhttp-eventsource's contract-tests service.
+    /// LaunchDarkly.EventSource library.
     ///
     /// The entry point that starts the HTTP server lives in Program.cs (desktop) and in
     /// ../contract-tests-android/MainActivity.cs (Android). Both instantiate this Webapp and

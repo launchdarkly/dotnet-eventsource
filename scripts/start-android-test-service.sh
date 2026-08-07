@@ -4,7 +4,7 @@
 #
 # This script assumes adb is on PATH and an emulator is already running. It installs the
 # APK, launches the MainActivity, waits for the app process to appear, forwards the local
-# port to the emulator, and exits. Modeled on android-client-sdk/scripts/start-test-service.sh.
+# port to the emulator, and exits.
 #
 # Optional environment variables:
 #   LOCAL_PORT: host-side port that will forward into the emulator (default 8000)
