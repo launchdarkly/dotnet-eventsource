@@ -2,10 +2,6 @@
 
 This is a small HTTP service that wraps `LaunchDarkly.EventSource` and exposes it to
 the [`sse-contract-tests`](https://github.com/launchdarkly/sse-contract-tests) harness.
-It is the .NET analogue of the `contract-tests/` services in
-[`eventsource`](https://github.com/launchdarkly/eventsource) (Go),
-[`js-eventsource`](https://github.com/launchdarkly/js-eventsource) (JavaScript), and
-[`okhttp-eventsource`](https://github.com/launchdarkly/okhttp-eventsource) (Java).
 
 The service is not shipped as part of any published NuGet package. It exists purely
 as a test target for the `sse-contract-tests` harness.
