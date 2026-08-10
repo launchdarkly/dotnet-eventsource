@@ -2,6 +2,14 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [5.3.2](https://github.com/launchdarkly/dotnet-eventsource/compare/5.3.1...5.3.2) (2026-08-10)
+
+
+### Bug Fixes
+
+* increase SSE read buffer to 8192 bytes to avoid Android streaming stall ([cdd255a](https://github.com/launchdarkly/dotnet-eventsource/commit/cdd255a72c8fdecc174b19f9d7bd570d0f39365e))
+* SSE streaming stall on MAUI Android (SDK-2755) ([#124](https://github.com/launchdarkly/dotnet-eventsource/issues/124)) ([3989eca](https://github.com/launchdarkly/dotnet-eventsource/commit/3989eca34d0c8813789d0ebd879b4433ac41f11a))
+
 ## [5.3.1](https://github.com/launchdarkly/dotnet-eventsource/compare/5.3.0...5.3.1) (2026-07-01)
 
 
