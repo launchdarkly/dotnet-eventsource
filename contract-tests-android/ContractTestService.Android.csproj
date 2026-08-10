@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>ContractTestService.Android</RootNamespace>
+    <AssemblyName>ContractTestService.Android</AssemblyName>
+    <ApplicationId>com.launchdarkly.contracttestservice</ApplicationId>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <Nullable>disable</Nullable>
+    <!-- Disable Fast Deployment and embed assemblies into the APK. Fast Deployment ships
+         .NET assemblies via adb sync into a __override__ directory at runtime; if the sync
+         hasn't happened when the app launches, it aborts with "No assemblies found in ...".
+         For CI (fresh APK, single-shot install-and-run), we want everything in the APK. -->
+    <AndroidFastDeployment>false</AndroidFastDeployment>
+    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LaunchDarkly.TestHelpers" Version="2.0.0" />
+    <PackageReference Include="LaunchDarkly.Logging" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\LaunchDarkly.EventSource\LaunchDarkly.EventSource.csproj" />
+  </ItemGroup>
+
+  <!-- The Android host and desktop host share the SSE contract-test service application
+       logic. Only the entry point (Program.cs desktop / MainActivity.cs Android) differs
+       between the two targets. -->
+  <ItemGroup>
+    <Compile Include="..\contract-tests\Representations.cs" Link="Representations.cs" />
+    <Compile Include="..\contract-tests\StreamEntity.cs" Link="StreamEntity.cs" />
+    <Compile Include="..\contract-tests\TestService.cs" Link="TestService.cs" />
+  </ItemGroup>
+
+</Project>

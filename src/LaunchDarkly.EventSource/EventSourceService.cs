@@ -17,7 +17,10 @@ namespace LaunchDarkly.EventSource
     {
         #region Private Fields
 
-        private const int Utf8ReadBufferSize = 1000;
+        // Must be >= 4096 to bypass Xamarin.Android.Net.AndroidMessageHandler's
+        // BufferedStream-4096 small-count code path, which stalls SSE reads for
+        // ~60 s waiting for the next server keepalive. See SDK-2755.
+        private const int ReadBufferSize = 8192;
 
         private readonly Configuration _configuration;
         private readonly HttpClient _httpClient;
@@ -119,7 +122,8 @@ namespace LaunchDarkly.EventSource
                     else
                     {
                         _logger.Debug("Reading stream with string conversion");
-                        using (var reader = new StreamReader(stream, Encoding.UTF8))
+                        using (var reader = new StreamReader(stream, Encoding.UTF8,
+                            detectEncodingFromByteOrderMarks: true, bufferSize: ReadBufferSize))
                         {
                             await ProcessResponseFromReaderAsync(processResponseLineString, reader, cancellationToken);
                         }
@@ -169,7 +173,7 @@ namespace LaunchDarkly.EventSource
             CancellationToken cancellationToken
             )
         {
-            var lineScanner = new ByteArrayLineScanner(Utf8ReadBufferSize);
+            var lineScanner = new ByteArrayLineScanner(ReadBufferSize);
             while (!cancellationToken.IsCancellationRequested)
             {
                 // Note that even though Stream.ReadAsync has an overload that takes a CancellationToken, that

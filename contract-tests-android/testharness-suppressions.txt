@@ -1,0 +1,7 @@
+basic parsing/ID field is ignored if it contains a null
+basic parsing/large message in two chunks
+linefeeds/CR separator
+linefeeds/CRLF where CR is end of 1 chunk
+reconnection/discards partial messages on retry
+HTTP behavior/REPORT request
+reconnection/caller can trigger a restart
