@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
@@ -146,6 +146,11 @@ namespace LaunchDarkly.EventSource
         /// If a connection fails before the threshold has elapsed, the delay before reconnecting will be greater
         /// than the last delay; if it fails after the threshold, the delay will start over at the initial minimum
         /// value. This prevents long delays from occurring on connections that are only rarely restarted.
+        /// </para>
+        /// <para>
+        /// A connection that stays open for at least this long also discards any bounds set by
+        /// <see cref="IEventSource.SetTemporaryRetryDelayBounds(TimeSpan, TimeSpan)"/>, restoring
+        /// <see cref="InitialRetryDelay(TimeSpan)"/> and <see cref="MaxRetryDelay(TimeSpan)"/>.
         /// </para>
         /// <para>
         /// The default value is <see cref="Configuration.DefaultBackoffResetThreshold"/>. Negative

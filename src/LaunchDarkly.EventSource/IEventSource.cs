@@ -70,9 +70,66 @@ namespace LaunchDarkly.EventSource
         /// </para>
         /// </remarks>
         /// <param name="resetBackoffDelay">true if the delay before reconnection should be reset to
-        /// the lowest level (<see cref="ConfigurationBuilder.InitialRetryDelay(TimeSpan)"/>); false if it
+        /// the lowest level of the currently active bounds, which could be the temporary bounds if
+        /// <see cref="SetTemporaryRetryDelayBounds(TimeSpan, TimeSpan)"/> is in effect; false if it
         /// should increase according to the usual exponential backoff logic</param>
         void Restart(bool resetBackoffDelay);
+
+        /// <summary>
+        /// Temporarily replaces the bounds used to compute reconnection delays.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The configured <see cref="ConfigurationBuilder.InitialRetryDelay(TimeSpan)"/> and
+        /// <see cref="ConfigurationBuilder.MaxRetryDelay(TimeSpan)"/> normally govern the
+        /// exponential backoff between reconnection attempts. This method installs different
+        /// bounds at runtime, so a caller can slow reconnection down without reconfiguring or
+        /// recreating the <c>EventSource</c>.
+        /// </para>
+        /// <para>
+        /// The bounds are <i>temporary</i>: they remain in effect until either a connection stays
+        /// open for at least
+        /// <see cref="ConfigurationBuilder.BackoffResetThreshold(TimeSpan)"/>, at which point the
+        /// configured bounds are restored automatically, or
+        /// <see cref="ClearTemporaryRetryDelayBounds"/> is called.
+        /// </para>
+        /// <para>
+        /// Changing the bounds resets the backoff level, so the next delay is computed from the new
+        /// <paramref name="initialDelay"/> rather than continuing to grow from where it left off. 
+        /// Calling this with bounds that are already in effect does nothing, so it is safe to call
+        /// repeatedly.
+        /// </para>
+        /// <para>
+        /// Negative values are changed to zero. If <paramref name="initialDelay"/> is greater than
+        /// <paramref name="maxDelay"/>, delays are limited to <paramref name="maxDelay"/>. No
+        /// argument causes this method to throw, and no argument can cause a later reconnect to
+        /// fail.
+        /// </para>
+        /// <para>
+        /// It is safe to call this from any thread, including from an
+        /// <see cref="Error"/> handler.
+        /// </para>
+        /// </remarks>
+        /// <param name="initialDelay">the lowest delay to use while these bounds are in effect</param>
+        /// <param name="maxDelay">the highest delay to use while these bounds are in effect</param>
+        /// <seealso cref="ClearTemporaryRetryDelayBounds"/>
+        void SetTemporaryRetryDelayBounds(TimeSpan initialDelay, TimeSpan maxDelay);
+
+        /// <summary>
+        /// Discards any bounds installed by
+        /// <see cref="SetTemporaryRetryDelayBounds(TimeSpan, TimeSpan)"/>, restoring the configured
+        /// <see cref="ConfigurationBuilder.InitialRetryDelay(TimeSpan)"/> and
+        /// <see cref="ConfigurationBuilder.MaxRetryDelay(TimeSpan)"/>.
+        /// </summary>
+        /// <remarks>
+        /// Restoring the configured bounds resets the backoff level. If no temporary bounds
+        /// are in effect this does nothing. The count of reconnection attempts is not reset.
+        /// Calling this is not required as the configured bounds are also restored automatically
+        /// after a connection stays open for
+        /// <see cref="ConfigurationBuilder.BackoffResetThreshold(TimeSpan)"/>.
+        /// </remarks>
+        /// <seealso cref="SetTemporaryRetryDelayBounds(TimeSpan, TimeSpan)"/>
+        void ClearTemporaryRetryDelayBounds();
 
         /// <summary>
         /// Closes the connection to the SSE server. The <c>EventSource</c> cannot be reopened after this.

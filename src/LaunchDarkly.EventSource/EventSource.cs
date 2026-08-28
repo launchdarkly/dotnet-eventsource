@@ -24,8 +24,9 @@ namespace LaunchDarkly.EventSource
         private MemoryStream _eventDataUtf8ByteBuffer;
         private string _eventName;
         private string _lastEventId;
-        private TimeSpan _retryDelay;
         private readonly ExponentialBackoffWithDecorrelation _backOff;
+        private readonly TimeSpan _configuredInitialRetryDelay;
+        private readonly TimeSpan _configuredMaxRetryDelay;
         private CancellationTokenSource _currentRequestToken;
         private DateTime? _lastSuccessfulConnectionTime;
         private ReadyState _readyState;
@@ -78,6 +79,9 @@ namespace LaunchDarkly.EventSource
             private set;
         }
 
+        // Exposed for tests, so that retry-bounds behavior can be asserted directly
+        internal ExponentialBackoffWithDecorrelation BackOff => _backOff;
+
         #endregion
 
         #region Public Constructors
@@ -94,9 +98,11 @@ namespace LaunchDarkly.EventSource
 
             _logger = _configuration.Logger;
 
-            _retryDelay = _configuration.InitialRetryDelay;
+            _configuredInitialRetryDelay = _configuration.InitialRetryDelay;
+            _configuredMaxRetryDelay = _configuration.MaxRetryDelay;
 
-            _backOff = new ExponentialBackoffWithDecorrelation(_retryDelay, _configuration.MaxRetryDelay);
+            _backOff = new ExponentialBackoffWithDecorrelation(_configuredInitialRetryDelay,
+                _configuredMaxRetryDelay);
 
             _httpClient = _configuration.HttpClient ?? CreateHttpClient();
         }
@@ -125,7 +131,11 @@ namespace LaunchDarkly.EventSource
                     {
                         if (DateTime.Now.Subtract(_lastSuccessfulConnectionTime.Value) >= _configuration.BackoffResetThreshold)
                         {
-                            _backOff.ResetReconnectAttemptCount();
+                            // Sustained healthy operation reverts any temporary bounds and resets
+                            // n. Reverting takes precedence over bounds that were
+                            // set during the preceding fault window.
+                            ClearTemporaryRetryDelayBounds();
+                            _backOff.ResetBackoffN();
                         }
                         _lastSuccessfulConnectionTime = null;
                     }
@@ -199,14 +209,12 @@ namespace LaunchDarkly.EventSource
         }
 
         private async Task MaybeWaitWithBackOff()  {
-            if (_retryDelay.TotalMilliseconds > 0)
+            TimeSpan sleepTime = _backOff.GetNextBackOff();
+            if (sleepTime > TimeSpan.Zero)
             {
-                TimeSpan sleepTime = _backOff.GetNextBackOff();
-                if (sleepTime.TotalMilliseconds > 0) {
-                    _logger.Info("Waiting {0} milliseconds before reconnecting...", sleepTime.TotalMilliseconds);
-                    BackOffDelay = sleepTime;
-                    await Task.Delay(sleepTime);
-                }
+                _logger.Info("Waiting {0} milliseconds before reconnecting...", sleepTime.TotalMilliseconds);
+                BackOffDelay = sleepTime;
+                await Task.Delay(sleepTime);
             }
         }
 
@@ -221,10 +229,22 @@ namespace LaunchDarkly.EventSource
                 }
                 if (resetBackoffDelay)
                 {
-                    _backOff.ResetReconnectAttemptCount();
+                    _backOff.ResetBackoffN();
                 }
             }
             CancelCurrentRequest();
+        }
+
+        /// <inheritdoc/>
+        public void SetTemporaryRetryDelayBounds(TimeSpan initialDelay, TimeSpan maxDelay)
+        {
+            _backOff.SetBounds(initialDelay, maxDelay);
+        }
+
+        /// <inheritdoc/>
+        public void ClearTemporaryRetryDelayBounds()
+        {
+            _backOff.SetBounds(_configuredInitialRetryDelay, _configuredMaxRetryDelay);
         }
 
         /// <summary>
@@ -411,7 +431,7 @@ namespace LaunchDarkly.EventSource
             {
                 if (long.TryParse(result.GetValueAsString(), out var retry))
                 {
-                    _retryDelay = TimeSpan.FromMilliseconds(retry);
+                    _backOff.SetServerDirectedMinDelay(TimeSpan.FromMilliseconds(retry));
                 }
             }
         }
