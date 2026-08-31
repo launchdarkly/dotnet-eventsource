@@ -195,7 +195,7 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
-        public void SetTemporaryBoundsIsSafeFromAnotherThread()
+        public async Task SetTemporaryBoundsIsSafeFromAnotherThread()
         {
             using (var es = MakeConfigured())
             {
@@ -216,9 +216,11 @@ namespace LaunchDarkly.EventSource.Tests
                     es.BackOff.GetNextBackOff();
                     computed++;
                 }
-                writer.Wait(TimeSpan.FromSeconds(10));
+                // Bounded so that a genuine deadlock fails the test rather than hanging it.
+                var finished = await Task.WhenAny(writer, Task.Delay(TimeSpan.FromSeconds(10)));
+                Assert.Same(writer, finished);
+                await writer; // surfaces any exception thrown on the writer thread
 
-                Assert.True(writer.IsCompleted);
                 Assert.Equal(iterations, computed);
                 // Bounds must end up as one of the two pairs the writer set, never a torn mix.
                 Assert.Contains(es.BackOff.GetMinimumDelay().TotalMilliseconds, new double[] { 10, 11 });
