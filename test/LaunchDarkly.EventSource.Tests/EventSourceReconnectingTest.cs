@@ -109,6 +109,39 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
+        public async Task CloseInterruptsAPendingBackoffWait()
+        {
+            // The first attempt fails, so the loop enters a backoff wait long enough that
+            // running it to completion would hang the test rather than merely slow it.
+            var handler = Handlers.Sequential(
+                Handlers.Status((int)HttpStatusCode.InternalServerError),
+                StartStream().Then(LeaveStreamOpen())
+                );
+
+            using (var server = HttpServer.Start(handler))
+            {
+                using (var es = MakeEventSource(server.Uri,
+                    c => c.InitialRetryDelay(TimeSpan.FromMinutes(10))))
+                {
+                    var eventSink = new EventSink(es, _testLogging);
+                    var streamTask = Task.Run(es.StartAsync);
+
+                    // Waiting for the Closed action means the failed attempt has been reported,
+                    // so the loop is at or about to reach the wait.
+                    eventSink.ExpectAction();
+                    eventSink.ExpectActions(EventSink.ClosedAction());
+
+                    es.Close();
+
+                    var finished = await Task.WhenAny(streamTask,
+                        Task.Delay(TimeSpan.FromSeconds(5)));
+
+                    Assert.Same(streamTask, finished);
+                }
+            }
+        }
+
+        [Fact]
         public async Task NoReconnectAttemptIsMadeIfErrorHandlerClosesEventSource()
         {
             var handler = Handlers.Sequential(

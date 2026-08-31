@@ -28,6 +28,7 @@ namespace LaunchDarkly.EventSource
         private readonly TimeSpan _configuredInitialRetryDelay;
         private readonly TimeSpan _configuredMaxRetryDelay;
         private CancellationTokenSource _currentRequestToken;
+        private readonly CancellationTokenSource _shutdownTokenSource = new CancellationTokenSource();
         private DateTime? _lastSuccessfulConnectionTime;
         private ReadyState _readyState;
 
@@ -214,7 +215,14 @@ namespace LaunchDarkly.EventSource
             {
                 _logger.Info("Waiting {0} milliseconds before reconnecting...", sleepTime.TotalMilliseconds);
                 BackOffDelay = sleepTime;
-                await Task.Delay(sleepTime);
+                try
+                {
+                    await Task.Delay(sleepTime, _shutdownTokenSource.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Cancellation happened during the wait, likely intentional close
+                }
             }
         }
 
@@ -257,6 +265,7 @@ namespace LaunchDarkly.EventSource
                 Close(ReadyState.Shutdown);
             }
             CancelCurrentRequest();
+            _shutdownTokenSource.Cancel();
 
             // do not dispose httpClient if it is user provided
             if (_configuration.HttpClient == null)
