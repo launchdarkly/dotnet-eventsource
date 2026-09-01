@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using LaunchDarkly.TestHelpers.HttpTest;
 using Xunit;
@@ -106,6 +107,70 @@ namespace LaunchDarkly.EventSource.Tests
             });
 
             AssertBackoffsAlwaysIncrease(backoffs, nAttempts);
+        }
+
+        [Fact]
+        public void CloseBeforeStartAsyncReportsShutdown()
+        {
+            // Closed fires many times over one instance -- once per connection cycle -- and
+            // carries the state it is reporting, so a consumer can tell a per-connection close
+            // from a terminal one. Closing before the stream ever started was the one path that
+            // shut down silently, leaving no way to observe it.
+            using (var es = MakeEventSource(_uri))
+            {
+                var reported = new List<ReadyState>();
+                es.Closed += (_, e) => reported.Add(e.ReadyState);
+
+                es.Close();
+
+                Assert.Equal(new[] { ReadyState.Shutdown }, reported);
+                Assert.Equal(ReadyState.Shutdown, es.ReadyState);
+            }
+        }
+
+        [Fact]
+        public void ClosingTwiceReportsShutdownOnce()
+        {
+            using (var es = MakeEventSource(_uri))
+            {
+                var reported = new List<ReadyState>();
+                es.Closed += (_, e) => reported.Add(e.ReadyState);
+
+                es.Close();
+                es.Close();
+
+                // Shutdown is terminal in SetReadyState, so the repeat is silent.
+                Assert.Single(reported);
+            }
+        }
+
+        [Fact]
+        public async Task CloseBeforeStartAsyncDoesNotSpin()
+        {
+            // Close() from the Raw state deliberately does not transition to Shutdown, so a loop
+            // that tested only ReadyState would keep running -- and because Close() latches the
+            // shutdown token, every backoff wait would return instantly, reconnecting with no
+            // pacing at all.
+            var handler = Handlers.Status((int)HttpStatusCode.InternalServerError);
+
+            using (var server = HttpServer.Start(handler))
+            {
+                using (var es = MakeEventSource(server.Uri,
+                    c => c.InitialRetryDelay(TimeSpan.FromMilliseconds(10))))
+                {
+                    var errors = 0;
+                    es.Error += (_, __) => Interlocked.Increment(ref errors);
+
+                    es.Close();
+
+                    var streamTask = Task.Run(es.StartAsync);
+                    var finished = await Task.WhenAny(streamTask,
+                        Task.Delay(TimeSpan.FromSeconds(2)));
+
+                    Assert.Same(streamTask, finished);
+                    Assert.InRange(Volatile.Read(ref errors), 0, 1);
+                }
+            }
         }
 
         [Fact]

@@ -26,6 +26,11 @@
         internal static string RetryField = "retry";
 
         /// <summary>
+        /// The largest reconnection time honored from a Server Sent Event retry field.
+        /// </summary>
+        internal const long MaxServerDirectedRetryDelayMillis = 3_600_000;
+
+        /// <summary>
         /// The identifier field name in a Server Sent Event.
         /// </summary>
         internal static string IdField = "id";

@@ -106,11 +106,19 @@ namespace LaunchDarkly.EventSource
         /// fail.
         /// </para>
         /// <para>
+        /// A server-directed reconnection time received via the SSE <c>retry:</c> field supersedes
+        /// <paramref name="initialDelay"/>, and the configured
+        /// <see cref="ConfigurationBuilder.InitialRetryDelay(TimeSpan)"/> along with it. Such a
+        /// value does not affect <paramref name="maxDelay"/>, so the ceiling set here continues to
+        /// bound reconnection.
+        /// </para>
+        /// <para>
         /// It is safe to call this from any thread, including from an
         /// <see cref="Error"/> handler.
         /// </para>
         /// </remarks>
-        /// <param name="initialDelay">the lowest delay to use while these bounds are in effect</param>
+        /// <param name="initialDelay">the lowest delay to use while these bounds are in effect,
+        /// unless a server-directed <c>retry:</c> value supersedes it</param>
         /// <param name="maxDelay">the highest delay to use while these bounds are in effect</param>
         /// <seealso cref="ClearTemporaryRetryDelayBounds"/>
         void SetTemporaryRetryDelayBounds(TimeSpan initialDelay, TimeSpan maxDelay);
@@ -118,15 +126,26 @@ namespace LaunchDarkly.EventSource
         /// <summary>
         /// Discards any bounds installed by
         /// <see cref="SetTemporaryRetryDelayBounds(TimeSpan, TimeSpan)"/>, restoring the configured
-        /// <see cref="ConfigurationBuilder.InitialRetryDelay(TimeSpan)"/> and
-        /// <see cref="ConfigurationBuilder.MaxRetryDelay(TimeSpan)"/>.
+        /// <see cref="ConfigurationBuilder.MaxRetryDelay(TimeSpan)"/> and, unless a server-directed
+        /// <c>retry:</c> value is in effect, the configured
+        /// <see cref="ConfigurationBuilder.InitialRetryDelay(TimeSpan)"/>.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// Restoring the configured bounds resets the backoff level. If no temporary bounds
         /// are in effect this does nothing. The count of reconnection attempts is not reset.
         /// Calling this is not required as the configured bounds are also restored automatically
         /// after a connection stays open for
         /// <see cref="ConfigurationBuilder.BackoffResetThreshold(TimeSpan)"/>.
+        /// </para>
+        /// <para>
+        /// A server-directed reconnection time received via the SSE <c>retry:</c> field is not
+        /// discarded and continues to supersede
+        /// <see cref="ConfigurationBuilder.InitialRetryDelay(TimeSpan)"/>, so the configured
+        /// minimum may not be the one actually in use afterwards. Only a later <c>retry:</c> value
+        /// replaces it. <see cref="ConfigurationBuilder.MaxRetryDelay(TimeSpan)"/> is unaffected
+        /// and is always restored.
+        /// </para>
         /// </remarks>
         /// <seealso cref="SetTemporaryRetryDelayBounds(TimeSpan, TimeSpan)"/>
         void ClearTemporaryRetryDelayBounds();

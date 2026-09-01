@@ -97,6 +97,11 @@ namespace LaunchDarkly.EventSource
         /// a backoff algorithm.
         /// </para>
         /// <para>
+        /// A server-directed reconnection time received via the SSE <c>retry:</c> field supersedes
+        /// this value, as do bounds installed by
+        /// <see cref="IEventSource.SetTemporaryRetryDelayBounds(TimeSpan, TimeSpan)"/>.
+        /// </para>
+        /// <para>
         /// The default value is <see cref="Configuration.DefaultInitialRetryDelay"/>. Negative values
         /// are changed to zero.
         /// </para>
@@ -150,7 +155,9 @@ namespace LaunchDarkly.EventSource
         /// <para>
         /// A connection that stays open for at least this long also discards any bounds set by
         /// <see cref="IEventSource.SetTemporaryRetryDelayBounds(TimeSpan, TimeSpan)"/>, restoring
-        /// <see cref="InitialRetryDelay(TimeSpan)"/> and <see cref="MaxRetryDelay(TimeSpan)"/>.
+        /// <see cref="InitialRetryDelay(TimeSpan)"/> and <see cref="MaxRetryDelay(TimeSpan)"/>. A
+        /// server-directed reconnection time received via the SSE <c>retry:</c> field is not
+        /// discarded.
         /// </para>
         /// <para>
         /// The default value is <see cref="Configuration.DefaultBackoffResetThreshold"/>. Negative

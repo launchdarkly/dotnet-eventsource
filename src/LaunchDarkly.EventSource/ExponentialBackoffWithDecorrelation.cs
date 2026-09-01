@@ -4,8 +4,6 @@ namespace LaunchDarkly.EventSource
 {
     internal sealed class ExponentialBackoffWithDecorrelation
     {
-        internal static readonly TimeSpan MaxServerDirectedMinDelay = TimeSpan.FromHours(1);
-
         private readonly object _lock = new object();
         private readonly Random _randomSource;
 
@@ -57,10 +55,18 @@ namespace LaunchDarkly.EventSource
         /// applied: <c>minimumDelay * 2^n</c>, limited to the maximum.
         /// </summary>
         /// <remarks>
+        /// <para>
+        /// The caller must hold the lock. This reads the bounds without taking it because it is the
+        /// inner core of <see cref="GetNextBackOff"/>, which already holds it; taking it here would
+        /// only be a re-entrant acquisition on the hot path. Anything needing a synchronized read of
+        /// the bounds on its own should use the accessors below, which take the lock themselves.
+        /// </para>
+        /// <para>
         /// <c>n</c> is compared against the ceiling rather than used to compute a value that is
         /// then clamped, so no intermediate ever exceeds the maximum. That matters because
         /// <c>n</c> is unbounded: a long outage keeps incrementing it, and computing
         /// <c>minimumDelay * 2^n</c> directly would overflow.
+        /// </para>
         /// </remarks>
         internal long GetUnjitteredMillisecondsForN(int n)
         {
@@ -105,18 +111,14 @@ namespace LaunchDarkly.EventSource
         /// double from wherever the progression had reached.
         /// </para>
         /// <para>
-        /// Values above <see cref="MaxServerDirectedMinDelay"/> are capped at it. Negative
-        /// values become zero.
+        /// Negative values become zero. No upper bound is applied here; a caller taking a value
+        /// from an untrusted source is responsible for capping it first.
         /// </para>
         /// </remarks>
         /// <param name="minDelay">the server-directed reconnection time</param>
         public void SetServerDirectedMinDelay(TimeSpan minDelay)
         {
             var value = NonNegative(minDelay);
-            if (value > MaxServerDirectedMinDelay)
-            {
-                value = MaxServerDirectedMinDelay;
-            }
             lock (_lock)
             {
                 _serverDirectedMinDelay = value;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -29,7 +30,8 @@ namespace LaunchDarkly.EventSource
         private readonly TimeSpan _configuredMaxRetryDelay;
         private CancellationTokenSource _currentRequestToken;
         private readonly CancellationTokenSource _shutdownTokenSource = new CancellationTokenSource();
-        private DateTime? _lastSuccessfulConnectionTime;
+        private static readonly TimeSpan MaxSleepTime = TimeSpan.FromMilliseconds(int.MaxValue);
+        private readonly Stopwatch _connectionTimer = new Stopwatch();
         private ReadyState _readyState;
 
         #endregion
@@ -128,9 +130,9 @@ namespace LaunchDarkly.EventSource
             {
                 if (!firstTime)
                 {
-                    if (_lastSuccessfulConnectionTime.HasValue)
+                    if (_connectionTimer.IsRunning)
                     {
-                        if (DateTime.Now.Subtract(_lastSuccessfulConnectionTime.Value) >= _configuration.BackoffResetThreshold)
+                        if (_connectionTimer.Elapsed >= _configuration.BackoffResetThreshold)
                         {
                             // Sustained healthy operation reverts any temporary bounds and resets
                             // n. Reverting takes precedence over bounds that were
@@ -138,7 +140,7 @@ namespace LaunchDarkly.EventSource
                             ClearTemporaryRetryDelayBounds();
                             _backOff.ResetBackoffN();
                         }
-                        _lastSuccessfulConnectionTime = null;
+                        _connectionTimer.Reset();
                     }
                     await MaybeWaitWithBackOff();
                 }
@@ -211,6 +213,13 @@ namespace LaunchDarkly.EventSource
 
         private async Task MaybeWaitWithBackOff()  {
             TimeSpan sleepTime = _backOff.GetNextBackOff();
+            if (sleepTime > MaxSleepTime)
+            {
+                // Task.Delay throws for anything above the platform timer ceiling, and this method
+                // runs outside the reconnect loop's exception handling, so an unclamped value
+                // would fault StartAsync and stop the stream permanently.
+                sleepTime = MaxSleepTime;
+            }
             if (sleepTime > TimeSpan.Zero)
             {
                 _logger.Info("Waiting {0} milliseconds before reconnecting...", sleepTime.TotalMilliseconds);
@@ -222,6 +231,7 @@ namespace LaunchDarkly.EventSource
                 catch (OperationCanceledException)
                 {
                     // Cancellation happened during the wait, likely intentional close
+                    _logger.Debug("Backoff wait interrupted by shutdown");
                 }
             }
         }
@@ -260,7 +270,7 @@ namespace LaunchDarkly.EventSource
         /// </summary>
         public void Close()
         {
-            if (ReadyState != ReadyState.Raw && ReadyState != ReadyState.Shutdown)
+            if (ReadyState != ReadyState.Shutdown)
             {
                 Close(ReadyState.Shutdown);
             }
@@ -332,7 +342,7 @@ namespace LaunchDarkly.EventSource
             var svc = GetEventSourceService(_configuration);
 
             svc.ConnectionOpened += (o, e) => {
-                _lastSuccessfulConnectionTime = DateTime.Now;
+                _connectionTimer.Restart();
                 SetReadyState(ReadyState.Open, OnOpened, e.Headers);
             };
             svc.ConnectionClosed += (o, e) => { SetReadyState(ReadyState.Closed, OnClosed); };
@@ -440,7 +450,10 @@ namespace LaunchDarkly.EventSource
             {
                 if (long.TryParse(result.GetValueAsString(), out var retry))
                 {
-                    _backOff.SetServerDirectedMinDelay(TimeSpan.FromMilliseconds(retry));
+                    // Clamp while the value is still an integer.
+                    var millis = Math.Max(0,
+                        Math.Min(retry, Constants.MaxServerDirectedRetryDelayMillis));
+                    _backOff.SetServerDirectedMinDelay(TimeSpan.FromMilliseconds(millis));
                 }
             }
         }

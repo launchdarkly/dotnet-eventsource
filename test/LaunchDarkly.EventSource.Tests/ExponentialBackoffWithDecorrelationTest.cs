@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Numerics;
 using Xunit;
 
 namespace LaunchDarkly.EventSource.Tests
@@ -335,21 +337,6 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
-        public void ServerDirectedMinDelayIsClampedToOneHour()
-        {
-            // The maximum is deliberately larger than the wire cap so the cap is the bound under
-            // test, not the ceiling.
-            var expo = Seeded(Base1s, TimeSpan.FromHours(24));
-
-            expo.SetServerDirectedMinDelay(TimeSpan.FromHours(2));
-
-            Assert.Equal(ExponentialBackoffWithDecorrelation.MaxServerDirectedMinDelay,
-                expo.GetServerDirectedMinDelay());
-            Assert.Equal((long)TimeSpan.FromHours(1).TotalMilliseconds,
-                expo.GetUnjitteredMillisecondsForN(0));
-        }
-
-        [Fact]
         public void ZeroServerDirectedMinDelayProducesZeroDelay()
         {
             var expo = Seeded(Base1s, Max30s);
@@ -616,5 +603,100 @@ namespace LaunchDarkly.EventSource.Tests
             expo.SetBounds(TimeSpan.FromMilliseconds(-10), TimeSpan.FromMilliseconds(-20));
             Assert.Equal(1, expo.GetBackoffN());
         }
+
+        #region Exact reference for the delay formula
+
+        // GetUnjitteredMillisecondsForN computes min << n clamped to max, using shift tricks and an
+        // n >= 63 guard to avoid overflowing the 64-bit shift. These two tests check it against an
+        // arbitrary-precision reference that cannot overflow, so the optimisation is pinned to the
+        // arithmetic it is standing in for rather than to hand-picked expectations.
+
+        private const long MaxTimeSpanMs = 922337203685477L;   // TimeSpan.MaxValue in whole ms
+
+        private static ExponentialBackoffWithDecorrelation FromMillis(long minMs, long maxMs) =>
+            new ExponentialBackoffWithDecorrelation(
+                TimeSpan.FromTicks(minMs * TimeSpan.TicksPerMillisecond),
+                TimeSpan.FromTicks(maxMs * TimeSpan.TicksPerMillisecond));
+
+        private static long ExactReference(long minMs, long maxMs, int n)
+        {
+            if (minMs <= 0 || maxMs <= 0)
+            {
+                return 0;
+            }
+            var exact = new BigInteger(minMs) * BigInteger.Pow(2, n <= 0 ? 0 : n);
+            return exact > new BigInteger(maxMs) ? maxMs : (long)exact;
+        }
+
+        [Fact]
+        public void DelayFormulaMatchesExactReferenceForCuratedBounds()
+        {
+            // Powers of two and their neighbours, the shipped defaults, the server-directed cap,
+            // and the boundaries of int and TimeSpan -- the places a shift or a cast goes wrong.
+            var interesting = new long[]
+            {
+                0, 1, 2, 3, 4, 5, 7, 8, 9, 15, 16, 17, 19, 20, 31, 32, 33, 63, 64, 65,
+                99, 100, 127, 128, 129, 255, 256, 999, 1000, 1023, 1024, 1025,
+                29999, 30000, 30001, 65535, 65536, 3600000, 86400000,
+                int.MaxValue - 1L, int.MaxValue, int.MaxValue + 1L,
+                (1L << 31) - 1, 1L << 31, (1L << 40) + 12345,
+                MaxTimeSpanMs - 1, MaxTimeSpanMs
+            };
+
+            var failures = new List<string>();
+            foreach (var min in interesting)
+            {
+                foreach (var max in interesting)
+                {
+                    var backoff = FromMillis(min, max);
+                    for (var n = -3; n <= 70; n++)   // negatives and n past the 63-bit guard
+                    {
+                        var actual = backoff.GetUnjitteredMillisecondsForN(n);
+                        var expected = ExactReference(min, max, n);
+                        if (actual != expected && failures.Count < 20)
+                        {
+                            failures.Add($"min={min} max={max} n={n} actual={actual} expected={expected}");
+                        }
+                    }
+                }
+            }
+            Assert.True(failures.Count == 0, string.Join("; ", failures));
+        }
+
+        [Fact]
+        public void DelayFormulaMatchesExactReferenceForRandomizedBounds()
+        {
+            // Fixed seed, so a failure is reproducible. The count is deliberately modest: the
+            // reference uses BigInteger, and this runs inside the normal suite.
+            var random = new Random(12345);
+            var failures = new List<string>();
+            for (var i = 0; i < 200000; i++)
+            {
+                var min = NextInclusive(random, 0, MaxTimeSpanMs);
+                var max = NextInclusive(random, 0, MaxTimeSpanMs);
+                var backoff = FromMillis(min, max);
+                for (var k = 0; k < 5; k++)
+                {
+                    var n = random.Next(-2, 72);
+                    var actual = backoff.GetUnjitteredMillisecondsForN(n);
+                    var expected = ExactReference(min, max, n);
+                    if (actual != expected && failures.Count < 20)
+                    {
+                        failures.Add($"min={min} max={max} n={n} actual={actual} expected={expected}");
+                    }
+                }
+            }
+            Assert.True(failures.Count == 0, string.Join("; ", failures));
+        }
+
+        private static long NextInclusive(Random random, long minInclusive, long maxInclusive)
+        {
+            var buffer = new byte[8];
+            random.NextBytes(buffer);
+            var value = BitConverter.ToInt64(buffer, 0) & long.MaxValue;
+            return minInclusive + value % (maxInclusive - minInclusive + 1);
+        }
+
+        #endregion
     }
 }

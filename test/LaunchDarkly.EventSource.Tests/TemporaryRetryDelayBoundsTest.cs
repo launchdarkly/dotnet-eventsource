@@ -179,17 +179,35 @@ namespace LaunchDarkly.EventSource.Tests
         }
 
         [Fact]
-        public void AbsurdTemporaryBoundsCannotBreakTheReconnectLoop()
+        public async Task AbsurdTemporaryBoundsDoNotFaultTheReconnectLoop()
         {
-            using (var es = MakeConfigured())
-            {
-                es.SetTemporaryRetryDelayBounds(TimeSpan.FromMilliseconds(1000), TimeSpan.MaxValue);
+            // Bounds this large exceed what Task.Delay accepts, and MaybeWaitWithBackOff runs
+            // outside the reconnect loop's exception handling -- so before the delay was clamped
+            // this threw ArgumentOutOfRangeException out of StartAsync and the stream was dead
+            // permanently. Asserting on GetNextBackOff alone cannot catch that: it is one layer
+            // below where the failure occurs.
+            var handler = Handlers.Sequential(
+                Handlers.Status((int)HttpStatusCode.InternalServerError),
+                StartStream().Then(LeaveStreamOpen())
+                );
 
-                // No caller-supplied bound may make a later delay computation throw; that would
-                // escape StartAsync and stop the stream for good.
-                for (int i = 0; i < 64; i++)
+            using (var server = HttpServer.Start(handler))
+            {
+                using (var es = MakeEventSource(server.Uri,
+                    c => c.InitialRetryDelay(TimeSpan.FromMilliseconds(10))))
                 {
-                    es.BackOff.GetNextBackOff();
+                    es.SetTemporaryRetryDelayBounds(TimeSpan.MaxValue, TimeSpan.MaxValue);
+
+                    var streamTask = Task.Run(es.StartAsync);
+                    server.Recorder.RequireRequest();
+
+                    var finished = await Task.WhenAny(streamTask,
+                        Task.Delay(TimeSpan.FromSeconds(2)));
+
+                    // Still waiting, not faulted: the clamped delay is honored as a very long
+                    // wait rather than crashing the loop.
+                    Assert.NotSame(streamTask, finished);
+                    Assert.False(streamTask.IsFaulted);
                 }
             }
         }

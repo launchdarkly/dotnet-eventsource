@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using LaunchDarkly.TestHelpers.HttpTest;
 using Xunit;
@@ -115,13 +116,95 @@ namespace LaunchDarkly.EventSource.Tests
                 });
         }
 
+        // Pins the documented contract on ClearTemporaryRetryDelayBounds: it restores the
+        // configured ceiling but must not discard a server-directed minimum.
+        [Fact]
+        public void RetryFieldSurvivesClearTemporaryRetryDelayBounds()
+        {
+            WithRetryLine("300", es =>
+            {
+                es.SetTemporaryRetryDelayBounds(TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(10));
+                es.ClearTemporaryRetryDelayBounds();
+
+                Assert.Equal(TimeSpan.FromMilliseconds(300),
+                    es.BackOff.GetServerDirectedMinDelay());
+                Assert.Equal(300L, es.BackOff.GetUnjitteredMillisecondsForN(0));
+
+                // The ceiling, unlike the minimum, is genuinely restored.
+                Assert.Equal(ConfiguredMax, es.BackOff.GetMaximumDelay());
+            });
+        }
+
         [Fact]
         public void RetryFieldAboveOneHourIsClampedToOneHour()
         {
             // ConfiguredMax is 24 hours so the wire cap, not the ceiling, is the bound under test.
             WithRetryLine("7200000", es =>
-                Assert.Equal(ExponentialBackoffWithDecorrelation.MaxServerDirectedMinDelay,
+                Assert.Equal(TimeSpan.FromMilliseconds(Constants.MaxServerDirectedRetryDelayMillis),
                     es.BackOff.GetServerDirectedMinDelay()));
+        }
+
+        // A server can send any number that parses as a long, which is a far wider range than
+        // TimeSpan can represent. The clamp has to happen while the value is still an integer;
+        // otherwise constructing the TimeSpan throws before any cap can apply, and the connection
+        // is torn down every time the line is read without the directive being applied at all.
+        [Theory]
+        [InlineData("1000000000000000")]      // 1e15 ms, just past TimeSpan.MaxValue
+        [InlineData("9223372036854775807")]   // long.MaxValue
+        public void HugeRetryFieldIsClampedRatherThanThrowing(string value)
+        {
+            WithRetryLine(value, es =>
+                Assert.Equal(TimeSpan.FromMilliseconds(Constants.MaxServerDirectedRetryDelayMillis),
+                    es.BackOff.GetServerDirectedMinDelay()));
+        }
+
+        [Theory]
+        [InlineData("-1000000000000000")]
+        [InlineData("-9223372036854775808")]  // long.MinValue
+        public void HugeNegativeRetryFieldIsClampedRatherThanThrowing(string value)
+        {
+            WithRetryLine(value, es =>
+                Assert.Equal(TimeSpan.Zero, es.BackOff.GetServerDirectedMinDelay()));
+        }
+
+        [Fact]
+        public void RetryFieldChangesTheActualWaitBeforeReconnecting()
+        {
+            var handler = Handlers.Sequential(
+                StartStream()
+                    .Then(Handlers.WriteChunkString("retry: 400\n"))
+                    .Then(WriteEvent(Marker)),        // first stream then ends, forcing a reconnect
+                StartStream().Then(LeaveStreamOpen())
+                );
+
+            WithServerAndEventSource(handler,
+                // 10ms configured initial delay: without the directed value the reconnect would
+                // land at roughly 5-10ms, two orders of magnitude below the assertion.
+                c => c.InitialRetryDelay(TimeSpan.FromMilliseconds(10))
+                      .MaxRetryDelay(TimeSpan.FromSeconds(30))
+                      .BackoffResetThreshold(TimeSpan.FromSeconds(30)),
+                (server, es) =>
+                {
+                    var sink = new EventSink(es, _testLogging);
+                    _ = Task.Run(es.StartAsync);
+
+                    server.Recorder.RequireRequest();
+                    var timer = Stopwatch.StartNew();
+
+                    // Receiving the event proves the preceding retry: line was parsed.
+                    sink.ExpectActions(
+                        EventSink.OpenedAction(),
+                        EventSink.MessageReceivedAction(Marker));
+
+                    server.Recorder.RequireRequest();
+                    timer.Stop();
+
+                    // retry: 400 puts the floor at 200ms; 150ms leaves room for timer skew while
+                    // staying far above the 10ms the configured delay would have produced.
+                    Assert.True(timer.Elapsed >= TimeSpan.FromMilliseconds(150),
+                        $"reconnected after {timer.ElapsedMilliseconds}ms; retry: 400 should have "
+                        + "delayed it by at least 200ms, so the directed value did not reach the wait");
+                });
         }
 
         [Fact]
