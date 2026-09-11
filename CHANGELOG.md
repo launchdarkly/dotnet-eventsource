@@ -2,6 +2,25 @@
 
 All notable changes to the LaunchDarkly's EventSource implementation for C# will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org).
 
+## [6.0.0](https://github.com/launchdarkly/dotnet-eventsource/compare/5.3.2...6.0.0) (2026-09-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* temporary retry-delay bounds and SSE retry: field handling ([#126](https://github.com/launchdarkly/dotnet-eventsource/issues/126))
+* IEventSource gains two members. Implementations of the interface must add them; callers of EventSource are unaffected.
+
+### Features
+
+* add temporary retry-delay bounds and apply the SSE retry: field ([d3866c7](https://github.com/launchdarkly/dotnet-eventsource/commit/d3866c76363e893ecd84b93fdb49d9f199514ec5))
+* temporary retry-delay bounds and SSE retry: field handling ([#126](https://github.com/launchdarkly/dotnet-eventsource/issues/126)) ([6d81838](https://github.com/launchdarkly/dotnet-eventsource/commit/6d81838178bdb82310fa654be53094b5b8b2330b))
+
+
+### Bug Fixes
+
+* address first-round review findings ([7a39b04](https://github.com/launchdarkly/dotnet-eventsource/commit/7a39b04940b6454811386e779f0ef17058023cd2))
+* interrupt a pending backoff wait on shutdown ([b786b7d](https://github.com/launchdarkly/dotnet-eventsource/commit/b786b7d61c7d84f2b78ecab625e9454b8891c3a5))
+
 ## [5.3.2](https://github.com/launchdarkly/dotnet-eventsource/compare/5.3.1...5.3.2) (2026-08-10)
 
 
