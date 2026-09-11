@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -24,10 +25,13 @@ namespace LaunchDarkly.EventSource
         private MemoryStream _eventDataUtf8ByteBuffer;
         private string _eventName;
         private string _lastEventId;
-        private TimeSpan _retryDelay;
         private readonly ExponentialBackoffWithDecorrelation _backOff;
+        private readonly TimeSpan _configuredInitialRetryDelay;
+        private readonly TimeSpan _configuredMaxRetryDelay;
         private CancellationTokenSource _currentRequestToken;
-        private DateTime? _lastSuccessfulConnectionTime;
+        private readonly CancellationTokenSource _shutdownTokenSource = new CancellationTokenSource();
+        private static readonly TimeSpan MaxSleepTime = TimeSpan.FromMilliseconds(int.MaxValue);
+        private readonly Stopwatch _connectionTimer = new Stopwatch();
         private ReadyState _readyState;
 
         #endregion
@@ -78,6 +82,9 @@ namespace LaunchDarkly.EventSource
             private set;
         }
 
+        // Exposed for tests, so that retry-bounds behavior can be asserted directly
+        internal ExponentialBackoffWithDecorrelation BackOff => _backOff;
+
         #endregion
 
         #region Public Constructors
@@ -94,9 +101,11 @@ namespace LaunchDarkly.EventSource
 
             _logger = _configuration.Logger;
 
-            _retryDelay = _configuration.InitialRetryDelay;
+            _configuredInitialRetryDelay = _configuration.InitialRetryDelay;
+            _configuredMaxRetryDelay = _configuration.MaxRetryDelay;
 
-            _backOff = new ExponentialBackoffWithDecorrelation(_retryDelay, _configuration.MaxRetryDelay);
+            _backOff = new ExponentialBackoffWithDecorrelation(_configuredInitialRetryDelay,
+                _configuredMaxRetryDelay);
 
             _httpClient = _configuration.HttpClient ?? CreateHttpClient();
         }
@@ -121,13 +130,17 @@ namespace LaunchDarkly.EventSource
             {
                 if (!firstTime)
                 {
-                    if (_lastSuccessfulConnectionTime.HasValue)
+                    if (_connectionTimer.IsRunning)
                     {
-                        if (DateTime.Now.Subtract(_lastSuccessfulConnectionTime.Value) >= _configuration.BackoffResetThreshold)
+                        if (_connectionTimer.Elapsed >= _configuration.BackoffResetThreshold)
                         {
-                            _backOff.ResetReconnectAttemptCount();
+                            // Sustained healthy operation reverts any temporary bounds and resets
+                            // n. Reverting takes precedence over bounds that were
+                            // set during the preceding fault window.
+                            ClearTemporaryRetryDelayBounds();
+                            _backOff.ResetBackoffN();
                         }
-                        _lastSuccessfulConnectionTime = null;
+                        _connectionTimer.Reset();
                     }
                     await MaybeWaitWithBackOff();
                 }
@@ -199,13 +212,26 @@ namespace LaunchDarkly.EventSource
         }
 
         private async Task MaybeWaitWithBackOff()  {
-            if (_retryDelay.TotalMilliseconds > 0)
+            TimeSpan sleepTime = _backOff.GetNextBackOff();
+            if (sleepTime > MaxSleepTime)
             {
-                TimeSpan sleepTime = _backOff.GetNextBackOff();
-                if (sleepTime.TotalMilliseconds > 0) {
-                    _logger.Info("Waiting {0} milliseconds before reconnecting...", sleepTime.TotalMilliseconds);
-                    BackOffDelay = sleepTime;
-                    await Task.Delay(sleepTime);
+                // Task.Delay throws for anything above the platform timer ceiling, and this method
+                // runs outside the reconnect loop's exception handling, so an unclamped value
+                // would fault StartAsync and stop the stream permanently.
+                sleepTime = MaxSleepTime;
+            }
+            if (sleepTime > TimeSpan.Zero)
+            {
+                _logger.Info("Waiting {0} milliseconds before reconnecting...", sleepTime.TotalMilliseconds);
+                BackOffDelay = sleepTime;
+                try
+                {
+                    await Task.Delay(sleepTime, _shutdownTokenSource.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Cancellation happened during the wait, likely intentional close
+                    _logger.Debug("Backoff wait interrupted by shutdown");
                 }
             }
         }
@@ -221,10 +247,22 @@ namespace LaunchDarkly.EventSource
                 }
                 if (resetBackoffDelay)
                 {
-                    _backOff.ResetReconnectAttemptCount();
+                    _backOff.ResetBackoffN();
                 }
             }
             CancelCurrentRequest();
+        }
+
+        /// <inheritdoc/>
+        public void SetTemporaryRetryDelayBounds(TimeSpan initialDelay, TimeSpan maxDelay)
+        {
+            _backOff.SetBounds(initialDelay, maxDelay);
+        }
+
+        /// <inheritdoc/>
+        public void ClearTemporaryRetryDelayBounds()
+        {
+            _backOff.SetBounds(_configuredInitialRetryDelay, _configuredMaxRetryDelay);
         }
 
         /// <summary>
@@ -232,11 +270,12 @@ namespace LaunchDarkly.EventSource
         /// </summary>
         public void Close()
         {
-            if (ReadyState != ReadyState.Raw && ReadyState != ReadyState.Shutdown)
+            if (ReadyState != ReadyState.Shutdown)
             {
                 Close(ReadyState.Shutdown);
             }
             CancelCurrentRequest();
+            _shutdownTokenSource.Cancel();
 
             // do not dispose httpClient if it is user provided
             if (_configuration.HttpClient == null)
@@ -303,7 +342,7 @@ namespace LaunchDarkly.EventSource
             var svc = GetEventSourceService(_configuration);
 
             svc.ConnectionOpened += (o, e) => {
-                _lastSuccessfulConnectionTime = DateTime.Now;
+                _connectionTimer.Restart();
                 SetReadyState(ReadyState.Open, OnOpened, e.Headers);
             };
             svc.ConnectionClosed += (o, e) => { SetReadyState(ReadyState.Closed, OnClosed); };
@@ -411,7 +450,10 @@ namespace LaunchDarkly.EventSource
             {
                 if (long.TryParse(result.GetValueAsString(), out var retry))
                 {
-                    _retryDelay = TimeSpan.FromMilliseconds(retry);
+                    // Clamp while the value is still an integer.
+                    var millis = Math.Max(0,
+                        Math.Min(retry, Constants.MaxServerDirectedRetryDelayMillis));
+                    _backOff.SetServerDirectedMinDelay(TimeSpan.FromMilliseconds(millis));
                 }
             }
         }

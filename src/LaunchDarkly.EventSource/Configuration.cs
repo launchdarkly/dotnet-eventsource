@@ -65,6 +65,10 @@ namespace LaunchDarkly.EventSource
         /// <summary>
         /// The amount of time a connection must stay open before the EventSource resets its backoff delay.
         /// </summary>
+        /// <remarks>
+        /// A connection that stays open for at least this long also discards any temporary bounds set
+        /// by <see cref="IEventSource.SetTemporaryRetryDelayBounds(TimeSpan, TimeSpan)"/>.
+        /// </remarks>
         /// <seealso cref="ConfigurationBuilder.BackoffResetThreshold(TimeSpan)"/>
         public TimeSpan BackoffResetThreshold { get; }
 
