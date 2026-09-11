@@ -41,7 +41,7 @@ namespace LaunchDarkly.EventSource
                 // Random.Next takes an int bound. 2^31 milliseconds is far longer than any
                 // reconnect delay we would use, so saturating here cannot affect a realistic
                 // delay.
-                int jitterBound = unjittered > int.MaxValue ? int.MaxValue : (int)unjittered;
+                int jitterBound = (int)Math.Min(unjittered, int.MaxValue);
                 long delayMillis = unjittered / 2
                     + (jitterBound > 0 ? _randomSource.Next(jitterBound) / 2 : 0);
 
