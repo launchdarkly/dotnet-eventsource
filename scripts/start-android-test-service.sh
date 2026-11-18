@@ -18,14 +18,14 @@ LOCAL_PORT=${LOCAL_PORT:-8000}
 ANDROID_PORT=${ANDROID_PORT:-5554}
 SERIAL_NUMBER=emulator-${ANDROID_PORT}
 APP_ID=${APP_ID:-com.launchdarkly.contracttestservice}
-APK_PATH=${APK_PATH:-contract-tests-android/bin/Debug/net9.0-android/${APP_ID}-Signed.apk}
+APK_PATH=${APK_PATH:-contract-tests-android/bin/Debug/net10.0-android/${APP_ID}-Signed.apk}
 
 if [ ! -f "$APK_PATH" ]; then
   # Fall back to the unsigned APK if the signed one isn't present -- .NET for Android emits
   # -Signed.apk under some configurations and a bare .apk under others.
-  APK_PATH=$(find contract-tests-android/bin/Debug/net9.0-android -name '*.apk' -not -name '*Signed*' | head -1)
+  APK_PATH=$(find contract-tests-android/bin/Debug/net10.0-android -name '*.apk' -not -name '*Signed*' | head -1)
   if [ -z "$APK_PATH" ] || [ ! -f "$APK_PATH" ]; then
-    echo "No APK found under contract-tests-android/bin/Debug/net9.0-android/" >&2
+    echo "No APK found under contract-tests-android/bin/Debug/net10.0-android/" >&2
     exit 1
   fi
 fi

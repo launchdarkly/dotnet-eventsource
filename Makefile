@@ -21,7 +21,7 @@ run-contract-tests:
 contract-tests: build-contract-tests start-contract-test-service-bg run-contract-tests
 
 # ---- Android contract tests ----
-# Requires: an Android emulator or device connected via adb, and the .NET 9 SDK with the
+# Requires: an Android emulator or device connected via adb, and the .NET 10 SDK with the
 # android workload installed. See ci.yml's contract-tests-android job for how CI does this.
 
 build-contract-tests-android:
