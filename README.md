@@ -15,6 +15,8 @@ This version of the library is built for the following targets:
 * .NET Framework 4.6.2: runs on .NET Framework 4.6.2 and above.
 * .NET Standard 2.0: runs on .NET Core 3.x or .NET 6.0+, or within a library that is targeted to .NET Standard 2.x.
 
+While these are the minimum supported versions, you should use the latest patched version of a supported .NET release.
+
 The .NET build tools should automatically load the most appropriate build of the library for whatever platform your application or library is targeted to.
 
 ## Signing
