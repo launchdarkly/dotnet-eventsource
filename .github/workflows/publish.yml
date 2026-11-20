@@ -46,7 +46,7 @@ jobs:
         uses: ./.github/actions/build-docs
 
       - name: Sign DLLs
-        uses: launchdarkly/gh-actions/actions/sign-dlls@sign-dlls-v1.0.0
+        uses: launchdarkly/gh-actions/actions/sign-dlls@sign-dlls-v1.0.2
         with:
           build_configuration_path: ./src/LaunchDarkly.EventSource/bin/Release
           dll_name: LaunchDarkly.EventSource.dll
