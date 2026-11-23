@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: launchdarkly/gh-actions/actions/release-secrets@release-secrets-v1.2.1
+      - uses: launchdarkly/gh-actions/actions/release-secrets@release-secrets/v1.2.2
         name: Get secrets
         with:
           aws_assume_role: ${{ vars.AWS_ROLE_ARN }}
@@ -46,7 +46,7 @@ jobs:
         uses: ./.github/actions/build-docs
 
       - name: Sign DLLs
-        uses: launchdarkly/gh-actions/actions/sign-dlls@sign-dlls-v1.0.2
+        uses: launchdarkly/gh-actions/actions/sign-dlls@sign-dlls/v1.0.2
         with:
           build_configuration_path: ./src/LaunchDarkly.EventSource/bin/Release
           dll_name: LaunchDarkly.EventSource.dll
