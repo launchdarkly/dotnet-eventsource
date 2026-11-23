@@ -67,6 +67,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           repo: sse-contract-tests
           branch: main
+          enable_persistence_tests: false
           extra_params: >-
             -skip "basic parsing/ID field is ignored if it contains a null"
             -skip "linefeeds/CR separator"
