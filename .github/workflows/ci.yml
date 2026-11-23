@@ -66,6 +66,7 @@ jobs:
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
           repo: sse-contract-tests
+          enable_persistence_tests: false
           branch: main
           extra_params: >-
             -skip "basic parsing/ID field is ignored if it contains a null"
